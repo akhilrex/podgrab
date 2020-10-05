@@ -1,0 +1,14 @@
+module github.com/akhilrex/podgrab
+
+go 1.15
+
+require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/gin-gonic/gin v1.6.3
+	github.com/gobeam/stringy v0.0.0-20200717095810-8a3637503f62
+	github.com/jasonlvhit/gocron v0.0.1
+	github.com/satori/go.uuid v1.2.0
+	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
+	gorm.io/driver/sqlite v1.1.3
+	gorm.io/gorm v1.20.2
+)
