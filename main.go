@@ -2,13 +2,17 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+	"os"
+	"strconv"
 
 	"github.com/akhilrex/podgrab/controllers"
 	"github.com/akhilrex/podgrab/db"
 	"github.com/akhilrex/podgrab/service"
 	"github.com/gin-gonic/gin"
 	"github.com/jasonlvhit/gocron"
+	_ "github.com/joho/godotenv/autoload"
 )
 
 func main() {
@@ -23,7 +27,9 @@ func main() {
 	db.Migrate()
 
 	r := gin.Default()
-	r.Static("/assets", "./assets")
+	dataPath := os.Getenv("DATA")
+	//r.Static("/assets", "./assets")
+	r.Static("/assets", dataPath)
 	r.LoadHTMLGlob("client/*")
 
 	r.GET("/podcasts", controllers.AddPodcast)
@@ -89,6 +95,7 @@ func main() {
 
 		})
 
+	go assetEnv()
 	go intiCron()
 
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
@@ -96,7 +103,18 @@ func main() {
 }
 
 func intiCron() {
-	//gocron.Every(5).Minutes().Do(service.DownloadMissingEpisodes)
-	gocron.Every(5).Minutes().Do(service.RefreshEpisodes)
+	checkFrequency, err := strconv.Atoi(os.Getenv("CHECK_FREQUENCY"))
+	if err != nil {
+		checkFrequency = 10
+		log.Print(err)
+	}
+	gocron.Every(uint64(checkFrequency)).Hours().Do(service.DownloadMissingEpisodes)
+	gocron.Every(uint64(checkFrequency)).Hours().Do(service.RefreshEpisodes)
 	<-gocron.Start()
+}
+
+func assetEnv() {
+	log.Println("Config Dir: ", os.Getenv("CONFIG"))
+	log.Println("Assets Dir: ", os.Getenv("DATA"))
+	log.Println("Check Frequency (hrs): ", os.Getenv("CHECK_FREQUENCY"))
 }

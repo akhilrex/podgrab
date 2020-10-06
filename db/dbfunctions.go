@@ -40,7 +40,7 @@ func GetAllPodcastItemsByPodcastId(podcastId string, podcasts *[]PodcastItem) er
 
 func GetAllPodcastItemsToBeDownloaded() (*[]PodcastItem, error) {
 	var podcastItems []PodcastItem
-	result := DB.Preload(clause.Associations).Where(&PodcastItem{DownloadDate: time.Time{}}).Find(&podcastItems)
+	result := DB.Debug().Preload(clause.Associations).Where("download_date=?", time.Time{}).Find(&podcastItems)
 	return &podcastItems, result.Error
 }
 
@@ -65,6 +65,6 @@ func CreatePodcastItem(podcastItem *PodcastItem) error {
 	return tx.Error
 }
 func UpdatePodcastItem(podcastItem *PodcastItem) error {
-	tx := DB.Save(&podcastItem)
+	tx := DB.Omit("Podcast").Save(&podcastItem)
 	return tx.Error
 }

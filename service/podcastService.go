@@ -101,13 +101,15 @@ func SetPodcastItemAsDownloaded(id string, location string) {
 func DownloadMissingEpisodes() error {
 	data, err := db.GetAllPodcastItemsToBeDownloaded()
 
-	fmt.Println("Processing episodes: %d", len(*data))
+	fmt.Println("Processing episodes: ", strconv.Itoa(len(*data)))
 	if err != nil {
 		return err
 	}
 	for _, item := range *data {
+
 		url, _ := Download(item.FileURL, item.Title, item.Podcast.Title)
 		SetPodcastItemAsDownloaded(item.ID, url)
+		return nil
 	}
 	return nil
 }

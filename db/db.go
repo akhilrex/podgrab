@@ -2,6 +2,8 @@ package db
 
 import (
 	"fmt"
+	"os"
+	"path"
 
 	"gorm.io/driver/sqlite"
 
@@ -14,7 +16,9 @@ var DB *gorm.DB
 //Init is used to Initialize Database
 func Init() (*gorm.DB, error) {
 	// github.com/mattn/go-sqlite3
-	db, err := gorm.Open(sqlite.Open("podgrab.db"), &gorm.Config{})
+	configPath := os.Getenv("CONFIG")
+	dbPath := path.Join(configPath, "podgrab.db")
+	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
 	if err != nil {
 		fmt.Println("db err: ", err)
 		return nil, err

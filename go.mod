@@ -7,6 +7,7 @@ require (
 	github.com/gin-gonic/gin v1.6.3
 	github.com/gobeam/stringy v0.0.0-20200717095810-8a3637503f62
 	github.com/jasonlvhit/gocron v0.0.1
+	github.com/joho/godotenv v1.3.0
 	github.com/microcosm-cc/bluemonday v1.0.4
 	github.com/satori/go.uuid v1.2.0
 	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a

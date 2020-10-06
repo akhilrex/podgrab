@@ -49,7 +49,8 @@ func httpClient() *http.Client {
 func createIfFoldeDoesntExist(folder string) string {
 	str := stringy.New(folder)
 	folder = str.RemoveSpecialCharacter()
-	folderPath := path.Join("./assets/", folder)
+	dataPath := os.Getenv("DATA")
+	folderPath := path.Join(dataPath, folder)
 	if _, err := os.Stat(folderPath); os.IsNotExist(err) {
 		os.MkdirAll(folderPath, 0755)
 	}
