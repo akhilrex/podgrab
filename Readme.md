@@ -100,16 +100,16 @@ Project Link: [https://github.com/akhilrex/podgrab](https://github.com/akhilrex/
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/akhilrex/repo.svg?style=flat-square
-[contributors-url]: https://github.com/akhilrex/repo/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/akhilrex/repo.svg?style=flat-square
-[forks-url]: https://github.com/akhilrex/repo/network/members
-[stars-shield]: https://img.shields.io/github/stars/akhilrex/repo.svg?style=flat-square
-[stars-url]: https://github.com/akhilrex/repo/stargazers
-[issues-shield]: https://img.shields.io/github/issues/akhilrex/repo.svg?style=flat-square
-[issues-url]: https://github.com/akhilrex/repo/issues
-[license-shield]: https://img.shields.io/github/license/akhilrex/repo.svg?style=flat-square
-[license-url]: https://github.com/akhilrex/repo/blob/master/LICENSE.txt
+[contributors-shield]: https://img.shields.io/github/contributors/akhilrex/podgrab.svg?style=flat-square
+[contributors-url]: https://github.com/akhilrex/podgrab/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/akhilrex/podgrab.svg?style=flat-square
+[forks-url]: https://github.com/akhilrex/podgrab/network/members
+[stars-shield]: https://img.shields.io/github/stars/akhilrex/podgrab.svg?style=flat-square
+[stars-url]: https://github.com/akhilrex/podgrab/stargazers
+[issues-shield]: https://img.shields.io/github/issues/akhilrex/podgrab.svg?style=flat-square
+[issues-url]: https://github.com/akhilrex/podgrab/issues
+[license-shield]: https://img.shields.io/github/license/akhilrex/podgrab.svg?style=flat-square
+[license-url]: https://github.com/akhilrex/podgrab/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=flat-square&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/akhilrex
 [product-screenshot]: images/screenshot.jpg
