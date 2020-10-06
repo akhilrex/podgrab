@@ -34,11 +34,11 @@
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
-  <a href="https://github.com/akhilrex/podgrab">
+  <!-- <a href="https://github.com/akhilrex/podgrab">
     <img src="images/logo.png" alt="Logo" width="80" height="80">
-  </a>
+  </a> -->
 
-  <h3 align="center">Podgrab</h3>
+  <h1 align="center">Podgrab</h1>
 
   <p align="center">
     A self-hosted tool to download latest podcast episodes as soon as they become live
