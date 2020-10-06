@@ -26,7 +26,6 @@ RUN mkdir /config
 RUN mkdir /assets
 ENV CONFIG=/config
 ENV DATA=/assets
-#COPY --from=builder /api/test.db .
 
 EXPOSE 8080
 VOLUME ["/config", "/assets"]
