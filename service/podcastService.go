@@ -11,14 +11,18 @@ import (
 	"time"
 
 	"github.com/akhilrex/podgrab/db"
+	"github.com/microcosm-cc/bluemonday"
 	"gorm.io/gorm"
 )
 
 //Fetch is
 func FetchURL(url string) (PodcastData, error) {
-	body := makeQuery(url)
+	body, err := makeQuery(url)
+	if err != nil {
+		return PodcastData{}, err
+	}
 	var response PodcastData
-	err := xml.Unmarshal(body, &response)
+	err = xml.Unmarshal(body, &response)
 	return response, err
 }
 func GetAllPodcasts() *[]db.Podcast {
@@ -31,15 +35,17 @@ func AddPodcast(url string) (db.Podcast, error) {
 	data, err := FetchURL(url)
 	if err != nil {
 		fmt.Println("Error")
-		log.Fatal(err)
+		//log.Fatal(err)
 		return db.Podcast{}, err
 	}
 	var podcast db.Podcast
 	err = db.GetPodcastByTitleAndAuthor(data.Channel.Title, data.Channel.Author, &podcast)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
+		p := bluemonday.StripTagsPolicy()
+
 		podcast := db.Podcast{
 			Title:   data.Channel.Title,
-			Summary: data.Channel.Summary,
+			Summary: p.Sanitize(data.Channel.Summary),
 			Author:  data.Channel.Author,
 			Image:   data.Channel.Image.URL,
 			URL:     url,
@@ -58,7 +64,7 @@ func AddPodcastItems(podcast *db.Podcast) error {
 		log.Fatal(err)
 		return err
 	}
-
+	p := bluemonday.StripTagsPolicy()
 	for i := 0; i < 5; i++ {
 		obj := data.Channel.Item[i]
 		var podcastItem db.PodcastItem
@@ -69,7 +75,7 @@ func AddPodcastItems(podcast *db.Podcast) error {
 			podcastItem = db.PodcastItem{
 				PodcastID:   podcast.ID,
 				Title:       obj.Title,
-				Summary:     obj.Summary,
+				Summary:     p.Sanitize(obj.Summary),
 				EpisodeType: obj.EpisodeType,
 				Duration:    duration,
 				PubDate:     pubDate,
@@ -120,24 +126,24 @@ func RefreshEpisodes() error {
 	return nil
 }
 
-func makeQuery(url string) []byte {
+func makeQuery(url string) ([]byte, error) {
 	//link := "https://www.goodreads.com/search/index.xml?q=Good%27s+Omens&key=" + "jCmNlIXjz29GoB8wYsrd0w"
 	//link := "https://www.goodreads.com/search/index.xml?key=jCmNlIXjz29GoB8wYsrd0w&q=Ender%27s+Game"
 	//fmt.Println(url)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	defer resp.Body.Close()
 	fmt.Println("Response status:", resp.Status)
 	body, err := ioutil.ReadAll(resp.Body)
 
-	return body
+	return body, nil
 
 }

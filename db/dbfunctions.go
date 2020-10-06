@@ -61,7 +61,7 @@ func CreatePodcast(podcast *Podcast) error {
 }
 
 func CreatePodcastItem(podcastItem *PodcastItem) error {
-	tx := DB.Create(&podcastItem)
+	tx := DB.Omit("Podcast").Create(&podcastItem)
 	return tx.Error
 }
 func UpdatePodcastItem(podcastItem *PodcastItem) error {

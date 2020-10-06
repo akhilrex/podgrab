@@ -64,8 +64,30 @@ func main() {
 	r.GET("/", func(c *gin.Context) {
 		//var podcasts []db.Podcast
 		podcasts := service.GetAllPodcasts()
-		c.HTML(http.StatusOK, "index.html", gin.H{"title": "Main website", "podcasts": podcasts})
+		c.HTML(http.StatusOK, "index.html", gin.H{"title": "Podgrab", "podcasts": podcasts})
 	})
+	r.POST(
+		"/", func(c *gin.Context) {
+			var addPodcastData controllers.AddPodcastData
+			err := c.ShouldBind(&addPodcastData)
+
+			if err == nil {
+
+				_, err = service.AddPodcast(addPodcastData.Url)
+				if err == nil {
+					c.Redirect(http.StatusFound, "/")
+
+				} else {
+
+					c.JSON(http.StatusBadRequest, err)
+
+				}
+			} else {
+				//	fmt.Println(err.Error())
+				c.JSON(http.StatusBadRequest, err)
+			}
+
+		})
 
 	go intiCron()
 
@@ -74,7 +96,7 @@ func main() {
 }
 
 func intiCron() {
-	gocron.Every(20).Minutes().Do(service.DownloadMissingEpisodes)
-	gocron.Every(20).Minutes().Do(service.RefreshEpisodes)
+	//gocron.Every(5).Minutes().Do(service.DownloadMissingEpisodes)
+	gocron.Every(5).Minutes().Do(service.RefreshEpisodes)
 	<-gocron.Start()
 }

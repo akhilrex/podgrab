@@ -20,7 +20,7 @@ type SearchByIdQuery struct {
 }
 
 type AddPodcastData struct {
-	url string `binding:"required" form:"url" json:"url"`
+	Url string `binding:"required" form:"url" json:"url"`
 }
 
 func GetAllPodcasts(c *gin.Context) {
@@ -85,7 +85,7 @@ func AddPodcast(c *gin.Context) {
 	err := c.ShouldBindJSON(&addPodcastData)
 	if err == nil {
 
-		service.AddPodcast(addPodcastData.url)
+		service.AddPodcast(addPodcastData.Url)
 		//	fmt.Println(time.Unix(addPodcastData.StartDate, 0))
 		c.JSON(200, addPodcastData)
 	} else {
