@@ -33,5 +33,5 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            akhilred/podgrab:latest
+            akhilrex/podgrab:latest
             akhilrex/podgrab:1.0.0
