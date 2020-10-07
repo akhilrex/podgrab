@@ -52,7 +52,7 @@ func createIfFoldeDoesntExist(folder string) string {
 	dataPath := os.Getenv("DATA")
 	folderPath := path.Join(dataPath, folder)
 	if _, err := os.Stat(folderPath); os.IsNotExist(err) {
-		os.MkdirAll(folderPath, 0755)
+		os.MkdirAll(folderPath, 0777)
 	}
 	return folderPath
 }
