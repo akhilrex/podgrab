@@ -14,7 +14,7 @@ import (
 	"gorm.io/gorm"
 )
 
-//Fetch is
+//FetchURL is
 func FetchURL(url string) (PodcastData, error) {
 	body, err := makeQuery(url)
 	if err != nil {
