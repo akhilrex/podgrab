@@ -26,6 +26,8 @@ RUN mkdir /config
 RUN mkdir /assets
 ENV CONFIG=/config
 ENV DATA=/assets
+RUN chmod 777 /assets; \
+    chmod 777 /config;
 
 EXPOSE 8080
 VOLUME ["/config", "/assets"]
