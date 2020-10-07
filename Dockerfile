@@ -1,8 +1,4 @@
 ARG GO_VERSION=1.15.2
-ENV UID=998
-ENV GID=100
-ENV CONFIG=/config
-ENV DATA=/assets
 
 FROM golang:${GO_VERSION}-alpine AS builder
 
@@ -20,6 +16,11 @@ RUN go build -o ./app ./main.go
 
 FROM alpine:latest
 
+ENV UID=998
+ENV GID=100
+ENV CONFIG=/config
+ENV DATA=/assets
+
 RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
 
 RUN mkdir -p /api
@@ -29,12 +30,12 @@ COPY client ./client
 RUN mkdir /config; \
     mkdir /assets
 
-RUN  groupadd -g ${GID} poduser &&\
-    useradd -l -u ${UID} -g poduser poduser &&\
-    chown --changes --silent --no-dereference --recursive \
-           ${UID}:${GID} \
-        /assets \
-        /config 
+# RUN  addgroup -g ${GID} poduser &&\
+#     adduser -l -u ${UID} -g poduser poduser &&\
+RUN chown --changes --silent --no-dereference --recursive \
+    ${UID}:${GID} \
+    /assets \
+    /config 
 
 USER poduser
 
