@@ -29,8 +29,8 @@ COPY client ./client
 RUN mkdir /config; \
     mkdir /assets
 
-RUN  groupadd -g ${GID} poduser &&\
-    useradd -l -u ${UID} -g poduser poduser &&\
+RUN groupadd -g ${GID} poduser &&\
+    useradd -l --disabled-password -u ${UID} -g poduser poduser &&\
     chown --changes --silent --no-dereference --recursive \
            ${UID}:${GID} \
         /assets \
