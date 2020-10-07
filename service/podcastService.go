@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -61,7 +60,7 @@ func AddPodcastItems(podcast *db.Podcast) error {
 	fmt.Println("Creating: " + podcast.ID)
 	data, err := FetchURL(podcast.URL)
 	if err != nil {
-		log.Fatal(err)
+		//log.Fatal(err)
 		return err
 	}
 	p := bluemonday.StripTagsPolicy()
@@ -109,7 +108,6 @@ func DownloadMissingEpisodes() error {
 
 		url, _ := Download(item.FileURL, item.Title, item.Podcast.Title)
 		SetPodcastItemAsDownloaded(item.ID, url)
-		return nil
 	}
 	return nil
 }
@@ -125,6 +123,7 @@ func RefreshEpisodes() error {
 		AddPodcastItems(&item)
 
 	}
+	go DownloadMissingEpisodes()
 	return nil
 }
 

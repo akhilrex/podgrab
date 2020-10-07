@@ -40,33 +40,6 @@ func main() {
 	r.GET("/podcastitems", controllers.GetAllPodcastItems)
 	r.GET("/podcastitems/:id", controllers.GetPodcastItemById)
 
-	r.GET("/ping", func(c *gin.Context) {
-
-		data, err := service.AddPodcast(c.Query("url"))
-		go service.AddPodcastItems(&data)
-		//data, err := db.GetAllPodcastItemsToBeDownloaded()
-		if err == nil {
-			c.JSON(200, data)
-		} else {
-			c.JSON(http.StatusInternalServerError, err.Error())
-		}
-	})
-	r.GET("/pong", func(c *gin.Context) {
-
-		data, err := db.GetAllPodcastItemsToBeDownloaded()
-
-		for _, item := range *data {
-			url, _ := service.Download(item.FileURL, item.Title, item.Podcast.Title)
-			service.SetPodcastItemAsDownloaded(item.ID, url)
-		}
-
-		if err == nil {
-			c.JSON(200, data)
-		} else {
-			c.JSON(http.StatusInternalServerError, err.Error())
-		}
-	})
-
 	r.GET("/", func(c *gin.Context) {
 		//var podcasts []db.Podcast
 		podcasts := service.GetAllPodcasts()
@@ -81,6 +54,7 @@ func main() {
 
 				_, err = service.AddPodcast(addPodcastData.Url)
 				if err == nil {
+					go service.RefreshEpisodes()
 					c.Redirect(http.StatusFound, "/")
 
 				} else {
@@ -108,13 +82,13 @@ func intiCron() {
 		checkFrequency = 10
 		log.Print(err)
 	}
-	gocron.Every(uint64(checkFrequency)).Hours().Do(service.DownloadMissingEpisodes)
-	gocron.Every(uint64(checkFrequency)).Hours().Do(service.RefreshEpisodes)
+	//gocron.Every(uint64(checkFrequency)).Minutes().Do(service.DownloadMissingEpisodes)
+	gocron.Every(uint64(checkFrequency)).Minutes().Do(service.RefreshEpisodes)
 	<-gocron.Start()
 }
 
 func assetEnv() {
 	log.Println("Config Dir: ", os.Getenv("CONFIG"))
 	log.Println("Assets Dir: ", os.Getenv("DATA"))
-	log.Println("Check Frequency (hrs): ", os.Getenv("CHECK_FREQUENCY"))
+	log.Println("Check Frequency (mins): ", os.Getenv("CHECK_FREQUENCY"))
 }
