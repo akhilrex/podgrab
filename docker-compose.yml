@@ -1,0 +1,13 @@
+version: "2.1"
+services:
+  podgrab:
+    image: akhilrex/podgrab
+    container_name: podgrab
+    environment:
+      - CHECK_FREQUENCY=20
+    volumes:
+      - /path/to/config:/config
+      - /path/to/data:/data
+    ports:
+      - 8080:8080
+    restart: unless-stopped

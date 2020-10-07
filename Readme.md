@@ -61,6 +61,7 @@
 
 * [About the Project](#about-the-project)
   * [Built With](#built-with)
+* [Installation](#installation)
 * [License](#license)
 * [Contact](#contact)
 
@@ -68,8 +69,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
-
+![Product Name Screen Shot][product-screenshot]
 
 
 ### Built With
@@ -78,6 +78,46 @@
 * [Go-Gin](https://github.com/gin-gonic/gin)
 * [GORM](https://github.com/go-gorm/gorm)
 * [SQLite](https://www.sqlite.org/index.html)
+
+
+## Installation
+
+The easiest way to run Podgrab is to run it as a container. 
+
+### Using Docker
+
+Simple setup without mounted volumes (for testing and evaluation)
+```sh
+  docker run -d -p 8080:8080 --name=podgrab akhilrex/podgrab
+```
+
+Binding local volumes to the container
+```sh
+   docker run -d -p 8080:8080 --name=podgrab -v "/host/path/to/assets:/assets" -v "/host/path/to/config:/config"  akhilrex/podgrab
+```
+
+### Using Docker-Compose
+
+Modify the docker compose file provided [here]() to update the volume and port binding and run the following command
+```yaml
+version: "2.1"
+services:
+  podgrab:
+    image: akhilrex/podgrab
+    container_name: podgrab
+    environment:
+      - CHECK_FREQUENCY=20
+    volumes:
+      - /path/to/config:/config
+      - /path/to/data:/data
+    ports:
+      - 8080:8080
+    restart: unless-stopped
+```
+
+```sh
+   docker-compose up -d
+```
 
 
 <!-- LICENSE -->
@@ -90,7 +130,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Your Name - [@akhilrex](https://twitter.com/akhilrex) - email
+Akhil Gupta - [@akhilrex](https://twitter.com/akhilrex)
 
 Project Link: [https://github.com/akhilrex/podgrab](https://github.com/akhilrex/podgrab)
 
