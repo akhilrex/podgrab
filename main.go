@@ -71,6 +71,28 @@ func main() {
 		}
 
 	})
+	r.GET("/episodes", func(c *gin.Context) {
+		var pagination controllers.Pagination
+		if c.ShouldBindQuery(&pagination) == nil {
+			var page, count int
+			if page = pagination.Page; page == 0 {
+				page = 1
+			}
+			if count = pagination.Count; count == 0 {
+				count = 10
+			}
+			var podcastItems []db.PodcastItem
+
+			if err := db.GetPaginatedPodcastItems(page, count, &podcastItems); err == nil {
+				c.HTML(http.StatusOK, "episodes.html", gin.H{"title": "All Episodes", "podcastItems": podcastItems})
+			} else {
+				c.JSON(http.StatusBadRequest, err)
+			}
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		}
+
+	})
 	r.POST(
 		"/", func(c *gin.Context) {
 			var addPodcastData controllers.AddPodcastData

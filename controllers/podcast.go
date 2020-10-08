@@ -19,6 +19,11 @@ type SearchByIdQuery struct {
 	Id string `binding:"required" uri:"id" json:"id" form:"id"`
 }
 
+type Pagination struct {
+	Page  int `uri:"page" query:"page" json:"page" form:"page"`
+	Count int `uri:"count" query:"count" json:"count" form:"count"`
+}
+
 type AddPodcastData struct {
 	Url string `binding:"required" form:"url" json:"url"`
 }
