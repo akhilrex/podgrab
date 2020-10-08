@@ -23,9 +23,9 @@ func main() {
 	db.DB, err = db.Init()
 	if err != nil {
 		fmt.Println("statuse: ", err)
+	}else{
+		db.Migrate()
 	}
-	db.Migrate()
-
 	r := gin.Default()
 	dataPath := os.Getenv("DATA")
 	//r.Static("/assets", "./assets")
