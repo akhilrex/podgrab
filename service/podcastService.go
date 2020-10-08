@@ -80,6 +80,7 @@ func AddPodcastItems(podcast *db.Podcast) error {
 				PubDate:     pubDate,
 				FileURL:     obj.Enclosure.URL,
 				GUID:        obj.Guid.Text,
+				Image:       obj.Image.Href,
 			}
 			db.CreatePodcastItem(&podcastItem)
 		}

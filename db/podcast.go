@@ -36,7 +36,8 @@ type PodcastItem struct {
 
 	FileURL string
 
-	GUID string
+	GUID  string
+	Image string
 
 	DownloadDate time.Time
 	DownloadPath string

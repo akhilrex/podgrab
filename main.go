@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/akhilrex/podgrab/controllers"
 	"github.com/akhilrex/podgrab/db"
@@ -23,14 +25,22 @@ func main() {
 	db.DB, err = db.Init()
 	if err != nil {
 		fmt.Println("statuse: ", err)
-	}else{
+	} else {
 		db.Migrate()
 	}
 	r := gin.Default()
 	dataPath := os.Getenv("DATA")
 	//r.Static("/assets", "./assets")
 	r.Static("/assets", dataPath)
-	r.LoadHTMLGlob("client/*")
+	funcMap := template.FuncMap{
+		"formatDate": func(raw time.Time) string {
+			return raw.Format("Jan 2 2006")
+		},
+	}
+	tmpl := template.Must(template.New("main").Funcs(funcMap).ParseGlob("client/*"))
+
+	//r.LoadHTMLGlob("client/*")
+	r.SetHTMLTemplate(tmpl)
 
 	r.GET("/podcasts", controllers.AddPodcast)
 	r.POST("/podcasts", controllers.GetAllPodcasts)
@@ -44,6 +54,22 @@ func main() {
 		//var podcasts []db.Podcast
 		podcasts := service.GetAllPodcasts()
 		c.HTML(http.StatusOK, "index.html", gin.H{"title": "Podgrab", "podcasts": podcasts})
+	})
+	r.GET("/podcasts/:id/view", func(c *gin.Context) {
+		var searchByIdQuery controllers.SearchByIdQuery
+		if c.ShouldBindUri(&searchByIdQuery) == nil {
+
+			var podcast db.Podcast
+
+			if err := db.GetPodcastById(searchByIdQuery.Id, &podcast); err == nil {
+				c.HTML(http.StatusOK, "podcast.html", gin.H{"title": podcast.Title, "podcast": podcast})
+			} else {
+				c.JSON(http.StatusBadRequest, err)
+			}
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		}
+
 	})
 	r.POST(
 		"/", func(c *gin.Context) {

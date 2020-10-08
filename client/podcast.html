@@ -96,7 +96,7 @@
 /* Larger than phone */
 @media (min-width: 550px) {
   .header {
-    margin-top: 18rem;
+    margin-top: 8rem;
     }
   .value-props {
     margin-top: 9rem;
@@ -128,30 +128,25 @@
 <body>
     <div class="container">
         <section class="header">
+          
     <h1>{{ .title }}</h1>
 </section>
-<div class="row">
-    <form action="/" method="post">
-        <div class="ten columns">
-        <input type="url" name="url" id="url" placeholder="Enter Podcast RSS feed" class="u-full-width">
-    </div><div class="two columns">
-        <input type="submit" value="Save" class="u-full-width button-primary">
-    </div>
-    </form>
-</div>
 <br>
-{{range .podcasts}}
+{{range .podcast.PodcastItems}}
 <div class="podcasts row">
     <div class="columns three">
         <img class="u-full-width" src="{{ .Image }}" alt="{{ .Title }}">
     </div>
-    <div class="columns eight">
-        <h3>{{.Title}}</h3>
+    <div class="columns nine">
+        <h4>{{.Title}}</h4>
+        <small>{{ formatDate .PubDate }}</small>
         <p>{{ .Summary }}</p>
+       
+        <a class="button button-primary" href="/{{ .DownloadPath }}" download>Download</a>
 
     </div>
     <div class="columns one">
-       <a href="/podcasts/{{ .ID }}/view"> {{ len .PodcastItems }} episodes</a>
+     
     </div>
      
 </div>
