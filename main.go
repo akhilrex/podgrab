@@ -36,6 +36,15 @@ func main() {
 		"formatDate": func(raw time.Time) string {
 			return raw.Format("Jan 2 2006")
 		},
+		"latestEpisodeDate": func(podcastItems []db.PodcastItem) string {
+			var latest time.Time
+			for _, item := range podcastItems {
+				if item.PubDate.After(latest) {
+					latest = item.PubDate
+				}
+			}
+			return latest.Format("Jan 2 2006")
+		},
 	}
 	tmpl := template.Must(template.New("main").Funcs(funcMap).ParseGlob("client/*"))
 

@@ -130,12 +130,13 @@
         <section class="header">
     <h1>{{ .title }}</h1>
 </section>
+{{template "navbar"}}
 <div class="row">
     <form action="/" method="post">
-        <div class="ten columns">
-        <input type="url" name="url" id="url" placeholder="Enter Podcast RSS feed" class="u-full-width">
-    </div><div class="two columns">
-        <input type="submit" value="Save" class="u-full-width button-primary">
+        <div class="nine columns">
+        <input type="url" name="url" id="url" placeholder="Enter Podcast RSS feed to add" class="u-full-width">
+    </div><div class="three columns">
+        <input type="submit" value="Add Podcast" class="u-full-width button-primary">
     </div>
     </form>
 </div>
@@ -147,6 +148,7 @@
     </div>
     <div class="columns eight">
         <h3>{{.Title}}</h3>
+        <small>Last Epidsode : {{ latestEpisodeDate .PodcastItems}}</small>
         <p>{{ .Summary }}</p>
 
     </div>
