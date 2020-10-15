@@ -2,9 +2,9 @@ package db
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path"
-	"log"
 
 	"gorm.io/driver/sqlite"
 
@@ -35,7 +35,7 @@ func Init() (*gorm.DB, error) {
 
 //Migrate Database
 func Migrate() {
-	DB.AutoMigrate(&Podcast{}, &PodcastItem{})
+	DB.AutoMigrate(&Podcast{}, &PodcastItem{}, &Setting{})
 
 }
 

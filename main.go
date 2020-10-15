@@ -31,6 +31,8 @@ func main() {
 	dataPath := os.Getenv("DATA")
 	r.Static("/webassets", "./webassets")
 	r.Static("/assets", dataPath)
+	r.Use(setupSettings())
+
 	funcMap := template.FuncMap{
 		"formatDate": func(raw time.Time) string {
 			return raw.Format("Jan 2 2006")
@@ -58,6 +60,7 @@ func main() {
 
 	r.GET("/podcastitems", controllers.GetAllPodcastItems)
 	r.GET("/podcastitems/:id", controllers.GetPodcastItemById)
+	r.GET("/podcastitems/:id/download", controllers.DownloadPodcastItem)
 
 	r.GET("/add", controllers.AddPage)
 	r.GET("/search", controllers.Search)
@@ -70,6 +73,14 @@ func main() {
 
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 
+}
+func setupSettings() gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		setting := db.GetOrCreateSetting()
+		c.Set("setting", setting)
+		c.Next()
+	}
 }
 
 func intiCron() {

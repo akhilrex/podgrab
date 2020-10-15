@@ -42,3 +42,10 @@ type PodcastItem struct {
 	DownloadDate time.Time
 	DownloadPath string
 }
+
+type Setting struct {
+	Base
+	DownloadOnAdd        bool `gorm:"default:true"`
+	InitialDownloadCount int  `gorm:"default:5"`
+	AutoDownload         bool `gorm:"default:true"`
+}

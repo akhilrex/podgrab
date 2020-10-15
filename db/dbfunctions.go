@@ -1,8 +1,10 @@
 package db
 
 import (
+	"errors"
 	"time"
 
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
@@ -31,7 +33,9 @@ func GetPaginatedPodcastItems(page int, count int, podcasts *[]PodcastItem) erro
 }
 func GetPodcastById(id string, podcast *Podcast) error {
 
-	result := DB.Preload(clause.Associations).First(&podcast, "id=?", id)
+	result := DB.Preload("PodcastItems", func(db *gorm.DB) *gorm.DB {
+		return db.Order("podcast_items.pub_date DESC")
+	}).First(&podcast, "id=?", id)
 	return result.Error
 }
 
@@ -86,4 +90,13 @@ func CreatePodcastItem(podcastItem *PodcastItem) error {
 func UpdatePodcastItem(podcastItem *PodcastItem) error {
 	tx := DB.Omit("Podcast").Save(&podcastItem)
 	return tx.Error
+}
+func GetOrCreateSetting() *Setting {
+	var setting Setting
+	result := DB.First(&setting)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		DB.Save(&Setting{})
+		DB.First(&setting)
+	}
+	return &setting
 }

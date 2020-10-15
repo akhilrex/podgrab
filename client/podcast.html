@@ -133,6 +133,7 @@
 </section>
 {{template "navbar"}}
 <br>
+{{$setting := .setting}}
 {{range .podcast.PodcastItems}}
 <div class="podcasts row">
     <div class="columns three">
@@ -143,7 +144,13 @@
         <small>{{ formatDate .PubDate }}</small>
         <p>{{ .Summary }}</p>
        
+        {{if .DownloadPath}}
         <a class="button button-primary" href="{{ .DownloadPath }}" download>Download</a>
+        {{else}}
+        {{if not $setting.AutoDownload}}
+        <a class="button button-primary" onclick="downloadToDisk('{{.ID}}')" download>Download to Disk</a>
+        {{end}}
+        {{end }}
 
     </div>
     <div class="columns one">
@@ -154,5 +161,35 @@
 <hr>
 {{end}}
 </div>
+{{template "scripts"}}
+<script> 
+function downloadToDisk(id){
+   
+    axios.get("/podcastitems/"+id+"/download")
+    .then(function(response){
+        Vue.toasted.show('Podcast download enqueued.' ,{ 
+                    theme: "bubble", 
+                    position: "top-right", 
+                    duration : 5000
+                });
+        var row = document.getElementById('podcast-'+id);
+        row.remove();
+    })
+    .catch(function(error){
+        if(error.response){
+            
+        Vue.toasted.show(error.response.data?.message, { 
+            theme: "bubble", 
+            position: "top-right", 
+            duration : 5000
+        })
+        }
+       
+    }).
+    then(function(){
+    })
+      return false;
+  }
+    </script>
 </body>
 </html>

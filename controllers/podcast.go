@@ -97,6 +97,17 @@ func GetPodcastItemById(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 	}
 }
+func DownloadPodcastItem(c *gin.Context) {
+	var searchByIdQuery SearchByIdQuery
+
+	if c.ShouldBindUri(&searchByIdQuery) == nil {
+
+		go service.DownloadSingleEpisode(searchByIdQuery.Id)
+		c.JSON(200, gin.H{})
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+	}
+}
 
 func AddPodcast(c *gin.Context) {
 	var addPodcastData AddPodcastData
@@ -104,7 +115,10 @@ func AddPodcast(c *gin.Context) {
 	if err == nil {
 		pod, err := service.AddPodcast(addPodcastData.Url)
 		if err == nil {
-			go service.RefreshEpisodes()
+			setting := c.MustGet("setting").(*db.Setting)
+			if setting.DownloadOnAdd {
+				go service.RefreshEpisodes()
+			}
 			c.JSON(200, pod)
 		} else {
 			if v, ok := err.(*model.PodcastAlreadyExistsError); ok {

@@ -30,7 +30,8 @@ func PodcastPage(c *gin.Context) {
 		var podcast db.Podcast
 
 		if err := db.GetPodcastById(searchByIdQuery.Id, &podcast); err == nil {
-			c.HTML(http.StatusOK, "podcast.html", gin.H{"title": podcast.Title, "podcast": podcast})
+			setting := c.MustGet("setting").(*db.Setting)
+			c.HTML(http.StatusOK, "podcast.html", gin.H{"title": podcast.Title, "podcast": podcast, "setting": setting})
 		} else {
 			c.JSON(http.StatusBadRequest, err)
 		}
@@ -52,7 +53,8 @@ func AllEpisodesPage(c *gin.Context) {
 		var podcastItems []db.PodcastItem
 
 		if err := db.GetPaginatedPodcastItems(page, count, &podcastItems); err == nil {
-			c.HTML(http.StatusOK, "episodes.html", gin.H{"title": "All Episodes", "podcastItems": podcastItems})
+			setting := c.MustGet("setting").(*db.Setting)
+			c.HTML(http.StatusOK, "episodes.html", gin.H{"title": "All Episodes", "podcastItems": podcastItems, "setting": setting})
 		} else {
 			c.JSON(http.StatusBadRequest, err)
 		}

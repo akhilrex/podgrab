@@ -56,14 +56,14 @@ func AddPodcast(url string) (db.Podcast, error) {
 }
 
 func AddPodcastItems(podcast *db.Podcast) error {
-	fmt.Println("Creating: " + podcast.ID)
+	//fmt.Println("Creating: " + podcast.ID)
 	data, err := FetchURL(podcast.URL)
 	if err != nil {
 		//log.Fatal(err)
 		return err
 	}
-	//p := bluemonday.StrictPolicy()
-	limit := 5
+	setting := db.GetOrCreateSetting()
+	limit := setting.InitialDownloadCount
 	if len(data.Channel.Item) < limit {
 		limit = len(data.Channel.Item)
 	}
@@ -91,20 +91,22 @@ func AddPodcastItems(podcast *db.Podcast) error {
 	return err
 }
 
-func SetPodcastItemAsDownloaded(id string, location string) {
+func SetPodcastItemAsDownloaded(id string, location string) error {
 	var podcastItem db.PodcastItem
-	db.GetPodcastItemById(id, &podcastItem)
-
+	err := db.GetPodcastItemById(id, &podcastItem)
+	if err != nil {
+		return err
+	}
 	podcastItem.DownloadDate = time.Now()
 	podcastItem.DownloadPath = location
 
-	db.UpdatePodcastItem(&podcastItem)
+	return db.UpdatePodcastItem(&podcastItem)
 }
 
 func DownloadMissingEpisodes() error {
 	data, err := db.GetAllPodcastItemsToBeDownloaded()
 
-	fmt.Println("Processing episodes: ", strconv.Itoa(len(*data)))
+	//fmt.Println("Processing episodes: ", strconv.Itoa(len(*data)))
 	if err != nil {
 		return err
 	}
@@ -114,6 +116,21 @@ func DownloadMissingEpisodes() error {
 		SetPodcastItemAsDownloaded(item.ID, url)
 	}
 	return nil
+}
+func DownloadSingleEpisode(podcastItemId string) error {
+	var podcastItem db.PodcastItem
+	err := db.GetPodcastItemById(podcastItemId, &podcastItem)
+
+	//fmt.Println("Processing episodes: ", strconv.Itoa(len(*data)))
+	if err != nil {
+		return err
+	}
+
+	url, err := Download(podcastItem.FileURL, podcastItem.Title, podcastItem.Podcast.Title)
+	if err != nil {
+		return err
+	}
+	return SetPodcastItemAsDownloaded(podcastItem.ID, url)
 }
 
 func RefreshEpisodes() error {
@@ -127,7 +144,10 @@ func RefreshEpisodes() error {
 		AddPodcastItems(&item)
 
 	}
-	go DownloadMissingEpisodes()
+	setting := db.GetOrCreateSetting()
+	if setting.AutoDownload {
+		go DownloadMissingEpisodes()
+	}
 	return nil
 }
 
