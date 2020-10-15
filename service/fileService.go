@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"io"
 	"net/http"
 	"net/url"
@@ -34,6 +35,15 @@ func Download(link string, episodeTitle string, podcastName string) (string, err
 	}
 	return finalPath, nil
 
+}
+func DeleteFile(filePath string) error {
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		return errors.New("File does not exist")
+	}
+	if err := os.Remove(filePath); err != nil {
+		return err
+	}
+	return nil
 }
 func httpClient() *http.Client {
 	client := http.Client{

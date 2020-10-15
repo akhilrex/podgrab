@@ -10,17 +10,18 @@ import (
 	"time"
 
 	"github.com/akhilrex/podgrab/db"
-	"github.com/microcosm-cc/bluemonday"
+	"github.com/akhilrex/podgrab/model"
+	strip "github.com/grokify/html-strip-tags-go"
 	"gorm.io/gorm"
 )
 
 //FetchURL is
-func FetchURL(url string) (PodcastData, error) {
+func FetchURL(url string) (model.PodcastData, error) {
 	body, err := makeQuery(url)
 	if err != nil {
-		return PodcastData{}, err
+		return model.PodcastData{}, err
 	}
-	var response PodcastData
+	var response model.PodcastData
 	err = xml.Unmarshal(body, &response)
 	return response, err
 }
@@ -30,21 +31,19 @@ func GetAllPodcasts() *[]db.Podcast {
 	return &podcasts
 }
 func AddPodcast(url string) (db.Podcast, error) {
-
-	data, err := FetchURL(url)
-	if err != nil {
-		fmt.Println("Error")
-		//log.Fatal(err)
-		return db.Podcast{}, err
-	}
 	var podcast db.Podcast
-	err = db.GetPodcastByTitleAndAuthor(data.Channel.Title, data.Channel.Author, &podcast)
+	err := db.GetPodcastByURL(url, &podcast)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		p := bluemonday.StripTagsPolicy()
+		data, err := FetchURL(url)
+		if err != nil {
+			fmt.Println("Error")
+			//log.Fatal(err)
+			return db.Podcast{}, err
+		}
 
 		podcast := db.Podcast{
 			Title:   data.Channel.Title,
-			Summary: p.Sanitize(data.Channel.Summary),
+			Summary: strip.StripTags(data.Channel.Summary),
 			Author:  data.Channel.Author,
 			Image:   data.Channel.Image.URL,
 			URL:     url,
@@ -52,7 +51,7 @@ func AddPodcast(url string) (db.Podcast, error) {
 		err = db.CreatePodcast(&podcast)
 		return podcast, err
 	}
-	return podcast, err
+	return podcast, &model.PodcastAlreadyExistsError{Url: url}
 
 }
 
@@ -63,8 +62,12 @@ func AddPodcastItems(podcast *db.Podcast) error {
 		//log.Fatal(err)
 		return err
 	}
-	p := bluemonday.StripTagsPolicy()
-	for i := 0; i < 5; i++ {
+	//p := bluemonday.StrictPolicy()
+	limit := 5
+	if len(data.Channel.Item) < limit {
+		limit = len(data.Channel.Item)
+	}
+	for i := 0; i < limit; i++ {
 		obj := data.Channel.Item[i]
 		var podcastItem db.PodcastItem
 		err := db.GetPodcastItemByPodcastIdAndGUID(podcast.ID, obj.Guid.Text, &podcastItem)
@@ -74,7 +77,7 @@ func AddPodcastItems(podcast *db.Podcast) error {
 			podcastItem = db.PodcastItem{
 				PodcastID:   podcast.ID,
 				Title:       obj.Title,
-				Summary:     p.Sanitize(obj.Summary),
+				Summary:     strip.StripTags(obj.Summary),
 				EpisodeType: obj.EpisodeType,
 				Duration:    duration,
 				PubDate:     pubDate,
@@ -128,10 +131,36 @@ func RefreshEpisodes() error {
 	return nil
 }
 
+func DeletePodcast(id string) error {
+	var podcast db.Podcast
+
+	err := db.GetPodcastById(id, &podcast)
+	if err != nil {
+		return err
+	}
+	var podcastItems []db.PodcastItem
+
+	err = db.GetAllPodcastItemsByPodcastId(id, &podcastItems)
+	if err != nil {
+		return err
+	}
+	for _, item := range podcastItems {
+		DeleteFile(item.DownloadPath)
+		db.DeletePodcastItemById(item.ID)
+
+	}
+	err = db.DeletePodcastById(id)
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
 func makeQuery(url string) ([]byte, error) {
 	//link := "https://www.goodreads.com/search/index.xml?q=Good%27s+Omens&key=" + "jCmNlIXjz29GoB8wYsrd0w"
 	//link := "https://www.goodreads.com/search/index.xml?key=jCmNlIXjz29GoB8wYsrd0w&q=Ender%27s+Game"
-	//fmt.Println(url)
+	fmt.Println(url)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err

@@ -2,8 +2,10 @@ package controllers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
+	"github.com/akhilrex/podgrab/model"
 	"github.com/akhilrex/podgrab/service"
 
 	"github.com/akhilrex/podgrab/db"
@@ -44,6 +46,17 @@ func GetPodcastById(c *gin.Context) {
 		err := db.GetPodcastById(searchByIdQuery.Id, &podcast)
 		fmt.Println(err)
 		c.JSON(200, podcast)
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+	}
+}
+func DeletePodcastById(c *gin.Context) {
+	var searchByIdQuery SearchByIdQuery
+
+	if c.ShouldBindUri(&searchByIdQuery) == nil {
+
+		service.DeletePodcast(searchByIdQuery.Id)
+		c.JSON(http.StatusNoContent, gin.H{})
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 	}
@@ -89,12 +102,20 @@ func AddPodcast(c *gin.Context) {
 	var addPodcastData AddPodcastData
 	err := c.ShouldBindJSON(&addPodcastData)
 	if err == nil {
-
-		service.AddPodcast(addPodcastData.Url)
-		//	fmt.Println(time.Unix(addPodcastData.StartDate, 0))
-		c.JSON(200, addPodcastData)
+		pod, err := service.AddPodcast(addPodcastData.Url)
+		if err == nil {
+			go service.RefreshEpisodes()
+			c.JSON(200, pod)
+		} else {
+			if v, ok := err.(*model.PodcastAlreadyExistsError); ok {
+				c.JSON(409, gin.H{"message": v.Error()})
+			} else {
+				log.Println(err.Error())
+				c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+			}
+		}
 	} else {
-		fmt.Println(err.Error())
-		c.JSON(http.StatusBadRequest, err)
+		log.Println(err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 	}
 }

@@ -10,6 +10,11 @@ func GetPodcastByURL(url string, podcast *Podcast) error {
 	result := DB.Preload(clause.Associations).Where(&Podcast{URL: url}).First(&podcast)
 	return result.Error
 }
+
+func GetPodcastsByURLList(urls []string, podcasts *[]Podcast) error {
+	result := DB.Preload(clause.Associations).Where("url in ?", urls).First(&podcasts)
+	return result.Error
+}
 func GetAllPodcasts(podcasts *[]Podcast) error {
 
 	result := DB.Preload("PodcastItems").Find(&podcasts)
@@ -33,6 +38,16 @@ func GetPodcastById(id string, podcast *Podcast) error {
 func GetPodcastItemById(id string, podcastItem *PodcastItem) error {
 
 	result := DB.Preload(clause.Associations).First(&podcastItem, "id=?", id)
+	return result.Error
+}
+func DeletePodcastItemById(id string) error {
+
+	result := DB.Where("id=?", id).Delete(&PodcastItem{})
+	return result.Error
+}
+func DeletePodcastById(id string) error {
+
+	result := DB.Where("id=?", id).Delete(&Podcast{})
 	return result.Error
 }
 
