@@ -2,12 +2,14 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"os"
 	"path"
 	"path/filepath"
+	"strconv"
 
 	stringy "github.com/gobeam/stringy"
 )
@@ -33,7 +35,18 @@ func Download(link string, episodeTitle string, podcastName string) (string, err
 	if erra != nil {
 		return "", erra
 	}
+	changeOwnership(finalPath)
 	return finalPath, nil
+
+}
+func changeOwnership(path string) {
+	uid, err1 := strconv.Atoi(os.Getenv("PUID"))
+	gid, err2 := strconv.Atoi(os.Getenv("PGID"))
+	fmt.Println(path)
+	if err1 == nil && err2 == nil {
+		fmt.Println(path + " : Attempting change")
+		os.Chown(path, uid, gid)
+	}
 
 }
 func DeleteFile(filePath string) error {
@@ -63,6 +76,7 @@ func createIfFoldeDoesntExist(folder string) string {
 	folderPath := path.Join(dataPath, folder)
 	if _, err := os.Stat(folderPath); os.IsNotExist(err) {
 		os.MkdirAll(folderPath, 0777)
+		changeOwnership(folderPath)
 	}
 	return folderPath
 }
