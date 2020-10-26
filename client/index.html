@@ -42,7 +42,7 @@
 {{range .podcasts}}
 <div class="podcasts row" id="podcast-{{ .ID }}">
     <div class="columns two">
-        <img class="u-full-width" src="{{ .Image }}" alt="{{ .Title }}">
+        <img onerror="onImageError(this)" class="u-full-width" src="{{ .Image }}" alt="{{ .Title }}">
     </div>
     <div class="columns ten">
       <a style="text-decoration: none;" href="/podcasts/{{ .ID }}/view"> <h3>{{.Title}}</h3></a>
