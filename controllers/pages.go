@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"math"
 	"net/http"
 	"strconv"
 
@@ -51,10 +52,28 @@ func AllEpisodesPage(c *gin.Context) {
 			count = 10
 		}
 		var podcastItems []db.PodcastItem
-
-		if err := db.GetPaginatedPodcastItems(page, count, &podcastItems); err == nil {
+		var totalCount int64
+		if err := db.GetPaginatedPodcastItems(page, count, &podcastItems, &totalCount); err == nil {
 			setting := c.MustGet("setting").(*db.Setting)
-			c.HTML(http.StatusOK, "episodes.html", gin.H{"title": "All Episodes", "podcastItems": podcastItems, "setting": setting})
+			totalPages := math.Ceil(float64(totalCount) / float64(count))
+			nextPage, previousPage := 0, 0
+			if float64(page) < totalPages {
+				nextPage = page + 1
+			}
+			if page > 1 {
+				previousPage = page - 1
+			}
+			c.HTML(http.StatusOK, "episodes.html", gin.H{
+				"title":        "All Episodes",
+				"podcastItems": podcastItems,
+				"setting":      setting,
+				"page":         page,
+				"count":        count,
+				"totalCount":   totalCount,
+				"totalPages":   totalPages,
+				"nextPage":     nextPage,
+				"previousPage": previousPage,
+			})
 		} else {
 			c.JSON(http.StatusBadRequest, err)
 		}

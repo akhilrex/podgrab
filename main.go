@@ -46,6 +46,22 @@ func main() {
 			}
 			return latest.Format("Jan 2 2006")
 		},
+		"formatDuration": func(total int) string {
+			if total <= 0 {
+				return ""
+			}
+			mins := total / 60
+			secs := total % 60
+			hrs := 0
+			if mins >= 60 {
+				hrs = mins / 60
+				mins = mins % 60
+			}
+			if hrs > 0 {
+				return fmt.Sprintf("%02d:%02d:%02d", hrs, mins, secs)
+			}
+			return fmt.Sprintf("%02d:%02d", mins, secs)
+		},
 	}
 	tmpl := template.Must(template.New("main").Funcs(funcMap).ParseGlob("client/*"))
 

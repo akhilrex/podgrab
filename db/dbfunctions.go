@@ -27,8 +27,11 @@ func GetAllPodcastItems(podcasts *[]PodcastItem) error {
 	result := DB.Preload("Podcast").Order("pub_date desc").Find(&podcasts)
 	return result.Error
 }
-func GetPaginatedPodcastItems(page int, count int, podcasts *[]PodcastItem) error {
+func GetPaginatedPodcastItems(page int, count int, podcasts *[]PodcastItem, total *int64) error {
 	result := DB.Debug().Preload("Podcast").Limit(count).Offset((page - 1) * count).Order("pub_date desc").Find(&podcasts)
+
+	DB.Model(&PodcastItem{}).Count(total)
+
 	return result.Error
 }
 func GetPodcastById(id string, podcast *Podcast) error {
