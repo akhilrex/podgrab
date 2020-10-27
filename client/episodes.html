@@ -57,7 +57,7 @@ hr{
        
         <div class="row">
           <div class="columns nine">
-            <h4>{{.Title}} // {{ .Podcast.Title}}</h4>
+            <h4>{{.Title}} {{if .Podcast.Title }} // {{ .Podcast.Title}} {{end}}</h4>
           </div>
           <div class="columns two">
             <small>{{ formatDate .PubDate }}</small>

@@ -35,7 +35,7 @@
 <hr>
 <div class="row" id="searchContainer">
     <h4>Search for your favorite podcast</h4>
-    <p>Experimental: Uses gpodder API to show search results.</p>
+    <p>Experimental: Uses iTunes API to show search results.</p>
     <form action="/search" method="post" @submit="search">
         <div class="nine columns">
         <input type="search" name="search" id="search" placeholder="Search for your podcast" v-model="query" class="u-full-width">
@@ -50,7 +50,7 @@
        
         <div v-for="item in results" :key="item.url" class="row">
             <div class="columns two">
-                <img class="u-full-width" :src="item.scaled_logo_url" :alt="item.title">
+                <img class="u-full-width" :src="item.image" :alt="item.title">
             </div>
             <div class="columns nine">
               <h5>${item.title}</h5>
@@ -135,6 +135,7 @@ var app = new Vue({
         }).
         then(function(){
             self.searching=false;
+            self.url=""
         })
           return false;
       }

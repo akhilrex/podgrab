@@ -91,3 +91,11 @@ type PodcastData struct {
 		} `xml:"item"`
 	} `xml:"channel"`
 }
+
+type CommonSearchResultModel struct {
+	URL          string `json:"url"`
+	Title        string `json:"title"`
+	Image        string `json:"image"`
+	AlreadySaved bool   `json:"already_saved"`
+	Description  string `json:"description"`
+}

@@ -32,7 +32,17 @@ func PodcastPage(c *gin.Context) {
 
 		if err := db.GetPodcastById(searchByIdQuery.Id, &podcast); err == nil {
 			setting := c.MustGet("setting").(*db.Setting)
-			c.HTML(http.StatusOK, "podcast.html", gin.H{"title": podcast.Title, "podcast": podcast, "setting": setting})
+			c.HTML(http.StatusOK, "episodes.html", gin.H{
+				"title":        podcast.Title,
+				"podcastItems": podcast.PodcastItems,
+				"setting":      setting,
+				"page":         1,
+				"count":        10,
+				"totalCount":   len(podcast.PodcastItems),
+				"totalPages":   0,
+				"nextPage":     0,
+				"previousPage": 0,
+			})
 		} else {
 			c.JSON(http.StatusBadRequest, err)
 		}
@@ -86,7 +96,8 @@ func AllEpisodesPage(c *gin.Context) {
 func Search(c *gin.Context) {
 	var searchQuery SearchGPodderData
 	if c.ShouldBindQuery(&searchQuery) == nil {
-		data := service.Query(searchQuery.Q)
+		itunesService := new(service.ItunesService)
+		data := itunesService.Query(searchQuery.Q)
 		allPodcasts := service.GetAllPodcasts()
 
 		urls := make(map[string]string, len(*allPodcasts))

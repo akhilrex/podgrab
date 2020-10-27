@@ -198,3 +198,19 @@ func makeQuery(url string) ([]byte, error) {
 	return body, nil
 
 }
+func GetSearchFromGpodder(pod model.GPodcast) *model.CommonSearchResultModel {
+	p := new(model.CommonSearchResultModel)
+	p.URL = pod.URL
+	p.Image = pod.LogoURL
+	p.Title = pod.Title
+	p.Description = pod.Description
+	return p
+}
+func GetSearchFromItunes(pod model.ItunesSingleResult) *model.CommonSearchResultModel {
+	p := new(model.CommonSearchResultModel)
+	p.URL = pod.FeedURL
+	p.Image = pod.ArtworkURL600
+	p.Title = pod.TrackName
+
+	return p
+}
