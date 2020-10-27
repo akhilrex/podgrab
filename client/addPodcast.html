@@ -8,6 +8,7 @@
     {{template "commoncss"}}
     <style>
         [v-cloak] { display: none }
+
     </style>
     
 </head>
@@ -48,7 +49,8 @@
     <progress v-if="searching" class="u-full-width"></progress>
     <div class="results">
        
-        <div v-for="item in results" :key="item.url" class="row">
+        <div v-for="item in results" :key="item.url">
+            <div class="row">
             <div class="columns two">
                 <img class="u-full-width" :src="item.image" :alt="item.title">
             </div>
@@ -59,7 +61,11 @@
               </div>
               <div class="columns one">
                   <button  v-if="!item.already_saved" v-on:click="addPodcast(item)" class="button button-primary">+ Add</button >
+                    <button  v-if="item.already_saved"  class="button" disabled="disabled">Already Added</button >
+                    
               </div>
+            </div>
+              <hr>
         </div>
     </div>
 </div>

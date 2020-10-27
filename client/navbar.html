@@ -1,7 +1,7 @@
 {{define "navbar"}}
 <style>
     /* Larger than tablet */
-@media (min-width: 750px) {
+
   .navbar + .docs-section {
     border-top-width: 0; }
   .navbar,
@@ -44,6 +44,11 @@
   /* Re-overiding the width 100% declaration to match size of % based container */
   .has-docked-nav .navbar > .container {
     width: 80%; }
+/* } */
+@media (max-width: 750px) {
+  .navbar-link{
+    margin-right: 1.5em;
+  }
 }
 </style>
 <nav class="navbar">
