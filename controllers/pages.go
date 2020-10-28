@@ -14,6 +14,11 @@ import (
 type SearchGPodderData struct {
 	Q string `binding:"required" form:"q" json:"q" query:"q"`
 }
+type SettingModel struct {
+	DownloadOnAdd        bool `form:"downloadOnAdd" json:"downloadOnAdd" query:"downloadOnAdd"`
+	InitialDownloadCount int  `form:"initialDownloadCount" json:"initialDownloadCount" query:"initialDownloadCount"`
+	AutoDownload         bool `form:"autoDownload" json:"autoDownload" query:"autoDownload"`
+}
 
 func AddPage(c *gin.Context) {
 
@@ -49,6 +54,15 @@ func PodcastPage(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 	}
+
+}
+func SettingsPage(c *gin.Context) {
+
+	setting := c.MustGet("setting").(*db.Setting)
+	c.HTML(http.StatusOK, "settings.html", gin.H{
+		"setting": setting,
+		"title":   "Update your preferences",
+	})
 
 }
 func AllEpisodesPage(c *gin.Context) {

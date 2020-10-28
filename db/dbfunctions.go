@@ -94,6 +94,10 @@ func UpdatePodcastItem(podcastItem *PodcastItem) error {
 	tx := DB.Omit("Podcast").Save(&podcastItem)
 	return tx.Error
 }
+func UpdateSettings(setting *Setting) error {
+	tx := DB.Save(&setting)
+	return tx.Error
+}
 func GetOrCreateSetting() *Setting {
 	var setting Setting
 	result := DB.First(&setting)

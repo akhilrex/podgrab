@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css" integrity="sha512-EZLkOqwILORob+p0BXZc+Vm3RgJBOe1Iq/0fiI7r/wJgzOFZMlsqTa29UEl6v6U6gsV4uIpsNZoV32YZqrCRCQ==" crossorigin="anonymous" />
+    <title>PodGrab</title>
+    {{template "commoncss"}}
+    <style>
+        .button-delete{
+            background-color: indianred;
+            color:wheat;
+        }
+        img{
+            display: none;
+        }
+        /* Larger than tablet */
+@media (min-width: 750px) {
+  img{
+    display: block
+  }
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <section class="header">
+    <h1>{{ .title }}</h1>
+</section>
+{{template "navbar"}}
+<br>
+<div class="row" id="app">
+    <form action="/saveSettings" method="post" @submit="saveSettings">
+        <label for="downloadOnAdd">
+            <input type="checkbox" name="downloadOnAdd" v-model="downloadOnAdd">
+            <span class="label-body">Download episodes whenever new podcast is added</span>
+        </label>
+        <div v-if="downloadOnAdd">
+        <label for="initialDownloadCount" >
+            <span class="label-body">How many episodes to be downloaded when a new podcast is added</span>
+           
+            
+        </label>
+        <input type="number" name="initialDownloadCount" v-model.number="initialDownloadCount" min="0">
+    </div>
+        <label for="autoDownload">
+            <input type="checkbox" name="autoDownload" v-model="autoDownload">
+            <span class="label-body">Automatically download new episodes to the disk</span>
+        </label>
+        <input type="submit" value="Save" class="button button-primary">
+    </form>
+
+</div>
+
+{{template "scripts"}}
+<script> 
+var app = new Vue({
+  delimiters: ['${', '}'],
+  el: '#app',
+
+  methods:{
+      saveSettings:function(e){
+          e.preventDefault();
+          var self=this;
+        self.searching=true;
+        axios.post("/settings",{
+            downloadOnAdd: self.downloadOnAdd,
+            initialDownloadCount:self.initialDownloadCount,
+            autoDownload:self.autoDownload
+
+        })
+        .then(function(response){
+            Vue.toasted.show('Settings saved successfully.' ,{ 
+                theme: "bubble", 
+                position: "top-right", 
+                duration : 5000
+            })
+         
+          
+        })
+        .catch(function(error){
+            if(error.response){
+                
+            Vue.toasted.show(error.response.data?.message, { 
+                theme: "bubble", 
+                position: "top-right", 
+                duration : 5000
+            })
+            }
+           
+        }).
+        then(function(){
+           
+        })
+          return false;
+      }
+  },
+  data: {
+    downloadOnAdd: {{ .setting.DownloadOnAdd }},
+    initialDownloadCount: {{ .setting.InitialDownloadCount }},
+    autoDownload: {{ .setting.AutoDownload }},
+   
+  },
+     
+})
+    </script>
+</body>
+</html>

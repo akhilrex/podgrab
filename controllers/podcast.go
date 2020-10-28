@@ -133,3 +133,25 @@ func AddPodcast(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 	}
 }
+
+func UpdateSetting(c *gin.Context) {
+	var model SettingModel
+	err := c.ShouldBind(&model)
+
+	if err == nil {
+
+		err = service.UpdateSettings(model.DownloadOnAdd, model.InitialDownloadCount, model.AutoDownload)
+		if err == nil {
+			c.JSON(200, gin.H{"message": "Success"})
+
+		} else {
+
+			c.JSON(http.StatusBadRequest, err)
+
+		}
+	} else {
+		//	fmt.Println(err.Error())
+		c.JSON(http.StatusBadRequest, err)
+	}
+
+}

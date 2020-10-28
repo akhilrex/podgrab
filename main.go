@@ -83,6 +83,8 @@ func main() {
 	r.GET("/", controllers.HomePage)
 	r.GET("/podcasts/:id/view", controllers.PodcastPage)
 	r.GET("/episodes", controllers.AllEpisodesPage)
+	r.GET("/settings", controllers.SettingsPage)
+	r.POST("/settings", controllers.UpdateSetting)
 
 	go assetEnv()
 	go intiCron()

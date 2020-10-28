@@ -214,3 +214,13 @@ func GetSearchFromItunes(pod model.ItunesSingleResult) *model.CommonSearchResult
 
 	return p
 }
+
+func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload bool) error {
+	setting := db.GetOrCreateSetting()
+
+	setting.AutoDownload = autoDownload
+	setting.DownloadOnAdd = downloadOnAdd
+	setting.InitialDownloadCount = initialDownloadCount
+
+	return db.UpdateSettings(setting)
+}
