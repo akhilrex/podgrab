@@ -1,6 +1,7 @@
 {{define "navbar"}}
 <style>
     /* Larger than tablet */
+    @media (min-width: 750px) {
 
   .navbar + .docs-section {
     border-top-width: 0; }
@@ -45,12 +46,103 @@
   .has-docked-nav .navbar > .container {
     width: 80%; }
 /* } */
-@media (max-width: 750px) {
-  .navbar-link{
-    margin-right: 1.5em;
-  }
+ 
 }
+
+#overlay{
+  display: none;
+}
+
+@media (max-width: 750px) {
+
+.drawer {
+  height: 100%;
+  width: 160px;
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  left: -160px;
+  background-color: #fff;
+  overflow-x: hidden;
+  padding-top: 20px;
+  overflow-x: hidden; /* Disable horizontal scroll */
+ display: block;
+  transition: 0.25s; /* 0.5 second transition effect to slide in the sidenav */
+}
+
+.drawer li{
+  list-style: none;
+  display: block;
+}
+
+.drawer li>a {
+  padding-top: 10px;
+  padding-left: 10px;
+  text-decoration: none;
+  display: block;
+
+  text-transform: uppercase;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .2rem;
+    line-height: 2.5rem;
+    color: #222;
+}
+
+div#overlay{
+  background-color: #ccc;
+  opacity: 0.5;
+  height: 100%;
+  width: 100%;
+  position: fixed;
+  z-index: 990;
+  top: 0;
+  left: 0;
+  display: none;
+}
+#burger{
+  position: absolute;
+ margin-top:10px;
+  left: 10px;
+}
+
+#burger div{
+  width: 35px;
+  height: 2px;
+  background-color: black;
+  margin: 6px 0;
+}
+.bar1, .bar2, .bar3 {
+  width: 35px;
+  height: 2px;
+  background-color: #333;
+  margin: 6px 0;
+}
+#closeDrawer{
+  display: inline-block;
+  position: absolute;
+    top: 0;
+    right: 0;
+}
+#closeDrawer .bar1{
+  -webkit-transform: rotate(-45deg) translate(-9px, 6px) ;
+  transform: rotate(-45deg) translate(-9px, 6px) ;
+}
+#closeDrawer .bar3{
+  -webkit-transform: rotate(45deg) translate(-8px, -8px) ;
+  transform: rotate(45deg) translate(-8px, -8px) ;
+}
+}
+
 </style>
+<section class="header">
+  <a id="burger" onclick="toggleMenu()" >
+    <div></div>
+<div></div>
+<div></div>
+  </a>
+  <h1>{{ .title }}</h1>
+</section>
 <nav class="navbar">
     <div class="container">
       <ul class="navbar-list">
@@ -62,4 +154,34 @@
       </ul>
     </div>
   </nav>
+
+  <div class="drawer" id="sideDrawer">
+    <ul>
+      <li><a  href="/">Home</a></li>
+      <li><a  href="/episodes">Episodes</a></li>
+      <li><a href="/add">Add Podcast</a></li>
+      <li><a  href="/settings">Settings</a></li>
+    </ul>
+    <div id="closeDrawer" onclick="toggleMenu()" >
+      <div class="bar1"></div>
+  <div class="bar3"></div>
+ 
+    </div>
+  </div>
+  <div id="overlay" onclick="toggleMenu()"></div>
+
+  <script>
+    function toggleMenu(){
+    let sideDrawer= document.getElementById('sideDrawer')
+    let overlay= document.getElementById('overlay')
+    if(overlay.style.display==="block"){
+      sideDrawer.style.left="-160px"
+      overlay.style.display="none"
+    }else{
+      sideDrawer.style.left="0px"
+      overlay.style.display="block"
+    }
+    }
+  </script>
+
   {{end}}
