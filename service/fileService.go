@@ -58,6 +58,11 @@ func DeleteFile(filePath string) error {
 	}
 	return nil
 }
+func FileExists(filePath string) bool {
+	_, err := os.Stat(filePath)
+	return err == nil
+
+}
 func httpClient() *http.Client {
 	client := http.Client{
 		CheckRedirect: func(r *http.Request, via []*http.Request) error {

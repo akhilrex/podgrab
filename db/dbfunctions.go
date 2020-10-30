@@ -69,6 +69,11 @@ func GetAllPodcastItemsToBeDownloaded() (*[]PodcastItem, error) {
 	result := DB.Debug().Preload(clause.Associations).Where("download_date=?", time.Time{}).Find(&podcastItems)
 	return &podcastItems, result.Error
 }
+func GetAllPodcastItemsAlreadyDownloaded() (*[]PodcastItem, error) {
+	var podcastItems []PodcastItem
+	result := DB.Debug().Preload(clause.Associations).Where("download_date!=?", time.Time{}).Find(&podcastItems)
+	return &podcastItems, result.Error
+}
 
 func GetPodcastItemByPodcastIdAndGUID(podcastId string, guid string, podcastItem *PodcastItem) error {
 

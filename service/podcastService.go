@@ -128,6 +128,21 @@ func DownloadMissingEpisodes() error {
 	}
 	return nil
 }
+func CheckMissingFiles() error {
+	data, err := db.GetAllPodcastItemsAlreadyDownloaded()
+
+	//fmt.Println("Processing episodes: ", strconv.Itoa(len(*data)))
+	if err != nil {
+		return err
+	}
+	for _, item := range *data {
+		fileExists := FileExists(item.DownloadPath)
+		if !fileExists {
+			SetPodcastItemAsNotDownloaded(item.ID)
+		}
+	}
+	return nil
+}
 
 func DeleteEpisodeFile(podcastItemId string) error {
 	var podcastItem db.PodcastItem
