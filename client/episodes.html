@@ -38,7 +38,8 @@ hr{
     </style>
 </head>
 <body>
-  {{template "navbar" .}}
+  <div class="container">
+    {{template "navbar" .}}
   
 <br>{{$setting := .setting}}
 {{range .podcastItems}}
@@ -62,7 +63,7 @@ hr{
           </div>
         </div>
       
-        <p>{{ .Summary }}</p>
+        <p class="useMore">{{ .Summary }}</p>
        {{if .DownloadPath}}
         <a class="button button-primary" href="{{ .DownloadPath }}" download>Download</a>
         <a class="button button" onclick="deleteFile('{{.ID}}')" download>Delete</a>
