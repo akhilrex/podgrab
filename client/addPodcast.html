@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css" integrity="sha512-EZLkOqwILORob+p0BXZc+Vm3RgJBOe1Iq/0fiI7r/wJgzOFZMlsqTa29UEl6v6U6gsV4uIpsNZoV32YZqrCRCQ==" crossorigin="anonymous" />
     <title>Add Podcast - PodGrab</title>
     {{template "commoncss"}}
     <style>
@@ -33,7 +32,8 @@
 <hr>
 <div class="row" id="searchContainer">
     <h4>Search for your favorite podcast</h4>
-    <p>Experimental: Uses iTunes API to show search results.</p>
+    <i><small>Experimental: Uses iTunes API to show search results.</small></i>
+    <br>
     <form action="/search" method="post" @submit="search">
         <div class="nine columns">
         <input type="search" name="search" id="search" placeholder="Search for your podcast" v-model="query" class="u-full-width">

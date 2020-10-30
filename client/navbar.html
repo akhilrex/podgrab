@@ -49,7 +49,7 @@
  
 }
 
-#overlay{
+#overlay, .drawer{
   display: none;
 }
 
@@ -67,7 +67,8 @@
   padding-top: 20px;
   overflow-x: hidden; /* Disable horizontal scroll */
  display: block;
-  transition: 0.25s; /* 0.5 second transition effect to slide in the sidenav */
+  transition: 0.25s ease; /* 0.5 second transition effect to slide in the sidenav */
+  
 }
 
 .drawer li{
@@ -107,13 +108,13 @@ div#overlay{
 }
 
 #burger div{
-  width: 35px;
+  width: 30px;
   height: 2px;
   background-color: black;
   margin: 6px 0;
 }
 .bar1, .bar2, .bar3 {
-  width: 35px;
+  width: 15px;
   height: 2px;
   background-color: #333;
   margin: 6px 0;
@@ -121,16 +122,16 @@ div#overlay{
 #closeDrawer{
   display: inline-block;
   position: absolute;
-    top: 0;
-    right: 0;
+    top: 5px;
+    right: 5px;
 }
 #closeDrawer .bar1{
-  -webkit-transform: rotate(-45deg) translate(-9px, 6px) ;
-  transform: rotate(-45deg) translate(-9px, 6px) ;
+  -webkit-transform: rotate(-45deg) translate(-7px, 6px) ;
+  transform: rotate(-45deg) translate(-7x, 6px) ;
 }
 #closeDrawer .bar3{
-  -webkit-transform: rotate(45deg) translate(-8px, -8px) ;
-  transform: rotate(45deg) translate(-8px, -8px) ;
+  -webkit-transform: rotate(45deg) translate(1px, 1px) ;
+  transform: rotate(45deg) translate(1px, 1px) ;
 }
 }
 
