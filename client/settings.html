@@ -14,11 +14,17 @@
         img{
             display: none;
         }
+        @media (max-width: 750px) {
+        .label-body{
+      display: inline!important;
+  }
+        }
         /* Larger than tablet */
 @media (min-width: 750px) {
   img{
     display: block
   }
+ 
 }
     </style>
 </head>
@@ -30,12 +36,17 @@
 {{template "navbar"}}
 <br>
 <div class="row" id="app">
+    <div class="columns twelve">
     <form action="/saveSettings" method="post" @submit="saveSettings">
+        <div class="row">
         <label for="downloadOnAdd">
             <input type="checkbox" name="downloadOnAdd" v-model="downloadOnAdd">
             <span class="label-body">Download episodes whenever new podcast is added</span>
         </label>
+    </div>
+   
         <div v-if="downloadOnAdd">
+            <br>
         <label for="initialDownloadCount" >
             <span class="label-body">How many episodes to be downloaded when a new podcast is added</span>
            
@@ -43,13 +54,15 @@
         </label>
         <input type="number" name="initialDownloadCount" v-model.number="initialDownloadCount" min="0">
     </div>
+    <br>
         <label for="autoDownload">
             <input type="checkbox" name="autoDownload" v-model="autoDownload">
             <span class="label-body">Automatically download new episodes to the disk</span>
         </label>
+        <br>
         <input type="submit" value="Save" class="button button-primary">
     </form>
-
+</div>
 </div>
 
 {{template "scripts"}}

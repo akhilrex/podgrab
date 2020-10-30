@@ -70,6 +70,8 @@ hr{
         <p>{{ .Summary }}</p>
        {{if .DownloadPath}}
         <a class="button button-primary" href="{{ .DownloadPath }}" download>Download</a>
+        <a class="button button" onclick="deleteFile('{{.ID}}')" download>Delete</a>
+
         {{else}}
         {{if not $setting.AutoDownload}}
         <a class="button button-primary" onclick="downloadToDisk('{{.ID}}')" download>Download to Disk</a>
@@ -125,6 +127,33 @@ function downloadToDisk(id){
     })
       return false;
   }
+  function deleteFile(id){
+   
+   axios.get("/podcastitems/"+id+"/delete")
+   .then(function(response){
+       Vue.toasted.show('Podcast file deleted.' ,{ 
+                   theme: "bubble", 
+                   position: "top-right", 
+                   duration : 5000
+               });
+       var row = document.getElementById('podcast-'+id);
+       row.remove();
+   })
+   .catch(function(error){
+       if(error.response){
+           
+       Vue.toasted.show(error.response.data?.message, { 
+           theme: "bubble", 
+           position: "top-right", 
+           duration : 5000
+       })
+       }
+      
+   }).
+   then(function(){
+   })
+     return false;
+ }
     </script>
 </body>
 </html>

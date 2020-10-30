@@ -77,6 +77,7 @@ func main() {
 	r.GET("/podcastitems", controllers.GetAllPodcastItems)
 	r.GET("/podcastitems/:id", controllers.GetPodcastItemById)
 	r.GET("/podcastitems/:id/download", controllers.DownloadPodcastItem)
+	r.GET("/podcastitems/:id/delete", controllers.DeletePodcastItem)
 
 	r.GET("/add", controllers.AddPage)
 	r.GET("/search", controllers.Search)

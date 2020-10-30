@@ -102,6 +102,17 @@ func SetPodcastItemAsDownloaded(id string, location string) error {
 
 	return db.UpdatePodcastItem(&podcastItem)
 }
+func SetPodcastItemAsNotDownloaded(id string) error {
+	var podcastItem db.PodcastItem
+	err := db.GetPodcastItemById(id, &podcastItem)
+	if err != nil {
+		return err
+	}
+	podcastItem.DownloadDate = time.Time{}
+	podcastItem.DownloadPath = ""
+
+	return db.UpdatePodcastItem(&podcastItem)
+}
 
 func DownloadMissingEpisodes() error {
 	data, err := db.GetAllPodcastItemsToBeDownloaded()
@@ -116,6 +127,22 @@ func DownloadMissingEpisodes() error {
 		SetPodcastItemAsDownloaded(item.ID, url)
 	}
 	return nil
+}
+
+func DeleteEpisodeFile(podcastItemId string) error {
+	var podcastItem db.PodcastItem
+	err := db.GetPodcastItemById(podcastItemId, &podcastItem)
+
+	//fmt.Println("Processing episodes: ", strconv.Itoa(len(*data)))
+	if err != nil {
+		return err
+	}
+
+	err = DeleteFile(podcastItem.DownloadPath)
+	if err != nil {
+		return err
+	}
+	return SetPodcastItemAsNotDownloaded(podcastItem.ID)
 }
 func DownloadSingleEpisode(podcastItemId string) error {
 	var podcastItem db.PodcastItem
