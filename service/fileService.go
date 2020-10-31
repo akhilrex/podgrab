@@ -1,6 +1,8 @@
 package service
 
 import (
+	"archive/tar"
+	"compress/gzip"
 	"errors"
 	"fmt"
 	"io"
@@ -9,7 +11,9 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
 	"strconv"
+	"time"
 
 	stringy "github.com/gobeam/stringy"
 )
@@ -62,6 +66,93 @@ func FileExists(filePath string) bool {
 	_, err := os.Stat(filePath)
 	return err == nil
 
+}
+
+func deleteOldBackup() {
+	var files []string
+	folder := createIfFoldeDoesntExist("backups")
+	err := filepath.Walk(folder, func(path string, info os.FileInfo, err error) error {
+		if !info.IsDir() {
+			files = append(files, path)
+		}
+		return nil
+	})
+	if err != nil {
+		return
+	}
+	if len(files) <= 5 {
+		return
+	}
+
+	sort.Sort(sort.Reverse(sort.StringSlice(files)))
+
+	toDelete := files[5:]
+	for _, file := range toDelete {
+		fmt.Println(file)
+		DeleteFile(file)
+	}
+}
+
+func CreateBackup() (string, error) {
+
+	backupFileName := "podgrab_backup_" + time.Now().Format("2006.01.02_150405") + ".tar.gz"
+	folder := createIfFoldeDoesntExist("backups")
+	configPath := os.Getenv("CONFIG")
+	tarballFilePath := path.Join(folder, backupFileName)
+	file, err := os.Create(tarballFilePath)
+	if err != nil {
+		return "", errors.New(fmt.Sprintf("Could not create tarball file '%s', got error '%s'", tarballFilePath, err.Error()))
+	}
+	defer file.Close()
+
+	dbPath := path.Join(configPath, "podgrab.db")
+	_, err = os.Stat(dbPath)
+	if err != nil {
+		return "", errors.New(fmt.Sprintf("Could not find db file '%s', got error '%s'", dbPath, err.Error()))
+	}
+	gzipWriter := gzip.NewWriter(file)
+	defer gzipWriter.Close()
+
+	tarWriter := tar.NewWriter(gzipWriter)
+	defer tarWriter.Close()
+
+	err = addFileToTarWriter(dbPath, tarWriter)
+	if err == nil {
+		deleteOldBackup()
+	}
+	return backupFileName, err
+}
+
+func addFileToTarWriter(filePath string, tarWriter *tar.Writer) error {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return errors.New(fmt.Sprintf("Could not open file '%s', got error '%s'", filePath, err.Error()))
+	}
+	defer file.Close()
+
+	stat, err := file.Stat()
+	if err != nil {
+		return errors.New(fmt.Sprintf("Could not get stat for file '%s', got error '%s'", filePath, err.Error()))
+	}
+
+	header := &tar.Header{
+		Name:    filePath,
+		Size:    stat.Size(),
+		Mode:    int64(stat.Mode()),
+		ModTime: stat.ModTime(),
+	}
+
+	err = tarWriter.WriteHeader(header)
+	if err != nil {
+		return errors.New(fmt.Sprintf("Could not write header for file '%s', got error '%s'", filePath, err.Error()))
+	}
+
+	_, err = io.Copy(tarWriter, file)
+	if err != nil {
+		return errors.New(fmt.Sprintf("Could not copy the file '%s' data to the tarball, got error '%s'", filePath, err.Error()))
+	}
+
+	return nil
 }
 func httpClient() *http.Client {
 	client := http.Client{
