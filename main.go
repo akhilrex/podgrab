@@ -37,6 +37,10 @@ func main() {
 		"formatDate": func(raw time.Time) string {
 			return raw.Format("Jan 2 2006")
 		},
+		"naturalDate": func(raw time.Time) string {
+			return service.NatualTime(time.Now(), raw)
+			//return raw.Format("Jan 2 2006")
+		},
 		"latestEpisodeDate": func(podcastItems []db.PodcastItem) string {
 			var latest time.Time
 			for _, item := range podcastItems {
