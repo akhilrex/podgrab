@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"math"
 	"net/http"
+	"os"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/akhilrex/podgrab/db"
 	"github.com/akhilrex/podgrab/service"
@@ -63,6 +66,37 @@ func SettingsPage(c *gin.Context) {
 		"setting": setting,
 		"title":   "Update your preferences",
 	})
+
+}
+func BackupsPage(c *gin.Context) {
+
+	files, err := service.GetAllBackupFiles()
+	var allFiles []interface{}
+
+	for _, file := range files {
+		arr := strings.Split(file, string(os.PathSeparator))
+		name := arr[len(arr)-1]
+		subsplit := strings.Split(name, "_")
+		dateStr := subsplit[2]
+		date, err := time.Parse("2006.01.02", dateStr)
+		if err == nil {
+			toAdd := map[string]interface{}{
+				"date": date,
+				"name": name,
+				"path": strings.ReplaceAll(file, string(os.PathSeparator), "/"),
+			}
+			allFiles = append(allFiles, toAdd)
+		}
+	}
+
+	if err == nil {
+		c.HTML(http.StatusOK, "backups.html", gin.H{
+			"backups": allFiles,
+			"title":   "Backups",
+		})
+	} else {
+		c.JSON(http.StatusBadRequest, err)
+	}
 
 }
 func AllEpisodesPage(c *gin.Context) {

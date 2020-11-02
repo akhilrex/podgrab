@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PodGrab</title>
+    {{template "commoncss"}}
+    <style>
+        .button-delete{
+            background-color: indianred;
+            color:wheat;
+        }
+        img{
+            display: none;
+        }
+        @media (max-width: 750px) {
+        .label-body{
+      display: inline!important;
+  }
+        }
+        /* Larger than tablet */
+@media (min-width: 750px) {
+  img{
+    display: block
+  }
+ 
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+ 
+{{template "navbar" .}}
+<br>
+<div class="row" id="app">
+    <div class="columns twelve">
+        <table class="u-full-width">
+            <thead>
+                <th>Date</th>
+        <th>Path</th>
+    </thead>
+    <tbody>
+   {{ range .backups}}
+       <tr>
+           <td>{{ formatDate .date }}</td>
+           <td><a href="{{ .path }}" download="">{{.name}}</a></td>
+       </tr>
+   {{end}}
+</tbody>
+</table>
+</div>
+</div>
+
+{{template "scripts"}}
+<script> 
+    </script>
+</body>
+</html>

@@ -32,10 +32,17 @@
  
 {{template "navbar" .}}
 <br>
+<div class="row">
+    <div class="columns twelve">
+        <a href="/backups" class="button">Backups</a>
+    </div>
+</div>
+<hr>
 <div class="row" id="app">
     <div class="columns twelve">
-    <form action="/saveSettings" method="post" @submit="saveSettings">
+    <form action="/saveSettings" method="post" @submit="saveSettings" >
         <div class="row">
+            <h3>Settings</h3>
         <label for="downloadOnAdd">
             <input type="checkbox" name="downloadOnAdd" v-model="downloadOnAdd">
             <span class="label-body">Download episodes whenever new podcast is added</span>

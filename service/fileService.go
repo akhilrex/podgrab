@@ -68,7 +68,7 @@ func FileExists(filePath string) bool {
 
 }
 
-func deleteOldBackup() {
+func GetAllBackupFiles() ([]string, error) {
 	var files []string
 	folder := createIfFoldeDoesntExist("backups")
 	err := filepath.Walk(folder, func(path string, info os.FileInfo, err error) error {
@@ -77,14 +77,18 @@ func deleteOldBackup() {
 		}
 		return nil
 	})
+	sort.Sort(sort.Reverse(sort.StringSlice(files)))
+	return files, err
+}
+
+func deleteOldBackup() {
+	files, err := GetAllBackupFiles()
 	if err != nil {
 		return
 	}
 	if len(files) <= 5 {
 		return
 	}
-
-	sort.Sort(sort.Reverse(sort.StringSlice(files)))
 
 	toDelete := files[5:]
 	for _, file := range toDelete {
