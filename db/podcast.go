@@ -39,13 +39,28 @@ type PodcastItem struct {
 	GUID  string
 	Image string
 
-	DownloadDate time.Time
-	DownloadPath string
+	DownloadDate   time.Time
+	DownloadPath   string
+	DownloadStatus DownloadStatus `gorm:"default:0"`
 }
+
+type DownloadStatus int
+
+const (
+	NotDownloaded DownloadStatus = iota
+	Downloading
+	Downloaded
+	Deleted
+)
 
 type Setting struct {
 	Base
 	DownloadOnAdd        bool `gorm:"default:true"`
 	InitialDownloadCount int  `gorm:"default:5"`
 	AutoDownload         bool `gorm:"default:true"`
+}
+type Migration struct {
+	Base
+	Date time.Time
+	Name string
 }

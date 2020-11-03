@@ -69,9 +69,13 @@ hr{
         <a class="button button" onclick="deleteFile('{{.ID}}')" download>Delete</a>
 
         {{else}}
-        {{if not $setting.AutoDownload}}
-        <a class="button button-primary" onclick="downloadToDisk('{{.ID}}')" download>Download to Disk</a>
-        {{end}}
+          {{if not $setting.AutoDownload}}
+          <a class="button button-primary" onclick="downloadToDisk('{{.ID}}')" download>Download to Disk</a>
+          {{else}}
+              {{if eq .DownloadStatus 3}}
+              <a class="button button-primary" onclick="downloadToDisk('{{.ID}}')" download>Download to Disk</a>
+              {{end}}
+          {{end}}
         {{end }}
     </div>
     <div class="columns one">

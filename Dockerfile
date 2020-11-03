@@ -20,6 +20,7 @@ ENV CONFIG=/config
 ENV DATA=/assets
 ENV UID=998
 ENV PID=100
+ENV GIN_MODE=release
 VOLUME ["/config", "/assets"]
 RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
 RUN mkdir -p /config; \

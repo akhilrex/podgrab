@@ -2,7 +2,6 @@ package db
 
 import (
 	"errors"
-	"time"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -66,12 +65,13 @@ func GetAllPodcastItemsByPodcastId(podcastId string, podcasts *[]PodcastItem) er
 
 func GetAllPodcastItemsToBeDownloaded() (*[]PodcastItem, error) {
 	var podcastItems []PodcastItem
-	result := DB.Debug().Preload(clause.Associations).Where("download_date=?", time.Time{}).Find(&podcastItems)
+	result := DB.Debug().Preload(clause.Associations).Where("download_status=?", NotDownloaded).Find(&podcastItems)
+	//fmt.Println("To be downloaded : " + string(len(podcastItems)))
 	return &podcastItems, result.Error
 }
 func GetAllPodcastItemsAlreadyDownloaded() (*[]PodcastItem, error) {
 	var podcastItems []PodcastItem
-	result := DB.Debug().Preload(clause.Associations).Where("download_date!=?", time.Time{}).Find(&podcastItems)
+	result := DB.Debug().Preload(clause.Associations).Where("download_status=?", Downloaded).Find(&podcastItems)
 	return &podcastItems, result.Error
 }
 

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -75,15 +76,16 @@ func AddPodcastItems(podcast *db.Podcast) error {
 			duration, _ := strconv.Atoi(obj.Duration)
 			pubDate, _ := time.Parse(time.RFC1123Z, obj.PubDate)
 			podcastItem = db.PodcastItem{
-				PodcastID:   podcast.ID,
-				Title:       obj.Title,
-				Summary:     strip.StripTags(obj.Summary),
-				EpisodeType: obj.EpisodeType,
-				Duration:    duration,
-				PubDate:     pubDate,
-				FileURL:     obj.Enclosure.URL,
-				GUID:        obj.Guid.Text,
-				Image:       obj.Image.Href,
+				PodcastID:      podcast.ID,
+				Title:          obj.Title,
+				Summary:        strip.StripTags(obj.Summary),
+				EpisodeType:    obj.EpisodeType,
+				Duration:       duration,
+				PubDate:        pubDate,
+				FileURL:        obj.Enclosure.URL,
+				GUID:           obj.Guid.Text,
+				Image:          obj.Image.Href,
+				DownloadStatus: db.NotDownloaded,
 			}
 			db.CreatePodcastItem(&podcastItem)
 		}
@@ -99,10 +101,11 @@ func SetPodcastItemAsDownloaded(id string, location string) error {
 	}
 	podcastItem.DownloadDate = time.Now()
 	podcastItem.DownloadPath = location
+	podcastItem.DownloadStatus = db.Downloaded
 
 	return db.UpdatePodcastItem(&podcastItem)
 }
-func SetPodcastItemAsNotDownloaded(id string) error {
+func SetPodcastItemAsNotDownloaded(id string, downloadStatus db.DownloadStatus) error {
 	var podcastItem db.PodcastItem
 	err := db.GetPodcastItemById(id, &podcastItem)
 	if err != nil {
@@ -110,6 +113,7 @@ func SetPodcastItemAsNotDownloaded(id string) error {
 	}
 	podcastItem.DownloadDate = time.Time{}
 	podcastItem.DownloadPath = ""
+	podcastItem.DownloadStatus = downloadStatus
 
 	return db.UpdatePodcastItem(&podcastItem)
 }
@@ -117,7 +121,7 @@ func SetPodcastItemAsNotDownloaded(id string) error {
 func DownloadMissingEpisodes() error {
 	data, err := db.GetAllPodcastItemsToBeDownloaded()
 
-	//fmt.Println("Processing episodes: ", strconv.Itoa(len(*data)))
+	fmt.Println("Processing episodes: ", strconv.Itoa(len(*data)))
 	if err != nil {
 		return err
 	}
@@ -138,7 +142,7 @@ func CheckMissingFiles() error {
 	for _, item := range *data {
 		fileExists := FileExists(item.DownloadPath)
 		if !fileExists {
-			SetPodcastItemAsNotDownloaded(item.ID)
+			SetPodcastItemAsNotDownloaded(item.ID, db.NotDownloaded)
 		}
 	}
 	return nil
@@ -154,10 +158,12 @@ func DeleteEpisodeFile(podcastItemId string) error {
 	}
 
 	err = DeleteFile(podcastItem.DownloadPath)
-	if err != nil {
+
+	if !os.IsNotExist(err) {
 		return err
 	}
-	return SetPodcastItemAsNotDownloaded(podcastItem.ID)
+	fmt.Println("Setting file as deleted")
+	return SetPodcastItemAsNotDownloaded(podcastItem.ID, db.Deleted)
 }
 func DownloadSingleEpisode(podcastItemId string) error {
 	var podcastItem db.PodcastItem

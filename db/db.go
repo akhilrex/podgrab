@@ -35,8 +35,8 @@ func Init() (*gorm.DB, error) {
 
 //Migrate Database
 func Migrate() {
-	DB.AutoMigrate(&Podcast{}, &PodcastItem{}, &Setting{})
-
+	DB.AutoMigrate(&Podcast{}, &PodcastItem{}, &Setting{}, &Migration{})
+	RunMigrations()
 }
 
 // Using this function to get a connection, you can create your connection pool here.

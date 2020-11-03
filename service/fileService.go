@@ -55,7 +55,7 @@ func changeOwnership(path string) {
 }
 func DeleteFile(filePath string) error {
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		return errors.New("File does not exist")
+		return err
 	}
 	if err := os.Remove(filePath); err != nil {
 		return err
