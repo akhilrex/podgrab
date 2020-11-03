@@ -65,16 +65,22 @@ func AddPodcastItems(podcast *db.Podcast) error {
 	}
 	setting := db.GetOrCreateSetting()
 	limit := setting.InitialDownloadCount
-	if len(data.Channel.Item) < limit {
-		limit = len(data.Channel.Item)
-	}
-	for i := 0; i < limit; i++ {
+	// if len(data.Channel.Item) < limit {
+	// 	limit = len(data.Channel.Item)
+	// }
+	for i := 0; i < len(data.Channel.Item); i++ {
 		obj := data.Channel.Item[i]
 		var podcastItem db.PodcastItem
 		err := db.GetPodcastItemByPodcastIdAndGUID(podcast.ID, obj.Guid.Text, &podcastItem)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			duration, _ := strconv.Atoi(obj.Duration)
 			pubDate, _ := time.Parse(time.RFC1123Z, obj.PubDate)
+			var downloadStatus db.DownloadStatus
+			if i < limit {
+				downloadStatus = db.NotDownloaded
+			} else {
+				downloadStatus = db.Deleted
+			}
 			podcastItem = db.PodcastItem{
 				PodcastID:      podcast.ID,
 				Title:          obj.Title,
@@ -85,7 +91,7 @@ func AddPodcastItems(podcast *db.Podcast) error {
 				FileURL:        obj.Enclosure.URL,
 				GUID:           obj.Guid.Text,
 				Image:          obj.Image.Href,
-				DownloadStatus: db.NotDownloaded,
+				DownloadStatus: downloadStatus,
 			}
 			db.CreatePodcastItem(&podcastItem)
 		}
