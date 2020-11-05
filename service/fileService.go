@@ -39,7 +39,7 @@ func Download(link string, episodeTitle string, podcastName string) (string, err
 	if erra != nil {
 		return "", erra
 	}
-	changeOwnership(finalPath)
+	//changeOwnership(finalPath)
 	return finalPath, nil
 
 }
