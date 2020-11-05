@@ -13,8 +13,17 @@ import (
 	"github.com/akhilrex/podgrab/db"
 	"github.com/akhilrex/podgrab/model"
 	strip "github.com/grokify/html-strip-tags-go"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
+
+var Logger *zap.SugaredLogger
+
+func init() {
+	zapper, _ := zap.NewProduction()
+	Logger = zapper.Sugar()
+	defer zapper.Sync()
+}
 
 //FetchURL is
 func FetchURL(url string) (model.PodcastData, error) {
@@ -38,7 +47,7 @@ func AddPodcast(url string) (db.Podcast, error) {
 		data, err := FetchURL(url)
 		if err != nil {
 			fmt.Println("Error")
-			//log.Fatal(err)
+			Logger.Errorw("Error adding podcast", err)
 			return db.Podcast{}, err
 		}
 
