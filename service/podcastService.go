@@ -174,10 +174,10 @@ func DeleteEpisodeFile(podcastItemId string) error {
 
 	err = DeleteFile(podcastItem.DownloadPath)
 
-	if !os.IsNotExist(err) {
+	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
-	fmt.Println("Setting file as deleted")
+
 	return SetPodcastItemAsNotDownloaded(podcastItem.ID, db.Deleted)
 }
 func DownloadSingleEpisode(podcastItemId string) error {
