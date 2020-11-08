@@ -84,6 +84,9 @@ func AddPodcastItems(podcast *db.Podcast) error {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			duration, _ := strconv.Atoi(obj.Duration)
 			pubDate, _ := time.Parse(time.RFC1123Z, obj.PubDate)
+			if (pubDate == time.Time{}) {
+				pubDate, _ = time.Parse(time.RFC1123, obj.PubDate)
+			}
 			var downloadStatus db.DownloadStatus
 			if i < limit {
 				downloadStatus = db.NotDownloaded
