@@ -119,7 +119,7 @@ services:
       - CHECK_FREQUENCY=20
     volumes:
       - /path/to/config:/config
-      - /path/to/data:/data
+      - /path/to/data:/assets
     ports:
       - 8080:8080
     restart: unless-stopped
