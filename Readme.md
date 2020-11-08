@@ -46,8 +46,8 @@
     <a href="https://github.com/akhilrex/podgrab"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/akhilrex/podgrab">View Demo</a>
-    ·
+    <!-- <a href="https://github.com/akhilrex/podgrab">View Demo</a>
+    · -->
     <a href="https://github.com/akhilrex/podgrab/issues">Report Bug</a>
     ·
     <a href="https://github.com/akhilrex/podgrab/issues">Request Feature</a>
