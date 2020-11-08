@@ -46,8 +46,8 @@
     <a href="https://github.com/akhilrex/podgrab"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/akhilrex/podgrab">View Demo</a>
-    ·
+    <!-- <a href="https://github.com/akhilrex/podgrab">View Demo</a>
+    · -->
     <a href="https://github.com/akhilrex/podgrab/issues">Report Bug</a>
     ·
     <a href="https://github.com/akhilrex/podgrab/issues">Request Feature</a>
@@ -119,7 +119,7 @@ services:
       - CHECK_FREQUENCY=20
     volumes:
       - /path/to/config:/config
-      - /path/to/data:/data
+      - /path/to/data:/assets
     ports:
       - 8080:8080
     restart: unless-stopped
