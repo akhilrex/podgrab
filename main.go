@@ -110,7 +110,7 @@ func setupSettings() gin.HandlerFunc {
 func intiCron() {
 	checkFrequency, err := strconv.Atoi(os.Getenv("CHECK_FREQUENCY"))
 	if err != nil {
-		checkFrequency = 10
+		checkFrequency = 30
 		log.Print(err)
 	}
 	//gocron.Every(uint64(checkFrequency)).Minutes().Do(service.DownloadMissingEpisodes)

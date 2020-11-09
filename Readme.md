@@ -116,7 +116,7 @@ services:
     image: akhilrex/podgrab
     container_name: podgrab
     environment:
-      - CHECK_FREQUENCY=20
+      - CHECK_FREQUENCY=240
     volumes:
       - /path/to/config:/config
       - /path/to/data:/assets
@@ -128,6 +128,12 @@ services:
 ```sh
    docker-compose up -d
 ```
+
+### Environment Variables
+
+| Name | Description | Default |
+| --- | --- | --- |
+| CHECK_FREQUENCY | How frequently to check for new episodes and missing files (in minutes) | 30 |
 
 
 <!-- LICENSE -->
