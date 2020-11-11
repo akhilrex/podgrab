@@ -91,6 +91,7 @@ func main() {
 	r.GET("/settings", controllers.SettingsPage)
 	r.POST("/settings", controllers.UpdateSetting)
 	r.GET("/backups", controllers.BackupsPage)
+	r.POST("/opml", controllers.UploadOpml)
 
 	go assetEnv()
 	go intiCron()

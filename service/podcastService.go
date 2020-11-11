@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/akhilrex/podgrab/db"
@@ -25,6 +26,12 @@ func init() {
 	defer zapper.Sync()
 }
 
+func ParseOpml(content string) (model.OpmlModel, error) {
+	var response model.OpmlModel
+	err := xml.Unmarshal([]byte(content), &response)
+	return response, err
+}
+
 //FetchURL is
 func FetchURL(url string) (model.PodcastData, error) {
 	body, err := makeQuery(url)
@@ -40,9 +47,45 @@ func GetAllPodcasts() *[]db.Podcast {
 	db.GetAllPodcasts(&podcasts)
 	return &podcasts
 }
+
+func AddOpml(content string) error {
+	model, err := ParseOpml(content)
+	if err != nil {
+		return errors.New("Invalid file format")
+	}
+	var wg sync.WaitGroup
+	setting := db.GetOrCreateSetting()
+	for _, outline := range model.Body.Outline {
+		if outline.XmlUrl != "" {
+			wg.Add(1)
+			go func(url string) {
+				defer wg.Done()
+				AddPodcast(url)
+
+			}(outline.XmlUrl)
+		}
+
+		for _, innerOutline := range outline.Outline {
+			if innerOutline.XmlUrl != "" {
+				wg.Add(1)
+				go func(url string) {
+					defer wg.Done()
+					AddPodcast(url)
+				}(innerOutline.XmlUrl)
+			}
+		}
+	}
+	wg.Wait()
+	if setting.DownloadOnAdd {
+		go RefreshEpisodes()
+	}
+	return nil
+
+}
 func AddPodcast(url string) (db.Podcast, error) {
 	var podcast db.Podcast
 	err := db.GetPodcastByURL(url, &podcast)
+	fmt.Println(url)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		data, err := FetchURL(url)
 		if err != nil {
@@ -77,11 +120,24 @@ func AddPodcastItems(podcast *db.Podcast) error {
 	// if len(data.Channel.Item) < limit {
 	// 	limit = len(data.Channel.Item)
 	// }
+	var allGuids []string
+	for i := 0; i < len(data.Channel.Item); i++ {
+		obj := data.Channel.Item[i]
+		allGuids = append(allGuids, obj.Guid.Text)
+	}
+
+	existingItems, err := db.GetPodcastItemsByPodcastIdAndGUIDs(podcast.ID, allGuids)
+	keyMap := make(map[string]int)
+
+	for _, item := range *existingItems {
+		keyMap[item.GUID] = 1
+	}
+
 	for i := 0; i < len(data.Channel.Item); i++ {
 		obj := data.Channel.Item[i]
 		var podcastItem db.PodcastItem
-		err := db.GetPodcastItemByPodcastIdAndGUID(podcast.ID, obj.Guid.Text, &podcastItem)
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		_, keyExists := keyMap[obj.Guid.Text]
+		if !keyExists {
 			duration, _ := strconv.Atoi(obj.Duration)
 			pubDate, _ := time.Parse(time.RFC1123Z, obj.PubDate)
 			if (pubDate == time.Time{}) {
@@ -143,11 +199,20 @@ func DownloadMissingEpisodes() error {
 	if err != nil {
 		return err
 	}
-	for _, item := range *data {
+	var wg sync.WaitGroup
+	for index, item := range *data {
+		wg.Add(1)
+		go func(item db.PodcastItem) {
+			defer wg.Done()
+			url, _ := Download(item.FileURL, item.Title, item.Podcast.Title)
+			SetPodcastItemAsDownloaded(item.ID, url)
+		}(item)
 
-		url, _ := Download(item.FileURL, item.Title, item.Podcast.Title)
-		SetPodcastItemAsDownloaded(item.ID, url)
+		if index%5 == 0 {
+			wg.Wait()
+		}
 	}
+	wg.Wait()
 	return nil
 }
 func CheckMissingFiles() error {

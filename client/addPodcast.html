@@ -1,149 +1,255 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Add Podcast - PodGrab</title>
     {{template "commoncss"}}
     <style>
-        [v-cloak] { display: none }
-
+      [v-cloak] {
+        display: none;
+      }
     </style>
-    
-</head>
-<body>
- 
-
+  </head>
+  <body>
     <div class="container">
-        {{template "navbar" .}}
-<br>
-<div id="app" v-cloak>
-<div class="row">
-    <h4>Add using the direct link to rss feed</h4>
-    <form action="/" method="post" @submit="addPodcastManual">
-        <div class="nine columns">
-        <input type="url" v-model="url" name="url" id="url" placeholder="Enter Podcast RSS feed to add" class="u-full-width">
-    </div>
-    <div class="three columns">
-        <input type="submit" value="Add Podcast" class="u-full-width button-primary">
-    </div>
-    </form>
-</div>
-<hr>
-<div class="row" id="searchContainer">
-    <h4>Search for your favorite podcast</h4>
-    <i><small>Experimental: Uses iTunes API to show search results.</small></i>
-    <br>
-    <form action="/search" method="post" @submit="search">
-        <div class="nine columns">
-        <input type="search" name="search" id="search" placeholder="Search for your podcast" v-model="query" class="u-full-width">
-    </div>
-    <div class="three columns">
-        <input type="submit" value="Search" class="u-full-width button-primary">
-    </div>
-    </form>
-    <br>
-    <progress v-if="searching" class="u-full-width"></progress>
-    <div class="results">
-       
-        <div v-for="item in results" :key="item.url">
-            <div class="row">
-            <div class="columns two">
-                <img class="u-full-width" :src="item.image" :alt="item.title">
+      {{template "navbar" .}}
+      <br />
+      <div id="app" v-cloak>
+        <div class="row">
+          <h4>Add using the direct link to rss feed</h4>
+          <form action="/" method="post" @submit="addPodcastManual">
+            <div class="nine columns">
+              <input
+                type="url"
+                v-model="url"
+                name="url"
+                id="url"
+                placeholder="Enter Podcast RSS feed to add"
+                class="u-full-width"
+              />
             </div>
-            <div class="columns nine">
-              <h5>${item.title}</h5>
-            
-                <p>${ item.description }</p>
-              </div>
-              <div class="columns one">
-                  <button  v-if="!item.already_saved" v-on:click="addPodcast(item)" class="button button-primary">+ Add</button >
-                    <button  v-if="item.already_saved"  class="button" disabled="disabled">Already Added</button >
-                    
-              </div>
+            <div class="three columns">
+              <input
+                type="submit"
+                value="Add Podcast"
+                class="u-full-width button-primary"
+              />
             </div>
-              <hr>
+          </form>
         </div>
+        <hr />
+        <div class="row">
+            <div>
+          <h4>Import OPML file</h4>
+          <i
+          ><small
+            >Most of the major podcast manager apps (eg. Podcast Addict) have the option to export add your podcast subscriptions in the opml format. You can migrate all your podcast in one go by exportin that OPML file and importing it here.</small
+          ></i
+        >
+    </div><br>
+         
+          <form enctype="multipart/form-data" action="/" @submit="uploadOpml" ref="uploadForm">
+            <div class="nine columns">
+            <input
+              type="file"
+              :name="uploadFieldName"
+              @change="selectFile"
+              ref="file"
+              accept="text/xml,.opml"
+            />
+        </div>
+         
+          <div class="three columns">
+            <input
+              type="submit"
+              value="Upload"
+              class="u-full-width button-primary"
+            />
+          </div> </form>
+        </div>
+        <hr />
+        <div class="row" id="searchContainer">
+          <h4>Search for your favorite podcast</h4>
+          <i
+            ><small
+              >Experimental: Uses iTunes API to show search results.</small
+            ></i
+          >
+          <br />
+          <form action="/search" method="post" @submit="search">
+            <div class="nine columns">
+              <input
+                type="search"
+                name="search"
+                id="search"
+                placeholder="Search for your podcast"
+                v-model="query"
+                class="u-full-width"
+              />
+            </div>
+            <div class="three columns">
+              <input
+                type="submit"
+                value="Search"
+                class="u-full-width button-primary"
+              />
+            </div>
+          </form>
+          <br />
+          <progress v-if="searching" class="u-full-width"></progress>
+          <div class="results">
+            <div v-for="item in results" :key="item.url">
+              <div class="row">
+                <div class="columns two">
+                  <img
+                    class="u-full-width"
+                    :src="item.image"
+                    :alt="item.title"
+                  />
+                </div>
+                <div class="columns nine">
+                  <h5>${item.title}</h5>
+
+                  <p>${ item.description }</p>
+                </div>
+                <div class="columns one">
+                  <button
+                    v-if="!item.already_saved"
+                    v-on:click="addPodcast(item)"
+                    class="button button-primary"
+                  >
+                    + Add
+                  </button>
+                  <button
+                    v-if="item.already_saved"
+                    class="button"
+                    disabled="disabled"
+                  >
+                    Already Added
+                  </button>
+                </div>
+              </div>
+              <hr />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-</div>
-</div>
-</div>
-{{template "scripts"}}
+    {{template "scripts"}}
 
     <script>
-var app = new Vue({
-  delimiters: ['${', '}'],
-  el: '#app',
-  data: {
-    results: [],
-    query:'',
-    searching:false,
-    url:''
-  },
-  methods:{
-      search:function(e){
-        e.preventDefault();
-        if(!this.query){
-            return;
-        }
-        var self=this;
-        self.searching=true;
-        axios.get("/search?q="+this.query)
-        .then(function(response){
-           self.results= response.data
-        })
-        .catch(function(error){
-
-        }).
-        then(function(){
-            self.searching=false;
-        })
-       
-      },
-      addPodcastManual:function(e){
-        e.preventDefault();
-        if(!this.url){
-            return;
-        }
-        this.addPodcast({url:this.url})
-
-      }
-      ,
-      addPodcast:function(item){
-        //  console.log(item);
-          var self=this;
-        self.searching=true;
-        axios.post("/podcasts",{
-            url:item.url
-        })
-        .then(function(response){
-            Vue.toasted.show('Podcast added successfully.' ,{ 
-	 theme: "bubble", 
-	 position: "top-right", 
-	 duration : 5000
-})
-           item.already_saved= true
-          
-        })
-        .catch(function(error){
-            if(error.response){
-                
-            Vue.toasted.show(error.response.data?.message, { 
-                theme: "bubble", 
-                position: "top-right", 
-                duration : 5000
-            })
+      var app = new Vue({
+        delimiters: ["${", "}"],
+        el: "#app",
+        data: {
+          results: [],
+          query: "",
+          searching: false,
+          url: "",
+          selectedFiles: undefined,
+        },
+        methods: {
+          selectFile: function () {
+            this.selectedFiles = this.$refs.file.files;
+          },
+          uploadOpml: function (e) {
+            e.preventDefault();
+            var currentFile = this.selectedFiles.item(0);
+            if (!currentFile) {
+              return;
             }
-           
-        }).
-        then(function(){
-            self.searching=false;
-            self.url=""
-        })
-          return false;
-      }
-  }
-})
-</script>
-</body>
+            var self=this;
+            self.searching = true;
+            let formData = new FormData();
+
+            formData.append("file", currentFile);
+            axios
+              .post("/opml", formData, {
+                headers: {
+                  "Content-Type": "multipart/form-data",
+                },
+              })
+              .then(function (response) {
+                Vue.toasted.show("File uploaded successfully.", {
+                  theme: "bubble",
+                  position: "top-right",
+                  duration: 5000,
+                });
+                item.already_saved = true;
+              })
+              .catch(function (error) {
+                if (error.response) {
+                  Vue.toasted.show(error.response.data?.message, {
+                    theme: "bubble",
+                    position: "top-right",
+                    duration: 5000,
+                  });
+                }
+              })
+              .then(function () {
+                self.searching = false;
+               
+                self.$refs.uploadForm.reset()
+              });
+          },
+          search: function (e) {
+            e.preventDefault();
+            if (!this.query) {
+              return;
+            }
+            var self = this;
+            self.searching = true;
+            axios
+              .get("/search?q=" + this.query)
+              .then(function (response) {
+                self.results = response.data;
+              })
+              .catch(function (error) {})
+              .then(function () {
+                self.searching = false;
+              });
+          },
+          addPodcastManual: function (e) {
+            e.preventDefault();
+            if (!this.url) {
+              return;
+            }
+            this.addPodcast({ url: this.url });
+          },
+          addPodcast: function (item) {
+            //  console.log(item);
+            var self = this;
+            self.searching = true;
+            axios
+              .post("/podcasts", {
+                url: item.url,
+              })
+              .then(function (response) {
+                Vue.toasted.show("Podcast added successfully.", {
+                  theme: "bubble",
+                  position: "top-right",
+                  duration: 5000,
+                });
+                item.already_saved = true;
+              })
+              .catch(function (error) {
+                if (error.response) {
+                  Vue.toasted.show(error.response.data?.message, {
+                    theme: "bubble",
+                    position: "top-right",
+                    duration: 5000,
+                  });
+                }
+              })
+              .then(function () {
+                self.searching = false;
+                self.url = "";
+              });
+            return false;
+          },
+        },
+      });
+    </script>
+  </body>
 </html>

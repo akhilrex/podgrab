@@ -22,8 +22,9 @@ type SearchByIdQuery struct {
 }
 
 type Pagination struct {
-	Page  int `uri:"page" query:"page" json:"page" form:"page"`
-	Count int `uri:"count" query:"count" json:"count" form:"count"`
+	Page           int  `uri:"page" query:"page" json:"page" form:"page"`
+	Count          int  `uri:"count" query:"count" json:"count" form:"count"`
+	DownloadedOnly bool `uri:"downloadedOnly" query:"downloadedOnly" json:"downloadedOnly" form:"downloadedOnly"`
 }
 
 type AddPodcastData struct {

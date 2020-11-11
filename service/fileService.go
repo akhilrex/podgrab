@@ -19,10 +19,13 @@ import (
 )
 
 func Download(link string, episodeTitle string, podcastName string) (string, error) {
+	if link == "" {
+		return "", errors.New("Download path empty")
+	}
 	client := httpClient()
 	resp, err := client.Get(link)
 	if err != nil {
-		Logger.Errorw("Error getting response", err)
+		Logger.Errorw("Error getting response: "+link, err)
 		return "", err
 	}
 
@@ -31,7 +34,7 @@ func Download(link string, episodeTitle string, podcastName string) (string, err
 	finalPath := path.Join(folder, fileName)
 	file, err := os.Create(finalPath)
 	if err != nil {
-		Logger.Errorw("Error creating file", err)
+		Logger.Errorw("Error creating file"+link, err)
 		return "", err
 	}
 	defer resp.Body.Close()
@@ -39,7 +42,7 @@ func Download(link string, episodeTitle string, podcastName string) (string, err
 	//fmt.Println(size)
 	defer file.Close()
 	if erra != nil {
-		Logger.Errorw("Error saving file", err)
+		Logger.Errorw("Error saving file"+link, err)
 		return "", erra
 	}
 	changeOwnership(finalPath)

@@ -88,10 +88,10 @@ hr{
 
 <div class="row"><div class="columns twelve" style="text-align: center;">
   {{if .previousPage }}
-  <a href="?page={{.previousPage}}" class="button button-primary">Newer</a>
+  <a href="?page={{.previousPage}}&downloadedOnly={{.downloadedOnly}}" class="button button-primary">Newer</a>
   {{end}}
   {{if .nextPage }}
-  <a href="?page={{.nextPage}}" class="button button-primary">Older</a>
+  <a href="?page={{.nextPage}}&downloadedOnly={{.downloadedOnly}}" class="button button-primary">Older</a>
   {{end}}
  
 </div></div>

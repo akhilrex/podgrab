@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"math"
 	"net/http"
 	"os"
@@ -41,15 +43,16 @@ func PodcastPage(c *gin.Context) {
 		if err := db.GetPodcastById(searchByIdQuery.Id, &podcast); err == nil {
 			setting := c.MustGet("setting").(*db.Setting)
 			c.HTML(http.StatusOK, "episodes.html", gin.H{
-				"title":        podcast.Title,
-				"podcastItems": podcast.PodcastItems,
-				"setting":      setting,
-				"page":         1,
-				"count":        10,
-				"totalCount":   len(podcast.PodcastItems),
-				"totalPages":   0,
-				"nextPage":     0,
-				"previousPage": 0,
+				"title":          podcast.Title,
+				"podcastItems":   podcast.PodcastItems,
+				"setting":        setting,
+				"page":           1,
+				"count":          10,
+				"totalCount":     len(podcast.PodcastItems),
+				"totalPages":     0,
+				"nextPage":       0,
+				"previousPage":   0,
+				"downloadedOnly": false,
 			})
 		} else {
 			c.JSON(http.StatusBadRequest, err)
@@ -111,7 +114,7 @@ func AllEpisodesPage(c *gin.Context) {
 		}
 		var podcastItems []db.PodcastItem
 		var totalCount int64
-		if err := db.GetPaginatedPodcastItems(page, count, &podcastItems, &totalCount); err == nil {
+		if err := db.GetPaginatedPodcastItems(page, count, pagination.DownloadedOnly, &podcastItems, &totalCount); err == nil {
 			setting := c.MustGet("setting").(*db.Setting)
 			totalPages := math.Ceil(float64(totalCount) / float64(count))
 			nextPage, previousPage := 0, 0
@@ -122,21 +125,22 @@ func AllEpisodesPage(c *gin.Context) {
 				previousPage = page - 1
 			}
 			c.HTML(http.StatusOK, "episodes.html", gin.H{
-				"title":        "All Episodes",
-				"podcastItems": podcastItems,
-				"setting":      setting,
-				"page":         page,
-				"count":        count,
-				"totalCount":   totalCount,
-				"totalPages":   totalPages,
-				"nextPage":     nextPage,
-				"previousPage": previousPage,
+				"title":          "All Episodes",
+				"podcastItems":   podcastItems,
+				"setting":        setting,
+				"page":           page,
+				"count":          count,
+				"totalCount":     totalCount,
+				"totalPages":     totalPages,
+				"nextPage":       nextPage,
+				"previousPage":   previousPage,
+				"downloadedOnly": pagination.DownloadedOnly,
 			})
 		} else {
 			c.JSON(http.StatusBadRequest, err)
 		}
 	} else {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid request"})
 	}
 
 }
@@ -161,6 +165,27 @@ func Search(c *gin.Context) {
 		c.JSON(200, data)
 	}
 
+}
+func UploadOpml(c *gin.Context) {
+	file, _, err := c.Request.FormFile("file")
+	defer file.Close()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid request"})
+		return
+	}
+
+	buf := bytes.NewBuffer(nil)
+	if _, err := io.Copy(buf, file); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid request"})
+		return
+	}
+	content := string(buf.Bytes())
+	err = service.AddOpml(content)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+	} else {
+		c.JSON(200, gin.H{"success": "File uploaded"})
+	}
 }
 
 func AddNewPodcast(c *gin.Context) {
