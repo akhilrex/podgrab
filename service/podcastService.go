@@ -143,6 +143,12 @@ func AddPodcastItems(podcast *db.Podcast) error {
 			if (pubDate == time.Time{}) {
 				pubDate, _ = time.Parse(time.RFC1123, obj.PubDate)
 			}
+			if (pubDate == time.Time{}) {
+				//	RFC1123     = "Mon, 02 Jan 2006 15:04:05 MST"
+				modifiedRFC1123 := "Mon, 2 Jan 2006 15:04:05 MST"
+				pubDate, _ = time.Parse(modifiedRFC1123, obj.PubDate)
+			}
+
 			var downloadStatus db.DownloadStatus
 			if i < limit {
 				downloadStatus = db.NotDownloaded
