@@ -42,6 +42,8 @@ type PodcastItem struct {
 	DownloadDate   time.Time
 	DownloadPath   string
 	DownloadStatus DownloadStatus `gorm:"default:0"`
+
+	IsPlayed bool `gorm:"default:false"`
 }
 
 type DownloadStatus int
@@ -63,4 +65,15 @@ type Migration struct {
 	Base
 	Date time.Time
 	Name string
+}
+
+type JobLock struct {
+	Base
+	Date     time.Time
+	Name     string
+	Duration int
+}
+
+func (lock *JobLock) IsLocked() bool {
+	return lock != nil && lock.Date != time.Time{}
 }

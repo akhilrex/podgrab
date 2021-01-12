@@ -2,6 +2,7 @@ package db
 
 import (
 	"errors"
+	"time"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -68,6 +69,11 @@ func GetAllPodcastItemsByPodcastId(podcastId string, podcasts *[]PodcastItem) er
 	return result.Error
 }
 
+func SetAllEpisodesToDownload(podcastId string) error {
+	result := DB.Debug().Model(PodcastItem{}).Where(&PodcastItem{PodcastID: podcastId, DownloadStatus: Deleted}).Update("download_status", NotDownloaded)
+	return result.Error
+}
+
 func GetAllPodcastItemsToBeDownloaded() (*[]PodcastItem, error) {
 	var podcastItems []PodcastItem
 	result := DB.Debug().Preload(clause.Associations).Where("download_status=?", NotDownloaded).Find(&podcastItems)
@@ -121,4 +127,56 @@ func GetOrCreateSetting() *Setting {
 		DB.First(&setting)
 	}
 	return &setting
+}
+
+func GetLock(name string) *JobLock {
+	var jobLock JobLock
+	result := DB.Where("name = ?", name).First(&jobLock)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return &JobLock{
+			Name: name,
+		}
+	}
+	return &jobLock
+}
+func Lock(name string, duration int) {
+	jobLock := GetLock(name)
+	if jobLock == nil {
+		jobLock = &JobLock{
+			Name: name,
+		}
+	}
+	jobLock.Duration = duration
+	jobLock.Date = time.Now()
+	if jobLock.ID == "" {
+		DB.Create(&jobLock)
+	} else {
+		DB.Save(&jobLock)
+	}
+}
+func Unlock(name string) {
+	jobLock := GetLock(name)
+	if jobLock == nil {
+		return
+	}
+	jobLock.Duration = 0
+	jobLock.Date = time.Time{}
+	DB.Save(&jobLock)
+}
+
+func UnlockMissedJobs() {
+	var jobLocks *[]JobLock
+
+	result := DB.Where("date != ", time.Time{}).Find(&jobLocks)
+	if result.Error != nil {
+		return
+	}
+	for _, job := range *jobLocks {
+		var duration time.Duration
+		duration = time.Duration(job.Duration)
+		d := job.Date.Add(time.Minute * duration)
+		if d.Before(time.Now()) {
+			Unlock(job.Name)
+		}
+	}
 }

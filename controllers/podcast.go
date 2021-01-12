@@ -27,6 +27,11 @@ type Pagination struct {
 	DownloadedOnly bool `uri:"downloadedOnly" query:"downloadedOnly" json:"downloadedOnly" form:"downloadedOnly"`
 }
 
+type PatchPodcastItem struct {
+	IsPlayed bool   `json:"isPlayed" form:"isPlayed" query:"isPlayed"`
+	Title    string `form:"title" json:"title" query:"title"`
+}
+
 type AddPodcastData struct {
 	Url string `binding:"required" form:"url" json:"url"`
 }
@@ -62,6 +67,17 @@ func DeletePodcastById(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 	}
 }
+func DeletePodcastEpisodesById(c *gin.Context) {
+	var searchByIdQuery SearchByIdQuery
+
+	if c.ShouldBindUri(&searchByIdQuery) == nil {
+
+		service.DeletePodcastEpisodes(searchByIdQuery.Id)
+		c.JSON(http.StatusNoContent, gin.H{})
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+	}
+}
 
 func GetPodcastItemsByPodcastId(c *gin.Context) {
 	var searchByIdQuery SearchByIdQuery
@@ -73,6 +89,19 @@ func GetPodcastItemsByPodcastId(c *gin.Context) {
 		err := db.GetAllPodcastItemsByPodcastId(searchByIdQuery.Id, &podcastItems)
 		fmt.Println(err)
 		c.JSON(200, podcastItems)
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+	}
+}
+
+func DownloadAllEpisodesByPodcastId(c *gin.Context) {
+	var searchByIdQuery SearchByIdQuery
+
+	if c.ShouldBindUri(&searchByIdQuery) == nil {
+
+		err := db.SetAllEpisodesToDownload(searchByIdQuery.Id)
+		fmt.Println(err)
+		c.JSON(200, gin.H{})
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 	}
@@ -98,6 +127,53 @@ func GetPodcastItemById(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 	}
 }
+
+func MarkPodcastItemAsUnplayed(c *gin.Context) {
+	var searchByIdQuery SearchByIdQuery
+
+	if c.ShouldBindUri(&searchByIdQuery) == nil {
+		service.SetPodcastItemPlayedStatus(searchByIdQuery.Id, false)
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+	}
+}
+func MarkPodcastItemAsPlayed(c *gin.Context) {
+	var searchByIdQuery SearchByIdQuery
+
+	if c.ShouldBindUri(&searchByIdQuery) == nil {
+		service.SetPodcastItemPlayedStatus(searchByIdQuery.Id, true)
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+	}
+}
+func PatchPodcastItemById(c *gin.Context) {
+	var searchByIdQuery SearchByIdQuery
+
+	if c.ShouldBindUri(&searchByIdQuery) == nil {
+
+		var podcast db.PodcastItem
+
+		err := db.GetPodcastItemById(searchByIdQuery.Id, &podcast)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+			return
+		}
+
+		var input PatchPodcastItem
+
+		if err := c.ShouldBindJSON(&input); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		db.DB.Model(&podcast).Updates(input)
+		c.JSON(200, podcast)
+
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+	}
+}
+
 func DownloadPodcastItem(c *gin.Context) {
 	var searchByIdQuery SearchByIdQuery
 
@@ -162,7 +238,7 @@ func UpdateSetting(c *gin.Context) {
 
 		}
 	} else {
-		//	fmt.Println(err.Error())
+		fmt.Println(err.Error())
 		c.JSON(http.StatusBadRequest, err)
 	}
 

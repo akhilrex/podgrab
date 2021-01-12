@@ -1,111 +1,211 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PodGrab</title>
     {{template "commoncss"}}
     <style>
-        .button-delete{
-            background-color: indianred;
-            color:wheat;
+      .button-delete {
+        color: #d11a2a;
+      }
+      .podcasts .button {
+        padding: 0 15px;
+      }
+      img {
+        display: none;
+      }
+      /* Larger than tablet */
+      @media (min-width: 750px) {
+        img {
+          display: block;
         }
-        img{
-            display: none;
-        }
-        /* Larger than tablet */
-@media (min-width: 750px) {
-  img{
-    display: block
-  }
-}
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        {{template "navbar" .}}
+      {{template "navbar" .}}
 
-<div class="row" style="display: none;">
-    <form action="/" method="post">
-        <div class="nine columns">
-        <input type="url" name="url" id="url" placeholder="Enter Podcast RSS feed to add" class="u-full-width">
-    </div><div class="three columns">
-        <input type="submit" value="Add Podcast" class="u-full-width button-primary">
-    </div>
-    </form>
-</div>
-<br>
-
-{{range .podcasts}}
-<div class="podcasts row" id="podcast-{{ .ID }}">
-    <div class="columns two">
-        <img onerror="onImageError(this)" class="u-full-width" src="{{ .Image }}" alt="{{ .Title }}">
-    </div>
-    <div class="columns ten">
-      <a style="text-decoration: none;" href="/podcasts/{{ .ID }}/view"> <h3>{{.Title}}</h3></a>
-    
-        <p class="useMore">{{ .Summary }}</p>
-
-   
-    <div class="row">
-    <div class="columns four">
-      
-       Last Episode : {{ latestEpisodeDate .PodcastItems}}
-    </div>
-    <div class="columns four">
-     {{ len .PodcastItems }} episodes
-     
-   </div>
-   <div class="columns four">
-       <button class="button button-delete" onclick="deletePodcast('{{.ID}}')">Delete</button>
-   </div>
-  </div>
+      <div class="row" style="display: none">
+        <form action="/" method="post">
+          <div class="nine columns">
+            <input
+              type="url"
+              name="url"
+              id="url"
+              placeholder="Enter Podcast RSS feed to add"
+              class="u-full-width"
+            />
+          </div>
+          <div class="three columns">
+            <input
+              type="submit"
+              value="Add Podcast"
+              class="u-full-width button-primary"
+            />
+          </div>
+        </form>
       </div>
-</div>
+      <br />
 
-<hr>
-{{else}}
-<h5>You haven't added any podcasts yet. <a href="/add">Click here</a> to add a new podcast to start monitoring.</h5>
-{{end}}
-<!-- <div class="row">
+      {{range .podcasts}}
+      <div class="podcasts row" id="podcast-{{ .ID }}">
+        <div class="columns two">
+          <img
+            onerror="onImageError(this)"
+            class="u-full-width"
+            src="{{ .Image }}"
+            alt="{{ .Title }}"
+          />
+        </div>
+        <div class="columns ten">
+          <a style="text-decoration: none" href="/podcasts/{{ .ID }}/view">
+            <h3>{{.Title}}</h3></a
+          >
+
+          <p class="useMore">{{ .Summary }}</p>
+
+          <div class="row">
+            <div class="columns three">
+              Last Ep : {{ latestEpisodeDate .PodcastItems}}
+            </div>
+            <div class="columns three">{{ len .PodcastItems }} episodes</div>
+            <div class="columns six" style="text-align: right">
+              <button
+                class="button button-delete"
+                onclick="deletePodcast('{{.ID}}')"
+                title="Delete Podcast and episode files"
+              >
+                <i class="fas fa-trash"></i>
+              </button>
+              <button
+                class="button button-delete"
+                title="Delete only episode files"
+                onclick="deletePodcastEpisodes('{{.ID}}')"
+              >
+                <i class="fas fa-folder-minus"></i>
+              </button>
+
+              <button
+                class="button"
+                title="Download all episode files"
+                onclick="downloadAllEpisodes('{{.ID}}')"
+              >
+                <i class="fas fa-download"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr />
+      {{else}}
+      <h5>
+        You haven't added any podcasts yet. <a href="/add">Click here</a> to add
+        a new podcast to start monitoring.
+      </h5>
+      {{end}}
+      <!-- <div class="row">
   <div class="columns twelve" style="text-align: center;">
     <a href="/episodes" class="button button-primary">All Episodes</a>
   </div>
 </div> -->
-</div>
-{{template "scripts"}}
-<script> 
-function deletePodcast(id){
-    console.log(id)
-     var confirmed= confirm("Are you sure you want to delete this podcast?");
-     if(!confirmed){
-         return false;
-     }
-    axios.delete("/podcasts/"+id)
-    .then(function(response){
-        Vue.toasted.show('Podcast deleted successfully.' ,{ 
-                    theme: "bubble", 
-                    position: "top-right", 
-                    duration : 5000
-                });
-        var row = document.getElementById('podcast-'+id);
-        row.remove();
-    })
-    .catch(function(error){
-        if(error.response){
-            
-        Vue.toasted.show(error.response.data?.message, { 
-            theme: "bubble", 
-            position: "top-right", 
-            duration : 5000
-        })
+    </div>
+    {{template "scripts"}}
+    <script>
+      function downloadAllEpisodes(id) {
+        var confirmed = confirm(
+          "Are you sure you want to download all episodes of this podcast?"
+        );
+        if (!confirmed) {
+          return false;
         }
-       
-    }).
-    then(function(){
-    })
-      return false;
-  }
+        axios
+          .get("/podcasts/" + id + "/download")
+          .then(function (response) {
+            Vue.toasted.show(
+              "All episodes of this podcast have been enqueued to download.",
+              {
+                theme: "bubble",
+                position: "top-right",
+                duration: 5000,
+              }
+            );
+          })
+          .catch(function (error) {
+            if (error.response) {
+              Vue.toasted.show(error.response.data?.message, {
+                theme: "bubble",
+                position: "top-right",
+                duration: 5000,
+              });
+            }
+          })
+          .then(function () {});
+        return false;
+      }
+      function deletePodcastEpisodes(id) {
+        console.log(id);
+        var confirmed = confirm(
+          "Are you sure you want to delete all episodes this podcast?"
+        );
+        if (!confirmed) {
+          return false;
+        }
+        axios
+          .delete("/podcasts/" + id + "/items")
+          .then(function (response) {
+            Vue.toasted.show("Podcast Episodes deleted successfully.", {
+              theme: "bubble",
+              position: "top-right",
+              duration: 5000,
+            });
+            var row = document.getElementById("podcast-" + id);
+            row.remove();
+          })
+          .catch(function (error) {
+            if (error.response) {
+              Vue.toasted.show(error.response.data?.message, {
+                theme: "bubble",
+                position: "top-right",
+                duration: 5000,
+              });
+            }
+          })
+          .then(function () {});
+        return false;
+      }
+
+      function deletePodcastEpisodes(id) {
+        console.log(id);
+        var confirmed = confirm(
+          "Are you sure you want to delete all episodes this podcast?"
+        );
+        if (!confirmed) {
+          return false;
+        }
+        axios
+          .delete("/podcasts/" + id + "/items")
+          .then(function (response) {
+            Vue.toasted.show("Podcast Episodes deleted successfully.", {
+              theme: "bubble",
+              position: "top-right",
+              duration: 5000,
+            });
+          })
+          .catch(function (error) {
+            if (error.response) {
+              Vue.toasted.show(error.response.data?.message, {
+                theme: "bubble",
+                position: "top-right",
+                duration: 5000,
+              });
+            }
+          })
+          .then(function () {});
+        return false;
+      }
     </script>
-</body>
+  </body>
 </html>

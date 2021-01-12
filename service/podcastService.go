@@ -82,6 +82,34 @@ func AddOpml(content string) error {
 	return nil
 
 }
+
+func ExportOmpl() (model.OpmlModel, error) {
+	podcasts := GetAllPodcasts()
+	var outlines []model.OpmlOutline
+	for _, podcast := range *podcasts {
+		toAdd := model.OpmlOutline{
+			AttrText: podcast.Title,
+			Type:     "rss",
+			XmlUrl:   podcast.URL,
+		}
+		outlines = append(outlines, toAdd)
+	}
+
+	toExport := model.OpmlModel{
+		Head: model.OpmlHead{
+			Title: "Podgrab Feed Export",
+		},
+		Body: model.OpmlBody{
+			Outline: outlines,
+		},
+		Version: "1.0",
+	}
+
+	data, err := xml.Marshal(toExport)
+	//return string(data), err
+	fmt.Println(string(data))
+	return toExport, err
+}
 func AddPodcast(url string) (db.Podcast, error) {
 	var podcast db.Podcast
 	err := db.GetPodcastByURL(url, &podcast)
@@ -143,6 +171,12 @@ func AddPodcastItems(podcast *db.Podcast) error {
 			if (pubDate == time.Time{}) {
 				pubDate, _ = time.Parse(time.RFC1123, obj.PubDate)
 			}
+			if (pubDate == time.Time{}) {
+				//	RFC1123     = "Mon, 02 Jan 2006 15:04:05 MST"
+				modifiedRFC1123 := "Mon, 2 Jan 2006 15:04:05 MST"
+				pubDate, _ = time.Parse(modifiedRFC1123, obj.PubDate)
+			}
+
 			var downloadStatus db.DownloadStatus
 			if i < limit {
 				downloadStatus = db.NotDownloaded
@@ -192,7 +226,27 @@ func SetPodcastItemAsNotDownloaded(id string, downloadStatus db.DownloadStatus) 
 	return db.UpdatePodcastItem(&podcastItem)
 }
 
+func SetPodcastItemPlayedStatus(id string, isPlayed bool) error {
+	var podcastItem db.PodcastItem
+	err := db.GetPodcastItemById(id, &podcastItem)
+	if err != nil {
+		return err
+	}
+	podcastItem.IsPlayed = isPlayed
+	return db.UpdatePodcastItem(&podcastItem)
+}
+func SetAllEpisodesToDownload(podcastId string) error {
+	return db.SetAllEpisodesToDownload(podcastId)
+}
 func DownloadMissingEpisodes() error {
+	const JOB_NAME = "DownloadMissingEpisodes"
+	lock := db.GetLock(JOB_NAME)
+	if lock.IsLocked() {
+		fmt.Println(JOB_NAME + " is locked")
+		return nil
+	}
+	db.Lock(JOB_NAME, 120)
+
 	data, err := db.GetAllPodcastItemsToBeDownloaded()
 
 	fmt.Println("Processing episodes: ", strconv.Itoa(len(*data)))
@@ -213,6 +267,7 @@ func DownloadMissingEpisodes() error {
 		}
 	}
 	wg.Wait()
+	db.Unlock(JOB_NAME)
 	return nil
 }
 func CheckMissingFiles() error {
@@ -282,6 +337,27 @@ func RefreshEpisodes() error {
 	return nil
 }
 
+func DeletePodcastEpisodes(id string) error {
+	var podcast db.Podcast
+
+	err := db.GetPodcastById(id, &podcast)
+	if err != nil {
+		return err
+	}
+	var podcastItems []db.PodcastItem
+
+	err = db.GetAllPodcastItemsByPodcastId(id, &podcastItems)
+	if err != nil {
+		return err
+	}
+	for _, item := range podcastItems {
+		DeleteFile(item.DownloadPath)
+		SetPodcastItemAsNotDownloaded(item.ID, db.Deleted)
+
+	}
+	return nil
+
+}
 func DeletePodcast(id string) error {
 	var podcast db.Podcast
 

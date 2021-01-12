@@ -1,60 +1,54 @@
 {{define "scripts"}}
-   <script src="/webassets/vue.js"></script>
-<script src="/webassets/axios.min.js" ></script>
+<script src="/webassets/vue.min.js"></script>
+<script src="/webassets/axios.min.js"></script>
 <script src="/webassets/vue-toasted.min.js"></script>
 
 <script>
-    Vue.use(Toasted)
-    function onImageError(image){
-        image.onerror = "";
-        image.src = "/webassets/blank.png";
-        return true;
+  Vue.use(Toasted);
+  function onImageError(image) {
+    image.onerror = "";
+    image.src = "/webassets/blank.png";
+    return true;
+  }
+  const limit = 300;
+  let elements = document.getElementsByClassName("useMore");
+
+  for (let index = 0; index < elements.length; index++) {
+    const element = elements[index];
+    let display = element.style.display;
+    let originalText = element.textContent;
+    if (originalText.length <= limit) {
+      continue;
     }
-    const limit = 300;
-    let elements = document.getElementsByClassName("useMore");
+    let newText = originalText.substr(0, limit);
 
-    for (let index = 0; index < elements.length; index++) {
-        const element = elements[index];
-        let display= element.style.display;
-        let originalText= element.textContent;
-        if(originalText.length<=limit){
-            continue;
-        }
-        let newText= originalText.substr(0,limit);
+    let newElement = document.createElement(element.tagName);
+    newElement.textContent = newText;
 
-        let newElement = document.createElement(element.tagName);
-        newElement.textContent=newText;
-        
+    newElement.classList.add("short-version");
+    element.classList.add("long-version");
 
-        newElement.classList.add("short-version")
-        element.classList.add("long-version")
+    let more = document.createElement("a");
+    more.textContent = " show more";
+    more.style.cursor = "pointer";
+    more.onclick = function () {
+      element.style.display = display;
+      newElement.style.display = "none";
+    };
 
-        let more =document.createElement("a");
-        more.textContent= " show more";
-        more.style.cursor="pointer"
-        more.onclick= function(){
-            element.style.display=display;
-            newElement.style.display="none";
-        }
+    let less = document.createElement("a");
+    less.textContent = " show less";
+    less.style.cursor = "pointer";
+    less.onclick = function () {
+      element.style.display = "none";
+      newElement.style.display = display;
+    };
 
-        let less =document.createElement("a");
-        less.textContent= " show less";
-        less.style.cursor="pointer"
-        less.onclick= function(){
-            element.style.display="none";
-            newElement.style.display=display;
-        }
+    newElement.appendChild(more);
+    element.appendChild(less);
 
-
-        newElement.appendChild(more)
-        element.appendChild(less)
-
-        element.parentNode.insertBefore(newElement, element.nextSibling)
-        element.style.display="none";
-    }
-
-
-
-
+    element.parentNode.insertBefore(newElement, element.nextSibling);
+    element.style.display = "none";
+  }
 </script>
 {{end}}

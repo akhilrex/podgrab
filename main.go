@@ -77,9 +77,14 @@ func main() {
 	r.GET("/podcasts/:id", controllers.GetPodcastById)
 	r.DELETE("/podcasts/:id", controllers.DeletePodcastById)
 	r.GET("/podcasts/:id/items", controllers.GetPodcastItemsByPodcastId)
+	r.GET("/podcasts/:id/download", controllers.DownloadAllEpisodesByPodcastId)
+	r.DELETE("/podcasts/:id/items", controllers.DeletePodcastEpisodesById)
 
 	r.GET("/podcastitems", controllers.GetAllPodcastItems)
 	r.GET("/podcastitems/:id", controllers.GetPodcastItemById)
+	r.GET("/podcastitems/:id/markUnplayed", controllers.MarkPodcastItemAsUnplayed)
+	r.GET("/podcastitems/:id/markPlayed", controllers.MarkPodcastItemAsPlayed)
+	r.PATCH("/podcastitems/:id", controllers.PatchPodcastItemById)
 	r.GET("/podcastitems/:id/download", controllers.DownloadPodcastItem)
 	r.GET("/podcastitems/:id/delete", controllers.DeletePodcastItem)
 
@@ -92,6 +97,7 @@ func main() {
 	r.POST("/settings", controllers.UpdateSetting)
 	r.GET("/backups", controllers.BackupsPage)
 	r.POST("/opml", controllers.UploadOpml)
+	r.GET("/opml", controllers.GetOmpl)
 
 	go assetEnv()
 	go intiCron()

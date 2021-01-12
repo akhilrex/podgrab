@@ -166,6 +166,15 @@ func Search(c *gin.Context) {
 	}
 
 }
+
+func GetOmpl(c *gin.Context) {
+	data, err := service.ExportOmpl()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid request"})
+		return
+	}
+	c.XML(200, data)
+}
 func UploadOpml(c *gin.Context) {
 	file, _, err := c.Request.FormFile("file")
 	defer file.Close()

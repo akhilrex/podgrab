@@ -1,159 +1,242 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PodGrab</title>
     {{template "commoncss"}}
     <style>
+      img {
+        display: none;
+      }
 
-    img{
-    display: none
-  }
+      h1,
+      h2,
+      h3,
+      h4,
+      h5 {
+        margin-bottom: 1rem;
+      }
+      h4 {
+        font-size: 2rem;
+      }
 
-h1,h2,h3,h4,h5{
-  margin-bottom: 1rem;
-}
-h4{
-  font-size: 2rem;
-}
+      h5 {
+        font-size: 1.5rem;
+      }
+      p {
+        margin-bottom: 0.5rem;
+      }
+      hr {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+      }
 
-h5{
-  font-size: 1.5rem;
-}
-p{
-  margin-bottom: 0.5rem;
-}
-hr{
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-}
+      .podcastItem .button {
+        padding: 0 15px;
+      }
 
-/* Larger than tablet */
-@media (min-width: 750px) {
-  img{
-    display: block
-  }
-}
-    </style>
-</head>
-<body>
-  <div class="container">
-    {{template "navbar" .}}
-  
-<br>{{$setting := .setting}}
-{{range .podcastItems}}
+      .IsPlayed-true {
+        color: #555555;
+      }
 
-
-<div class="podcasts row">
-    <div class="columns two">
-        <img onerror="onImageError(this)" class="u-full-width" src="{{ .Image }}" alt="{{ .Title }}">
-    </div>
-    <div class="columns ten">
-       
-        <div class="row">
-          <div class="columns eight">
-            <h4>{{.Title}} {{if .Podcast.Title }} // {{ .Podcast.Title}} {{end}}</h4>
-          </div>
-          <div class="columns three">
-            <small title="{{ formatDate .PubDate }}">{{ naturalDate .PubDate }}</small>
-          </div>
-          <div class="columns one">
-            <small>  {{ formatDuration .Duration}}</small>
-          </div>
-        </div>
-      
-        <p class="useMore">{{ .Summary }}</p>
-       {{if .DownloadPath}}
-        <a class="button button-primary" href="{{ .DownloadPath }}" download>Download</a>
-        <a class="button button" onclick="deleteFile('{{.ID}}')" download>Delete</a>
-
-        {{else}}
-          {{if not $setting.AutoDownload}}
-          <a class="button button-primary" onclick="downloadToDisk('{{.ID}}')" download>Download to Disk</a>
-          {{else}}
-              {{if eq .DownloadStatus 3}}
-              <a class="button button-primary" onclick="downloadToDisk('{{.ID}}')" download>Download to Disk</a>
-              {{end}}
-          {{end}}
-        {{end }}
-    </div>
-    <div class="columns one">
-     
-    </div>
-     
-</div>
-<hr>
-{{end}}
-
-<div class="row"><div class="columns twelve" style="text-align: center;">
-  {{if .previousPage }}
-  <a href="?page={{.previousPage}}&downloadedOnly={{.downloadedOnly}}" class="button button-primary">Newer</a>
-  {{end}}
-  {{if .nextPage }}
-  <a href="?page={{.nextPage}}&downloadedOnly={{.downloadedOnly}}" class="button button-primary">Older</a>
-  {{end}}
- 
-</div></div>
-
-</div>
-
-{{template "scripts"}}
-<script> 
-function downloadToDisk(id){
-   
-    axios.get("/podcastitems/"+id+"/download")
-    .then(function(response){
-        Vue.toasted.show('Podcast download enqueued.' ,{ 
-                    theme: "bubble", 
-                    position: "top-right", 
-                    duration : 5000
-                });
-        var row = document.getElementById('podcast-'+id);
-        row.remove();
-    })
-    .catch(function(error){
-        if(error.response){
-            
-        Vue.toasted.show(error.response.data?.message, { 
-            theme: "bubble", 
-            position: "top-right", 
-            duration : 5000
-        })
+      /* Larger than tablet */
+      @media (min-width: 750px) {
+        img {
+          display: block;
         }
-       
-    }).
-    then(function(){
-    })
-      return false;
-  }
-  function deleteFile(id){
-   
-   axios.get("/podcastitems/"+id+"/delete")
-   .then(function(response){
-       Vue.toasted.show('Podcast file deleted.' ,{ 
-                   theme: "bubble", 
-                   position: "top-right", 
-                   duration : 5000
-               });
-       var row = document.getElementById('podcast-'+id);
-       row.remove();
-   })
-   .catch(function(error){
-       if(error.response){
-           
-       Vue.toasted.show(error.response.data?.message, { 
-           theme: "bubble", 
-           position: "top-right", 
-           duration : 5000
-       })
-       }
-      
-   }).
-   then(function(){
-   })
-     return false;
- }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      {{template "navbar" .}}
+
+      <br />{{$setting := .setting}} {{range .podcastItems}}
+
+      <div class="podcasts row IsPlayed-{{ .IsPlayed }} podcastItem">
+        <div class="columns two">
+          <img
+            onerror="onImageError(this)"
+            class="u-full-width"
+            src="{{ .Image }}"
+            alt="{{ .Title }}"
+            lazy="lazy"
+          />
+        </div>
+        <div class="columns ten">
+          <div class="row">
+            <div class="columns eight">
+              <h4>
+                {{if .IsPlayed }}<i
+                  title="Played"
+                  style="color: green"
+                  class="fas fa-check-circle"
+                ></i>
+                {{end}} {{.Title}} {{if .Podcast.Title }} // {{ .Podcast.Title}}
+                {{end}}
+              </h4>
+            </div>
+            <div class="columns three">
+              <small title="{{ formatDate .PubDate }}"
+                >{{ naturalDate .PubDate }}</small
+              >
+            </div>
+            <div class="columns one">
+              <small> {{ formatDuration .Duration}}</small>
+            </div>
+          </div>
+
+          <p class="useMore">{{ .Summary }}</p>
+
+          {{if .IsPlayed }}
+          <a
+            class="button button"
+            title="Mark as not listened"
+            onclick="changePlayedStatus('{{.ID}}',{{ not .IsPlayed }})"
+            ><i class="fas fa-envelope"></i
+          ></a>
+          {{ else }}
+          <a
+            class="button button"
+            title="Mark as listened"
+            onclick="changePlayedStatus('{{.ID}}',{{ not .IsPlayed }})"
+            ><i class="fas fa-envelope-open"></i
+          ></a>
+          {{ end }} {{if .DownloadPath}}
+          <a
+            class="button"
+            href="{{ .DownloadPath }}"
+            download
+            title="Download episode file"
+            ><i class="fas fa-download"></i
+          ></a>
+          <a
+            class="button button"
+            onclick="deleteFile('{{.ID}}')"
+            title="Delete Podcast Episode File"
+            ><i class="fas fa-trash"></i
+          ></a>
+
+          {{else}} {{if not $setting.AutoDownload}}
+          <a
+            class="button button-primary"
+            onclick="downloadToDisk('{{.ID}}')"
+            title="Download to server"
+            download
+            ><i class="fas fa-cloud-download-alt"></i
+          ></a>
+          {{else}} {{if eq .DownloadStatus 3}}
+          <a
+            class="button button-primary"
+            onclick="downloadToDisk('{{.ID}}')"
+            title="Download to server"
+            download
+            ><i class="fas fa-cloud-download-alt"></i
+          ></a>
+          {{end}} {{end}} {{end }}
+        </div>
+        <div class="columns one"></div>
+      </div>
+      <hr />
+      {{end}}
+
+      <div class="row">
+        <div class="columns twelve" style="text-align: center">
+          {{if .previousPage }}
+          <a
+            href="?page={{.previousPage}}&downloadedOnly={{.downloadedOnly}}"
+            class="button button-primary"
+            >Newer</a
+          >
+          {{end}} {{if .nextPage }}
+          <a
+            href="?page={{.nextPage}}&downloadedOnly={{.downloadedOnly}}"
+            class="button button-primary"
+            >Older</a
+          >
+          {{end}}
+        </div>
+      </div>
+    </div>
+
+    {{template "scripts"}}
+    <script>
+      function downloadToDisk(id) {
+        axios
+          .get("/podcastitems/" + id + "/download")
+          .then(function (response) {
+            Vue.toasted.show("Podcast download enqueued.", {
+              theme: "bubble",
+              position: "top-right",
+              duration: 5000,
+            });
+            var row = document.getElementById("podcast-" + id);
+            row.remove();
+          })
+          .catch(function (error) {
+            if (error.response) {
+              Vue.toasted.show(error.response.data?.message, {
+                theme: "bubble",
+                position: "top-right",
+                duration: 5000,
+              });
+            }
+          })
+          .then(function () {});
+        return false;
+      }
+      function deleteFile(id) {
+        axios
+          .get("/podcastitems/" + id + "/delete")
+          .then(function (response) {
+            Vue.toasted.show("Podcast file deleted.", {
+              theme: "bubble",
+              position: "top-right",
+              duration: 5000,
+            });
+            var row = document.getElementById("podcast-" + id);
+            row.remove();
+          })
+          .catch(function (error) {
+            if (error.response) {
+              Vue.toasted.show(error.response.data?.message, {
+                theme: "bubble",
+                position: "top-right",
+                duration: 5000,
+              });
+            }
+          })
+          .then(function () {});
+        return false;
+      }
+      function changePlayedStatus(id, status) {
+        let endpoint = status ? "markPlayed" : "markUnplayed";
+        axios
+          .get("/podcastitems/" + id + "/" + endpoint, {
+            isPlayed: status,
+          })
+          .then(function (response) {
+            Vue.toasted.show("Podcast played status updated.", {
+              theme: "bubble",
+              position: "top-right",
+              duration: 5000,
+            });
+            var row = document.getElementById("podcast-" + id);
+            row.remove();
+          })
+          .catch(function (error) {
+            if (error.response) {
+              Vue.toasted.show(error.response.data?.message, {
+                theme: "bubble",
+                position: "top-right",
+                duration: 5000,
+              });
+            }
+          })
+          .then(function () {});
+        return false;
+      }
     </script>
-</body>
+  </body>
 </html>

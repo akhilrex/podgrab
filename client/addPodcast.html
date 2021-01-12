@@ -40,33 +40,42 @@
         </div>
         <hr />
         <div class="row">
-            <div>
-          <h4>Import OPML file</h4>
-          <i
-          ><small
-            >Most of the major podcast manager apps (eg. Podcast Addict) have the option to export add your podcast subscriptions in the opml format. You can migrate all your podcast in one go by exportin that OPML file and importing it here.</small
-          ></i
-        >
-    </div><br>
-         
-          <form enctype="multipart/form-data" action="/" @submit="uploadOpml" ref="uploadForm">
+          <div>
+            <h4>Import OPML file</h4>
+            <i
+              ><small
+                >Most of the major podcast manager apps (eg. Podcast Addict)
+                have the option to export add your podcast subscriptions in the
+                opml format. You can migrate all your podcast in one go by
+                exportin that OPML file and importing it here.</small
+              ></i
+            >
+          </div>
+          <br />
+
+          <form
+            enctype="multipart/form-data"
+            action="/"
+            @submit="uploadOpml"
+            ref="uploadForm"
+          >
             <div class="nine columns">
-            <input
-              type="file"
-              :name="uploadFieldName"
-              @change="selectFile"
-              ref="file"
-              accept="text/xml,.opml"
-            />
-        </div>
-         
-          <div class="three columns">
-            <input
-              type="submit"
-              value="Upload"
-              class="u-full-width button-primary"
-            />
-          </div> </form>
+              <input
+                type="file"
+                @change="selectFile"
+                ref="file"
+                accept="text/xml,.opml"
+              />
+            </div>
+
+            <div class="three columns">
+              <input
+                type="submit"
+                value="Upload"
+                class="u-full-width button-primary"
+              />
+            </div>
+          </form>
         </div>
         <hr />
         <div class="row" id="searchContainer">
@@ -159,7 +168,7 @@
             if (!currentFile) {
               return;
             }
-            var self=this;
+            var self = this;
             self.searching = true;
             let formData = new FormData();
 
@@ -189,8 +198,8 @@
               })
               .then(function () {
                 self.searching = false;
-               
-                self.$refs.uploadForm.reset()
+
+                self.$refs.uploadForm.reset();
               });
           },
           search: function (e) {
