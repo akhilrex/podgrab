@@ -145,18 +145,18 @@
           .then(function () {});
         return false;
       }
-      function deletePodcastEpisodes(id) {
-        console.log(id);
+      function deletePodcast(id) {
+        //  console.log(id);
         var confirmed = confirm(
-          "Are you sure you want to delete all episodes this podcast?"
+          "Are you sure you want to delete this podcast and all files?"
         );
         if (!confirmed) {
           return false;
         }
         axios
-          .delete("/podcasts/" + id + "/items")
+          .delete("/podcasts/" + id)
           .then(function (response) {
-            Vue.toasted.show("Podcast Episodes deleted successfully.", {
+            Vue.toasted.show("Podcast deleted successfully.", {
               theme: "bubble",
               position: "top-right",
               duration: 5000,
@@ -180,7 +180,7 @@
       function deletePodcastEpisodes(id) {
         console.log(id);
         var confirmed = confirm(
-          "Are you sure you want to delete all episodes this podcast?"
+          "Are you sure you want to delete all episodes of this podcast?"
         );
         if (!confirmed) {
           return false;
