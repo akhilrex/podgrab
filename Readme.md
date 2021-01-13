@@ -10,10 +10,6 @@
 *** akhilrex, podgrab, akhilrex, email
 -->
 
-
-
-
-
 <!-- PROJECT SHIELDS -->
 <!--
 *** I'm using markdown "reference style" links for readability.
@@ -22,14 +18,13 @@
 *** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
 *** https://www.markdownguide.org/basic-syntax/#reference-style-links
 -->
+
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
-
-
 
 <!-- PROJECT LOGO -->
 <br />
@@ -51,24 +46,25 @@
     <a href="https://github.com/akhilrex/podgrab/issues">Report Bug</a>
     ·
     <a href="https://github.com/akhilrex/podgrab/issues">Request Feature</a>
+        ·
+    <a href="Screenshots.md">Screenshots</a>
   </p>
 </p>
 
-
-
 <!-- TABLE OF CONTENTS -->
+
 ## Table of Contents
 
-* [About the Project](#about-the-project)
-  * [Motivation](#motivation)
-  * [Built With](#built-with)
-* [Installation](#installation)
-* [License](#license)
-* [Roadmap](#roadmap)
-* [Contact](#contact)
-
+- [About the Project](#about-the-project)
+  - [Motivation](#motivation)
+  - [Built With](#built-with)
+- [Installation](#installation)
+- [License](#license)
+- [Roadmap](#roadmap)
+- [Contact](#contact)
 
 <!-- ABOUT THE PROJECT -->
+
 ## About The Project
 
 Podgrab is a is a self-hosted podcast manager which automatically downloads latest podcast episodes. It is a light-weight application built using GO.
@@ -79,29 +75,30 @@ It works best if you already know which podcasts you want to monitor. However th
 
 Podgrab started a tool that I initially built to solve a specific problem I had. During the COVID pandemic times I started going for a run. I do not prefer taking by phone along so I would add podcast episodes to my smart watch which could be connected with my bluetooth earphones. Most podcasting apps do not expose the mp3 files directly which is why I decided to build this quick tool for myself. Once it reached a stage where my requirements were fulfilled I decided to make it a little pretty and share it with everyone else.
 
-
 ![Product Name Screen Shot][product-screenshot]
-
+[More Screenshots](Screenshots.md)
 
 ### Built With
 
-* [Go](https://golang.org/)
-* [Go-Gin](https://github.com/gin-gonic/gin)
-* [GORM](https://github.com/go-gorm/gorm)
-* [SQLite](https://www.sqlite.org/index.html)
+- [Go](https://golang.org/)
+- [Go-Gin](https://github.com/gin-gonic/gin)
+- [GORM](https://github.com/go-gorm/gorm)
+- [SQLite](https://www.sqlite.org/index.html)
 
 ## Installation
 
-The easiest way to run Podgrab is to run it as a docker container. 
+The easiest way to run Podgrab is to run it as a docker container.
 
 ### Using Docker
 
 Simple setup without mounted volumes (for testing and evaluation)
+
 ```sh
   docker run -d -p 8080:8080 --name=podgrab akhilrex/podgrab
 ```
 
 Binding local volumes to the container
+
 ```sh
    docker run -d -p 8080:8080 --name=podgrab -v "/host/path/to/assets:/assets" -v "/host/path/to/config:/config"  akhilrex/podgrab
 ```
@@ -109,6 +106,7 @@ Binding local volumes to the container
 ### Using Docker-Compose
 
 Modify the docker compose file provided [here](https://github.com/akhilrex/podgrab/blob/master/docker-compose.yml) to update the volume and port binding and run the following command
+
 ```yaml
 version: "2.1"
 services:
@@ -131,23 +129,26 @@ services:
 
 ### Environment Variables
 
-| Name | Description | Default |
-| --- | --- | --- |
-| CHECK_FREQUENCY | How frequently to check for new episodes and missing files (in minutes) | 30 |
-
+| Name            | Description                                                             | Default |
+| --------------- | ----------------------------------------------------------------------- | ------- |
+| CHECK_FREQUENCY | How frequently to check for new episodes and missing files (in minutes) | 30      |
 
 <!-- LICENSE -->
+
 ## License
 
 Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Roadmap
+
 Following are the things that I plan to complete in the near future.
+
 - Some more code refactoring.
 - API standardisation so that it can be used to build apps on top of it.
 - Better search and discovery
 
 <!-- CONTACT -->
+
 ## Contact
 
 Akhil Gupta - [@akhilrex](https://twitter.com/akhilrex)
@@ -156,10 +157,9 @@ Project Link: [https://github.com/akhilrex/podgrab](https://github.com/akhilrex/
 
 <a href="https://www.buymeacoffee.com/akhilrex" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
 
-
-
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+
 [contributors-shield]: https://img.shields.io/github/contributors/akhilrex/podgrab.svg?style=flat-square
 [contributors-url]: https://github.com/akhilrex/podgrab/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/akhilrex/podgrab.svg?style=flat-square
