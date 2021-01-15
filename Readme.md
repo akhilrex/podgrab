@@ -132,6 +132,8 @@ services:
 | Name            | Description                                                             | Default |
 | --------------- | ----------------------------------------------------------------------- | ------- |
 | CHECK_FREQUENCY | How frequently to check for new episodes and missing files (in minutes) | 30      |
+| PUID | Sets the UID of the container user | 1000 |
+| PGID | Sets the GID of the container user | 1000 |
 
 <!-- LICENSE -->
 

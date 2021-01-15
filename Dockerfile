@@ -20,6 +20,8 @@ ENV CONFIG=/config
 ENV DATA=/assets
 ENV UID=998
 ENV PID=100
+ENV PUID=1000
+ENV PGID=1000
 ENV GIN_MODE=release
 VOLUME ["/config", "/assets"]
 RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
@@ -36,5 +38,7 @@ COPY client ./client
 COPY webassets ./webassets
 
 EXPOSE 8080
+COPY start.sh .
+RUN chmod +x start.sh
 
-ENTRYPOINT ["./app"]
+ENTRYPOINT ["./start.sh"]
