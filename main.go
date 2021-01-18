@@ -50,6 +50,24 @@ func main() {
 			}
 			return latest.Format("Jan 2 2006")
 		},
+		"downloadedEpisodes": func(podcastItems []db.PodcastItem) int {
+			count := 0
+			for _, item := range podcastItems {
+				if item.DownloadStatus == db.Downloaded {
+					count++
+				}
+			}
+			return count
+		},
+		"downloadingEpisodes": func(podcastItems []db.PodcastItem) int {
+			count := 0
+			for _, item := range podcastItems {
+				if item.DownloadStatus == db.NotDownloaded {
+					count++
+				}
+			}
+			return count
+		},
 		"formatDuration": func(total int) string {
 			if total <= 0 {
 				return ""
@@ -120,9 +138,11 @@ func intiCron() {
 		checkFrequency = 30
 		log.Print(err)
 	}
+	service.UnlockMissedJobs()
 	//gocron.Every(uint64(checkFrequency)).Minutes().Do(service.DownloadMissingEpisodes)
 	gocron.Every(uint64(checkFrequency)).Minutes().Do(service.RefreshEpisodes)
 	gocron.Every(uint64(checkFrequency)).Minutes().Do(service.CheckMissingFiles)
+	gocron.Every(uint64(checkFrequency) * 2).Minutes().Do(service.UnlockMissedJobs)
 	gocron.Every(2).Days().Do(service.CreateBackup)
 	<-gocron.Start()
 }

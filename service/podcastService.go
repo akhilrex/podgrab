@@ -431,3 +431,7 @@ func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload b
 
 	return db.UpdateSettings(setting)
 }
+
+func UnlockMissedJobs() {
+	db.UnlockMissedJobs()
+}
