@@ -67,11 +67,21 @@
           <p class="useMore">{{ .Summary }}</p>
 
           <div class="row">
-            <div class="columns three">
+            <div class="columns four">
               Last Ep : {{ latestEpisodeDate .PodcastItems}}
             </div>
-            <div class="columns three">{{ len .PodcastItems }} episodes</div>
-            <div class="columns six" style="text-align: right">
+            {{$downloading:=downloadingEpisodes .PodcastItems}}         
+            <div
+              class="columns five"
+              title="{{downloadedEpisodes .PodcastItems}} episodes downloaded out of total {{ len .PodcastItems}} episodes.
+              {{if gt $downloading 0}} {{$downloading}} episodes in queue {{end}}
+              "
+            >
+           
+              {{if gt $downloading 0}} ({{$downloading}})/{{end}}{{downloadedEpisodes .PodcastItems}}/{{ len .PodcastItems }} episodes
+            
+            </div>
+            <div class="columns three" style="">
               <button
                 class="button button-delete"
                 onclick="deletePodcast('{{.ID}}')"

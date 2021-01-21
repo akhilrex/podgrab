@@ -178,8 +178,12 @@ func AddPodcastItems(podcast *db.Podcast) error {
 			}
 
 			var downloadStatus db.DownloadStatus
-			if i < limit {
-				downloadStatus = db.NotDownloaded
+			if setting.AutoDownload {
+				if i < limit {
+					downloadStatus = db.NotDownloaded
+				} else {
+					downloadStatus = db.Deleted
+				}
 			} else {
 				downloadStatus = db.Deleted
 			}
@@ -430,4 +434,8 @@ func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload b
 	setting.InitialDownloadCount = initialDownloadCount
 
 	return db.UpdateSettings(setting)
+}
+
+func UnlockMissedJobs() {
+	db.UnlockMissedJobs()
 }

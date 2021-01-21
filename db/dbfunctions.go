@@ -2,6 +2,7 @@ package db
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -165,17 +166,21 @@ func Unlock(name string) {
 }
 
 func UnlockMissedJobs() {
-	var jobLocks *[]JobLock
+	var jobLocks []JobLock
 
-	result := DB.Where("date != ", time.Time{}).Find(&jobLocks)
+	result := DB.Debug().Find(&jobLocks)
 	if result.Error != nil {
 		return
 	}
-	for _, job := range *jobLocks {
+	for _, job := range jobLocks {
+		if (job.Date == time.Time{}) {
+			continue
+		}
 		var duration time.Duration
 		duration = time.Duration(job.Duration)
 		d := job.Date.Add(time.Minute * duration)
 		if d.Before(time.Now()) {
+			fmt.Println(job.Name + " is unlocked")
 			Unlock(job.Name)
 		}
 	}
