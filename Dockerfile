@@ -2,7 +2,7 @@ ARG GO_VERSION=1.15.2
 
 FROM golang:${GO_VERSION}-alpine AS builder
 
-RUN apk update && apk add alpine-sdk git su-exec && rm -rf /var/cache/apk/*
+RUN apk update && apk add alpine-sdk git && rm -rf /var/cache/apk/*
 
 RUN mkdir -p /api
 WORKDIR /api
@@ -40,5 +40,6 @@ COPY webassets ./webassets
 EXPOSE 8080
 COPY start.sh .
 RUN chmod +x start.sh
+RUN apk update && apk add su-exec && rm -rf /var/cache/apk/*s
 
 ENTRYPOINT ["./start.sh"]
