@@ -40,6 +40,6 @@ COPY webassets ./webassets
 EXPOSE 8080
 COPY start.sh .
 RUN chmod +x start.sh
-RUN apk update && apk add su-exec && rm -rf /var/cache/apk/*s
+RUN apk update && apk add su-exec && rm -rf /var/cache/apk/*
 
 ENTRYPOINT ["./start.sh"]
