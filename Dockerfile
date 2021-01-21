@@ -2,7 +2,7 @@ ARG GO_VERSION=1.15.2
 
 FROM golang:${GO_VERSION}-alpine AS builder
 
-RUN apk update && apk add alpine-sdk git && rm -rf /var/cache/apk/*
+RUN apk update && apk add alpine-sdk git su-exec && rm -rf /var/cache/apk/*
 
 RUN mkdir -p /api
 WORKDIR /api
