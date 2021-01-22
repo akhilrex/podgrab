@@ -23,13 +23,13 @@
   img{
     display: block
   }
- 
+
 }
     </style>
 </head>
 <body>
     <div class="container">
- 
+
 {{template "navbar" .}}
 <br>
 <div class="row">
@@ -48,13 +48,13 @@
             <span class="label-body">Download episodes whenever new podcast is added</span>
         </label>
     </div>
-   
+
         <div v-if="downloadOnAdd">
             <br>
         <label for="initialDownloadCount" >
             <span class="label-body">How many episodes to be downloaded when a new podcast is added</span>
-           
-            
+
+
         </label>
         <input type="number" name="initialDownloadCount" v-model.number="initialDownloadCount" min="0">
     </div>
@@ -70,7 +70,7 @@
 </div>
 
 {{template "scripts"}}
-<script> 
+<script>
 var app = new Vue({
   delimiters: ['${', '}'],
   el: '#app',
@@ -87,27 +87,29 @@ var app = new Vue({
 
         })
         .then(function(response){
-            Vue.toasted.show('Settings saved successfully.' ,{ 
-                theme: "bubble", 
-                position: "top-right", 
+            Vue.toasted.show('Settings saved successfully.' ,{
+                theme: "bubble",
+                type: "success",
+                position: "top-right",
                 duration : 5000
             })
-         
-          
+
+
         })
         .catch(function(error){
             if(error.response){
-                
-            Vue.toasted.show(error.response.data?.message, { 
-                theme: "bubble", 
-                position: "top-right", 
+
+            Vue.toasted.show(error.response.data?.message, {
+                theme: "bubble",
+                type: "error",
+                position: "top-right",
                 duration : 5000
             })
             }
-           
+
         }).
         then(function(){
-           
+
         })
           return false;
       }
@@ -116,9 +118,9 @@ var app = new Vue({
     downloadOnAdd: {{ .setting.DownloadOnAdd }},
     initialDownloadCount: {{ .setting.InitialDownloadCount }},
     autoDownload: {{ .setting.AutoDownload }},
-   
+
   },
-     
+
 })
     </script>
 </body>

@@ -168,6 +168,7 @@
           .then(function (response) {
             Vue.toasted.show("Podcast download enqueued.", {
               theme: "bubble",
+              type: "info",
               position: "top-right",
               duration: 5000,
             });
@@ -178,6 +179,7 @@
             if (error.response) {
               Vue.toasted.show(error.response.data?.message, {
                 theme: "bubble",
+                type: "error",
                 position: "top-right",
                 duration: 5000,
               });
@@ -192,6 +194,7 @@
           .then(function (response) {
             Vue.toasted.show("Podcast file deleted.", {
               theme: "bubble",
+              type: "success",
               position: "top-right",
               duration: 5000,
             });
@@ -202,6 +205,7 @@
             if (error.response) {
               Vue.toasted.show(error.response.data?.message, {
                 theme: "bubble",
+                type: "error",
                 position: "top-right",
                 duration: 5000,
               });
@@ -219,6 +223,7 @@
           .then(function (response) {
             Vue.toasted.show("Podcast played status updated.", {
               theme: "bubble",
+              type: "info",
               position: "top-right",
               duration: 5000,
             });
@@ -229,6 +234,7 @@
             if (error.response) {
               Vue.toasted.show(error.response.data?.message, {
                 theme: "bubble",
+                type: "error",
                 position: "top-right",
                 duration: 5000,
               });

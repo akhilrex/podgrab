@@ -64,7 +64,7 @@
   white-space: pre;
   word-wrap: break-word }
 .example {
-  position: relative; 
+  position: relative;
   margin-top: 4rem; }
 .example-header {
   font-weight: 600;
@@ -121,14 +121,14 @@
 
 /* Larger than tablet */
 @media (min-width: 750px) {
- 
+
 }
     </style>
 </head>
 <body>
     <div class="container">
         <section class="header">
-          
+
     <h1>{{ .title }}</h1>
 </section>
 {{template "navbar"}}
@@ -143,7 +143,7 @@
         <h4>{{.Title}}</h4>
         <small>{{ formatDate .PubDate }}</small>
         <p>{{ .Summary }}</p>
-       
+
         {{if .DownloadPath}}
         <a class="button button-primary" href="{{ .DownloadPath }}" download>Download</a>
         {{else}}
@@ -154,22 +154,23 @@
 
     </div>
     <div class="columns one">
-     
+
     </div>
-     
+
 </div>
 <hr>
 {{end}}
 </div>
 {{template "scripts"}}
-<script> 
+<script>
 function downloadToDisk(id){
-   
+
     axios.get("/podcastitems/"+id+"/download")
     .then(function(response){
-        Vue.toasted.show('Podcast download enqueued.' ,{ 
-                    theme: "bubble", 
-                    position: "top-right", 
+        Vue.toasted.show('Podcast download enqueued.' ,{
+                    theme: "bubble",
+                    position: "top-right",
+                    type: "info",
                     duration : 5000
                 });
         var row = document.getElementById('podcast-'+id);
@@ -177,14 +178,15 @@ function downloadToDisk(id){
     })
     .catch(function(error){
         if(error.response){
-            
-        Vue.toasted.show(error.response.data?.message, { 
-            theme: "bubble", 
-            position: "top-right", 
+
+        Vue.toasted.show(error.response.data?.message, {
+            theme: "bubble",
+            position: "top-right",
+            type: "error",
             duration : 5000
         })
         }
-       
+
     }).
     then(function(){
     })

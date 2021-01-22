@@ -70,16 +70,16 @@
             <div class="columns four">
               Last Ep : {{ latestEpisodeDate .PodcastItems}}
             </div>
-            {{$downloading:=downloadingEpisodes .PodcastItems}}         
+            {{$downloading:=downloadingEpisodes .PodcastItems}}
             <div
               class="columns five"
               title="{{downloadedEpisodes .PodcastItems}} episodes downloaded out of total {{ len .PodcastItems}} episodes.
               {{if gt $downloading 0}} {{$downloading}} episodes in queue {{end}}
               "
             >
-           
+
               {{if gt $downloading 0}} ({{$downloading}})/{{end}}{{downloadedEpisodes .PodcastItems}}/{{ len .PodcastItems }} episodes
-            
+
             </div>
             <div class="columns three" style="">
               <button
@@ -138,6 +138,7 @@
               "All episodes of this podcast have been enqueued to download.",
               {
                 theme: "bubble",
+                type: "info",
                 position: "top-right",
                 duration: 5000,
               }
@@ -147,6 +148,7 @@
             if (error.response) {
               Vue.toasted.show(error.response.data?.message, {
                 theme: "bubble",
+                type: "error",
                 position: "top-right",
                 duration: 5000,
               });
@@ -168,6 +170,7 @@
           .then(function (response) {
             Vue.toasted.show("Podcast deleted successfully.", {
               theme: "bubble",
+              type: "success",
               position: "top-right",
               duration: 5000,
             });
@@ -178,6 +181,7 @@
             if (error.response) {
               Vue.toasted.show(error.response.data?.message, {
                 theme: "bubble",
+                type: "error",
                 position: "top-right",
                 duration: 5000,
               });
@@ -200,6 +204,7 @@
           .then(function (response) {
             Vue.toasted.show("Podcast Episodes deleted successfully.", {
               theme: "bubble",
+              type: "success",
               position: "top-right",
               duration: 5000,
             });
@@ -208,6 +213,7 @@
             if (error.response) {
               Vue.toasted.show(error.response.data?.message, {
                 theme: "bubble",
+                type: "error",
                 position: "top-right",
                 duration: 5000,
               });
