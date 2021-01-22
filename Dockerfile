@@ -16,6 +16,8 @@ RUN go build -o ./app ./main.go
 
 FROM alpine:latest
 
+LABEL org.opencontainers.image.source="https://github.com/akhilrex/podgrab"
+
 ENV CONFIG=/config
 ENV DATA=/assets
 ENV UID=998
