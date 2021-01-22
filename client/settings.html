@@ -64,6 +64,11 @@
             <span class="label-body">Automatically download new episodes to the disk</span>
         </label>
         <br>
+        <label for="appendDateToFileName">
+            <input type="checkbox" name="appendDateToFileName" v-model="appendDateToFileName">
+            <span class="label-body">Append episode date to episode file name</span>
+        </label>
+        <br>
         <input type="submit" value="Save" class="button button-primary">
     </form>
 </div>
@@ -83,7 +88,8 @@ var app = new Vue({
         axios.post("/settings",{
             downloadOnAdd: self.downloadOnAdd,
             initialDownloadCount:self.initialDownloadCount,
-            autoDownload:self.autoDownload
+            autoDownload:self.autoDownload,
+            appendDateToFileName:self.appendDateToFileName
 
         })
         .then(function(response){
@@ -118,6 +124,7 @@ var app = new Vue({
     downloadOnAdd: {{ .setting.DownloadOnAdd }},
     initialDownloadCount: {{ .setting.InitialDownloadCount }},
     autoDownload: {{ .setting.AutoDownload }},
+    appendDateToFileName: {{ .setting.AppendDateToFileName }},
 
   },
 

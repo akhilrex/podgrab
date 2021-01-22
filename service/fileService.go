@@ -18,7 +18,7 @@ import (
 	stringy "github.com/gobeam/stringy"
 )
 
-func Download(link string, episodeTitle string, podcastName string) (string, error) {
+func Download(link string, episodeTitle string, podcastName string, prefix string) (string, error) {
 	if link == "" {
 		return "", errors.New("Download path empty")
 	}
@@ -30,6 +30,9 @@ func Download(link string, episodeTitle string, podcastName string) (string, err
 	}
 
 	fileName := getFileName(link, episodeTitle, ".mp3")
+	if prefix != "" {
+		fileName = fmt.Sprintf("%s-%s", prefix, fileName)
+	}
 	folder := createIfFoldeDoesntExist(podcastName)
 	finalPath := path.Join(folder, fileName)
 	file, err := os.Create(finalPath)

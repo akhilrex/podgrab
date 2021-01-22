@@ -242,6 +242,14 @@ func SetPodcastItemPlayedStatus(id string, isPlayed bool) error {
 func SetAllEpisodesToDownload(podcastId string) error {
 	return db.SetAllEpisodesToDownload(podcastId)
 }
+
+func GetPodcastPrefix(item *db.PodcastItem, setting *db.Setting) string {
+	prefix := ""
+	if setting.AppendDateToFileName {
+		prefix = item.PubDate.Format("2006-01-02")
+	}
+	return prefix
+}
 func DownloadMissingEpisodes() error {
 	const JOB_NAME = "DownloadMissingEpisodes"
 	lock := db.GetLock(JOB_NAME)
@@ -250,6 +258,7 @@ func DownloadMissingEpisodes() error {
 		return nil
 	}
 	db.Lock(JOB_NAME, 120)
+	setting := db.GetOrCreateSetting()
 
 	data, err := db.GetAllPodcastItemsToBeDownloaded()
 
@@ -260,11 +269,11 @@ func DownloadMissingEpisodes() error {
 	var wg sync.WaitGroup
 	for index, item := range *data {
 		wg.Add(1)
-		go func(item db.PodcastItem) {
+		go func(item db.PodcastItem, setting db.Setting) {
 			defer wg.Done()
-			url, _ := Download(item.FileURL, item.Title, item.Podcast.Title)
+			url, _ := Download(item.FileURL, item.Title, item.Podcast.Title, GetPodcastPrefix(&item, &setting))
 			SetPodcastItemAsDownloaded(item.ID, url)
-		}(item)
+		}(item, *setting)
 
 		if index%5 == 0 {
 			wg.Wait()
@@ -316,7 +325,9 @@ func DownloadSingleEpisode(podcastItemId string) error {
 		return err
 	}
 
-	url, err := Download(podcastItem.FileURL, podcastItem.Title, podcastItem.Podcast.Title)
+	setting := db.GetOrCreateSetting()
+
+	url, err := Download(podcastItem.FileURL, podcastItem.Title, podcastItem.Podcast.Title, GetPodcastPrefix(&podcastItem, setting))
 	if err != nil {
 		return err
 	}
@@ -426,12 +437,13 @@ func GetSearchFromItunes(pod model.ItunesSingleResult) *model.CommonSearchResult
 	return p
 }
 
-func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload bool) error {
+func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload bool, appendDateToFileName bool) error {
 	setting := db.GetOrCreateSetting()
 
 	setting.AutoDownload = autoDownload
 	setting.DownloadOnAdd = downloadOnAdd
 	setting.InitialDownloadCount = initialDownloadCount
+	setting.AppendDateToFileName = appendDateToFileName
 
 	return db.UpdateSettings(setting)
 }

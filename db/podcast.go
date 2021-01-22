@@ -60,6 +60,7 @@ type Setting struct {
 	DownloadOnAdd        bool `gorm:"default:true"`
 	InitialDownloadCount int  `gorm:"default:5"`
 	AutoDownload         bool `gorm:"default:true"`
+	AppendDateToFileName bool `gorm:"default:false"`
 }
 type Migration struct {
 	Base
