@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"time"
@@ -18,9 +19,11 @@ func GetPodcastsByURLList(urls []string, podcasts *[]Podcast) error {
 	result := DB.Preload(clause.Associations).Where("url in ?", urls).First(&podcasts)
 	return result.Error
 }
-func GetAllPodcasts(podcasts *[]Podcast) error {
-
-	result := DB.Preload("PodcastItems").Find(&podcasts)
+func GetAllPodcasts(podcasts *[]Podcast, sorting string) error {
+	if sorting == "" {
+		sorting = "created_at"
+	}
+	result := DB.Debug().Order(sorting).Find(&podcasts)
 	return result.Error
 }
 func GetAllPodcastItems(podcasts *[]PodcastItem) error {
@@ -74,6 +77,10 @@ func SetAllEpisodesToDownload(podcastId string) error {
 	result := DB.Debug().Model(PodcastItem{}).Where(&PodcastItem{PodcastID: podcastId, DownloadStatus: Deleted}).Update("download_status", NotDownloaded)
 	return result.Error
 }
+func UpdateLastEpisodeDateForPodcast(podcastId string, lastEpisode time.Time) error {
+	result := DB.Debug().Model(Podcast{}).Where("id=?", podcastId).Update("last_episode", lastEpisode)
+	return result.Error
+}
 
 func GetAllPodcastItemsToBeDownloaded() (*[]PodcastItem, error) {
 	var podcastItems []PodcastItem
@@ -85,6 +92,16 @@ func GetAllPodcastItemsAlreadyDownloaded() (*[]PodcastItem, error) {
 	var podcastItems []PodcastItem
 	result := DB.Debug().Preload(clause.Associations).Where("download_status=?", Downloaded).Find(&podcastItems)
 	return &podcastItems, result.Error
+}
+
+func GetPodcastEpisodeStats() (*[]PodcastItemStatsModel, error) {
+	var stats []PodcastItemStatsModel
+	result := DB.Model(&PodcastItem{}).Select("download_status,podcast_id, count(1) as count").Group("podcast_id,download_status").Find(&stats)
+	return &stats, result.Error
+}
+
+func ForceSetLastEpisodeDate(podcastId string) {
+	DB.Exec("update podcasts set last_episode = (select max(pi.pub_date) from podcast_items pi where pi.podcast_id = @id) where id = @id", sql.Named("id", podcastId))
 }
 
 func GetPodcastItemsByPodcastIdAndGUIDs(podcastId string, guids []string) (*[]PodcastItem, error) {

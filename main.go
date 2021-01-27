@@ -35,6 +35,10 @@ func main() {
 
 	funcMap := template.FuncMap{
 		"formatDate": func(raw time.Time) string {
+			if raw == (time.Time{}) {
+				return ""
+			}
+
 			return raw.Format("Jan 2 2006")
 		},
 		"naturalDate": func(raw time.Time) string {

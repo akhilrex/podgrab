@@ -42,10 +42,28 @@ func FetchURL(url string) (model.PodcastData, error) {
 	err = xml.Unmarshal(body, &response)
 	return response, err
 }
-func GetAllPodcasts() *[]db.Podcast {
+func GetAllPodcasts(sorting string) *[]db.Podcast {
 	var podcasts []db.Podcast
-	db.GetAllPodcasts(&podcasts)
-	return &podcasts
+	db.GetAllPodcasts(&podcasts, sorting)
+
+	stats, _ := db.GetPodcastEpisodeStats()
+
+	type Key struct {
+		PodcastID      string
+		DownloadStatus db.DownloadStatus
+	}
+	statsMap := make(map[Key]int)
+	for _, stat := range *stats {
+		statsMap[Key{stat.PodcastID, stat.DownloadStatus}] = stat.Count
+	}
+	var toReturn []db.Podcast
+	for _, podcast := range podcasts {
+		podcast.DownloadedEpisodesCount = statsMap[Key{podcast.ID, db.Downloaded}]
+		podcast.DownloadingEpisodesCount = statsMap[Key{podcast.ID, db.NotDownloaded}]
+		podcast.AllEpisodesCount = podcast.DownloadedEpisodesCount + podcast.DownloadingEpisodesCount + statsMap[Key{podcast.ID, db.Deleted}]
+		toReturn = append(toReturn, podcast)
+	}
+	return &toReturn
 }
 
 func AddOpml(content string) error {
@@ -84,7 +102,7 @@ func AddOpml(content string) error {
 }
 
 func ExportOmpl() (model.OpmlModel, error) {
-	podcasts := GetAllPodcasts()
+	podcasts := GetAllPodcasts("")
 	var outlines []model.OpmlOutline
 	for _, podcast := range *podcasts {
 		toAdd := model.OpmlOutline{
@@ -160,6 +178,7 @@ func AddPodcastItems(podcast *db.Podcast) error {
 	for _, item := range *existingItems {
 		keyMap[item.GUID] = 1
 	}
+	var latestDate = time.Time{}
 
 	for i := 0; i < len(data.Channel.Item); i++ {
 		obj := data.Channel.Item[i]
@@ -175,6 +194,10 @@ func AddPodcastItems(podcast *db.Podcast) error {
 				//	RFC1123     = "Mon, 02 Jan 2006 15:04:05 MST"
 				modifiedRFC1123 := "Mon, 2 Jan 2006 15:04:05 MST"
 				pubDate, _ = time.Parse(modifiedRFC1123, obj.PubDate)
+			}
+
+			if latestDate.Before(pubDate) {
+				latestDate = pubDate
 			}
 
 			var downloadStatus db.DownloadStatus
@@ -202,7 +225,21 @@ func AddPodcastItems(podcast *db.Podcast) error {
 			db.CreatePodcastItem(&podcastItem)
 		}
 	}
+	if (latestDate != time.Time{}) {
+		db.UpdateLastEpisodeDateForPodcast(podcast.ID, latestDate)
+	}
 	return err
+}
+
+func SetPodcastItemAsQueuedForDownload(id string) error {
+	var podcastItem db.PodcastItem
+	err := db.GetPodcastItemById(id, &podcastItem)
+	if err != nil {
+		return err
+	}
+	podcastItem.DownloadStatus = db.NotDownloaded
+
+	return db.UpdatePodcastItem(&podcastItem)
 }
 
 func SetPodcastItemAsDownloaded(id string, location string) error {
@@ -326,6 +363,7 @@ func DownloadSingleEpisode(podcastItemId string) error {
 	}
 
 	setting := db.GetOrCreateSetting()
+	SetPodcastItemAsQueuedForDownload(podcastItemId)
 
 	url, err := Download(podcastItem.FileURL, podcastItem.Title, podcastItem.Podcast.Title, GetPodcastPrefix(&podcastItem, setting))
 	if err != nil {
@@ -336,14 +374,17 @@ func DownloadSingleEpisode(podcastItemId string) error {
 
 func RefreshEpisodes() error {
 	var data []db.Podcast
-	err := db.GetAllPodcasts(&data)
+	err := db.GetAllPodcasts(&data, "")
 
 	if err != nil {
 		return err
 	}
 	for _, item := range data {
+		if item.LastEpisode == nil {
+			fmt.Println(item.Title)
+			db.ForceSetLastEpisodeDate(item.ID)
+		}
 		AddPodcastItems(&item)
-
 	}
 	setting := db.GetOrCreateSetting()
 	if setting.AutoDownload {

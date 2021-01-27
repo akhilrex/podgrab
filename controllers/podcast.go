@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/akhilrex/podgrab/model"
 	"github.com/akhilrex/podgrab/service"
@@ -12,9 +13,25 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const (
+	DateAdded   = "dateadded"
+	Name        = "name"
+	LastEpisode = "lastepisode"
+)
+
+const (
+	Asc  = "asc"
+	Desc = "desc"
+)
+
 type SearchQuery struct {
 	Q    string `binding:"required" form:"q"`
 	Type string `form:"type"`
+}
+
+type PodcastListQuery struct {
+	Sort  string `uri:"sort" query:"sort" json:"sort" form:"sort" default:"created_at"`
+	Order string `uri:"order" query:"order" json:"order" form:"order" default:"asc"`
 }
 
 type SearchByIdQuery struct {
@@ -37,9 +54,25 @@ type AddPodcastData struct {
 }
 
 func GetAllPodcasts(c *gin.Context) {
-	var podcasts []db.Podcast
-	db.GetAllPodcasts(&podcasts)
-	c.JSON(200, podcasts)
+	var podcastListQuery PodcastListQuery
+
+	if c.ShouldBindQuery(&podcastListQuery) == nil {
+		var order = strings.ToLower(podcastListQuery.Order)
+		var sorting = "created_at"
+		switch sort := strings.ToLower(podcastListQuery.Sort); sort {
+		case DateAdded:
+			sorting = "created_at"
+		case Name:
+			sorting = "title"
+		case LastEpisode:
+			sorting = "last_episode"
+		}
+		if order == Desc {
+			sorting = fmt.Sprintf("%s desc", sorting)
+		}
+
+		c.JSON(200, service.GetAllPodcasts(sorting))
+	}
 }
 
 func GetPodcastById(c *gin.Context) {
@@ -179,7 +212,6 @@ func DownloadPodcastItem(c *gin.Context) {
 	var searchByIdQuery SearchByIdQuery
 
 	if c.ShouldBindUri(&searchByIdQuery) == nil {
-
 		go service.DownloadSingleEpisode(searchByIdQuery.Id)
 		c.JSON(200, gin.H{})
 	} else {

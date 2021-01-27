@@ -32,7 +32,7 @@ func AddPage(c *gin.Context) {
 }
 func HomePage(c *gin.Context) {
 	//var podcasts []db.Podcast
-	podcasts := service.GetAllPodcasts()
+	podcasts := service.GetAllPodcasts("")
 	c.HTML(http.StatusOK, "index.html", gin.H{"title": "Podgrab", "podcasts": podcasts})
 }
 func PodcastPage(c *gin.Context) {
@@ -42,19 +42,46 @@ func PodcastPage(c *gin.Context) {
 		var podcast db.Podcast
 
 		if err := db.GetPodcastById(searchByIdQuery.Id, &podcast); err == nil {
-			setting := c.MustGet("setting").(*db.Setting)
-			c.HTML(http.StatusOK, "episodes.html", gin.H{
-				"title":          podcast.Title,
-				"podcastItems":   podcast.PodcastItems,
-				"setting":        setting,
-				"page":           1,
-				"count":          10,
-				"totalCount":     len(podcast.PodcastItems),
-				"totalPages":     0,
-				"nextPage":       0,
-				"previousPage":   0,
-				"downloadedOnly": false,
-			})
+			var pagination Pagination
+			if c.ShouldBindQuery(&pagination) == nil {
+				var page, count int
+				if page = pagination.Page; page == 0 {
+					page = 1
+				}
+				if count = pagination.Count; count == 0 {
+					count = 10
+				}
+				setting := c.MustGet("setting").(*db.Setting)
+				totalCount := len(podcast.PodcastItems)
+				totalPages := math.Ceil(float64(totalCount) / float64(count))
+				nextPage, previousPage := 0, 0
+				if float64(page) < totalPages {
+					nextPage = page + 1
+				}
+				if page > 1 {
+					previousPage = page - 1
+				}
+
+				from := (page - 1) * count
+				to := page * count
+				if to > totalCount {
+					to = totalCount
+				}
+				c.HTML(http.StatusOK, "episodes.html", gin.H{
+					"title":          podcast.Title,
+					"podcastItems":   podcast.PodcastItems[from:to],
+					"setting":        setting,
+					"page":           page,
+					"count":          count,
+					"totalCount":     totalCount,
+					"totalPages":     totalPages,
+					"nextPage":       nextPage,
+					"previousPage":   previousPage,
+					"downloadedOnly": false,
+				})
+			} else {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+			}
 		} else {
 			c.JSON(http.StatusBadRequest, err)
 		}
@@ -151,7 +178,7 @@ func Search(c *gin.Context) {
 	if c.ShouldBindQuery(&searchQuery) == nil {
 		itunesService := new(service.ItunesService)
 		data := itunesService.Query(searchQuery.Q)
-		allPodcasts := service.GetAllPodcasts()
+		allPodcasts := service.GetAllPodcasts("")
 
 		urls := make(map[string]string, len(*allPodcasts))
 		for _, pod := range *allPodcasts {

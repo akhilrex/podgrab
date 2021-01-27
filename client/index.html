@@ -68,9 +68,11 @@
 
           <div class="row">
             <div class="columns four">
-              Last Ep : {{ latestEpisodeDate .PodcastItems}}
+              {{if .LastEpisode}}
+              Last Ep : {{ formatDate .LastEpisode }}
+              {{end}}
             </div>
-            {{$downloading:=downloadingEpisodes .PodcastItems}}
+            {{$downloading:= .DownloadingEpisodesCount}}
             <div
               class="columns five"
               title="{{downloadedEpisodes .PodcastItems}} episodes downloaded out of total {{ len .PodcastItems}} episodes.
@@ -78,7 +80,7 @@
               "
             >
 
-              {{if gt $downloading 0}} ({{$downloading}})/{{end}}{{downloadedEpisodes .PodcastItems}}/{{ len .PodcastItems }} episodes
+              {{if gt $downloading 0}} ({{$downloading}})/{{end}}{{.DownloadedEpisodesCount}}/{{.AllEpisodesCount}} episodes
 
             </div>
             <div class="columns three" style="">

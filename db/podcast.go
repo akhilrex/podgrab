@@ -17,7 +17,13 @@ type Podcast struct {
 
 	URL string
 
-	PodcastItems []PodcastItem
+	LastEpisode *time.Time
+
+	PodcastItems []PodcastItem `json:"-"`
+
+	DownloadedEpisodesCount  int `gorm:"-"`
+	DownloadingEpisodesCount int `gorm:"-"`
+	AllEpisodesCount         int `gorm:"-"`
 }
 
 //PodcastItem is
@@ -77,4 +83,10 @@ type JobLock struct {
 
 func (lock *JobLock) IsLocked() bool {
 	return lock != nil && lock.Date != time.Time{}
+}
+
+type PodcastItemStatsModel struct {
+	PodcastID      string
+	DownloadStatus DownloadStatus
+	Count          int
 }
