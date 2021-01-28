@@ -67,9 +67,9 @@ func DeletePodcastById(id string) error {
 	return result.Error
 }
 
-func GetAllPodcastItemsByPodcastId(podcastId string, podcasts *[]PodcastItem) error {
+func GetAllPodcastItemsByPodcastId(podcastId string, podcastItems *[]PodcastItem) error {
 
-	result := DB.Preload(clause.Associations).Where(&PodcastItem{PodcastID: podcastId}).Find(&podcasts)
+	result := DB.Preload(clause.Associations).Where(&PodcastItem{PodcastID: podcastId}).Find(&podcastItems)
 	return result.Error
 }
 

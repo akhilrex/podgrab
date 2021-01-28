@@ -35,6 +35,12 @@ func Download(link string, episodeTitle string, podcastName string, prefix strin
 	}
 	folder := createIfFoldeDoesntExist(podcastName)
 	finalPath := path.Join(folder, fileName)
+
+	if _, err := os.Stat(finalPath); !os.IsNotExist(err) {
+		changeOwnership(finalPath)
+		return finalPath, nil
+	}
+
 	file, err := os.Create(finalPath)
 	if err != nil {
 		Logger.Errorw("Error creating file"+link, err)

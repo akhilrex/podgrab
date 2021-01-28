@@ -132,7 +132,7 @@ func DownloadAllEpisodesByPodcastId(c *gin.Context) {
 
 	if c.ShouldBindUri(&searchByIdQuery) == nil {
 
-		err := db.SetAllEpisodesToDownload(searchByIdQuery.Id)
+		err := service.SetAllEpisodesToDownload(searchByIdQuery.Id)
 		fmt.Println(err)
 		go service.RefreshEpisodes()
 		c.JSON(200, gin.H{})
@@ -236,10 +236,7 @@ func AddPodcast(c *gin.Context) {
 	if err == nil {
 		pod, err := service.AddPodcast(addPodcastData.Url)
 		if err == nil {
-			setting := c.MustGet("setting").(*db.Setting)
-			if setting.DownloadOnAdd {
-				go service.RefreshEpisodes()
-			}
+			go service.RefreshEpisodes()
 			c.JSON(200, pod)
 		} else {
 			if v, ok := err.(*model.PodcastAlreadyExistsError); ok {

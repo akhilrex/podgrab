@@ -19,7 +19,7 @@ type Podcast struct {
 
 	LastEpisode *time.Time
 
-	PodcastItems []PodcastItem `json:"-"`
+	PodcastItems []PodcastItem
 
 	DownloadedEpisodesCount  int `gorm:"-"`
 	DownloadingEpisodesCount int `gorm:"-"`

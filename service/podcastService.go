@@ -72,7 +72,6 @@ func AddOpml(content string) error {
 		return errors.New("Invalid file format")
 	}
 	var wg sync.WaitGroup
-	setting := db.GetOrCreateSetting()
 	for _, outline := range model.Body.Outline {
 		if outline.XmlUrl != "" {
 			wg.Add(1)
@@ -94,9 +93,7 @@ func AddOpml(content string) error {
 		}
 	}
 	wg.Wait()
-	if setting.DownloadOnAdd {
-		go RefreshEpisodes()
-	}
+	go RefreshEpisodes()
 	return nil
 
 }
@@ -154,7 +151,7 @@ func AddPodcast(url string) (db.Podcast, error) {
 
 }
 
-func AddPodcastItems(podcast *db.Podcast) error {
+func AddPodcastItems(podcast *db.Podcast, newPodcast bool) error {
 	//fmt.Println("Creating: " + podcast.ID)
 	data, err := FetchURL(podcast.URL)
 	if err != nil {
@@ -210,6 +207,11 @@ func AddPodcastItems(podcast *db.Podcast) error {
 			} else {
 				downloadStatus = db.Deleted
 			}
+
+			if newPodcast && !setting.DownloadOnAdd {
+				downloadStatus = db.Deleted
+			}
+
 			podcastItem = db.PodcastItem{
 				PodcastID:      podcast.ID,
 				Title:          obj.Title,
@@ -277,6 +279,12 @@ func SetPodcastItemPlayedStatus(id string, isPlayed bool) error {
 	return db.UpdatePodcastItem(&podcastItem)
 }
 func SetAllEpisodesToDownload(podcastId string) error {
+	var podcast db.Podcast
+	err := db.GetPodcastById(podcastId, &podcast)
+	if err != nil {
+		return err
+	}
+	AddPodcastItems(&podcast, false)
 	return db.SetAllEpisodesToDownload(podcastId)
 }
 
@@ -380,11 +388,12 @@ func RefreshEpisodes() error {
 		return err
 	}
 	for _, item := range data {
-		if item.LastEpisode == nil {
+		isNewPodcast := item.LastEpisode == nil
+		if isNewPodcast {
 			fmt.Println(item.Title)
 			db.ForceSetLastEpisodeDate(item.ID)
 		}
-		AddPodcastItems(&item)
+		AddPodcastItems(&item, isNewPodcast)
 	}
 	setting := db.GetOrCreateSetting()
 	if setting.AutoDownload {
