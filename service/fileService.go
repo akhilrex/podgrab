@@ -197,11 +197,11 @@ func createFolder(folder string, parent string) string {
 
 func createDataFolderIfNotExists(folder string) string {
 	dataPath := os.Getenv("DATA")
-	return createFolder(dataPath, folder)
+	return createFolder(folder,dataPath)
 }
 func createConfigFolderIfNotExists(folder string) string {
 	dataPath := os.Getenv("CONFIG")
-	return createFolder(dataPath, folder)
+	return createFolder(folder,dataPath)
 }
 
 func getFileName(link string, title string, defaultExtension string) string {
