@@ -33,7 +33,7 @@ func Download(link string, episodeTitle string, podcastName string, prefix strin
 	if prefix != "" {
 		fileName = fmt.Sprintf("%s-%s", prefix, fileName)
 	}
-	folder := createIfFoldeDoesntExist(podcastName)
+	folder := createDataFolderIfNotExists(podcastName)
 	finalPath := path.Join(folder, fileName)
 
 	if _, err := os.Stat(finalPath); !os.IsNotExist(err) {
@@ -85,7 +85,7 @@ func FileExists(filePath string) bool {
 
 func GetAllBackupFiles() ([]string, error) {
 	var files []string
-	folder := createIfFoldeDoesntExist("backups")
+	folder := createConfigFolderIfNotExists("backups")
 	err := filepath.Walk(folder, func(path string, info os.FileInfo, err error) error {
 		if !info.IsDir() {
 			files = append(files, path)
@@ -115,7 +115,7 @@ func deleteOldBackup() {
 func CreateBackup() (string, error) {
 
 	backupFileName := "podgrab_backup_" + time.Now().Format("2006.01.02_150405") + ".tar.gz"
-	folder := createIfFoldeDoesntExist("backups")
+	folder := createConfigFolderIfNotExists("backups")
 	configPath := os.Getenv("CONFIG")
 	tarballFilePath := path.Join(folder, backupFileName)
 	file, err := os.Create(tarballFilePath)
@@ -184,16 +184,24 @@ func httpClient() *http.Client {
 	return &client
 }
 
-func createIfFoldeDoesntExist(folder string) string {
+func createFolder(folder string, parent string) string {
 	str := stringy.New(folder)
 	folder = str.RemoveSpecialCharacter()
-	dataPath := os.Getenv("DATA")
-	folderPath := path.Join(dataPath, folder)
+	folderPath := path.Join(parent, folder)
 	if _, err := os.Stat(folderPath); os.IsNotExist(err) {
 		os.MkdirAll(folderPath, 0777)
 		changeOwnership(folderPath)
 	}
 	return folderPath
+}
+
+func createDataFolderIfNotExists(folder string) string {
+	dataPath := os.Getenv("DATA")
+	return createFolder(dataPath, folder)
+}
+func createConfigFolderIfNotExists(folder string) string {
+	dataPath := os.Getenv("CONFIG")
+	return createFolder(dataPath, folder)
 }
 
 func getFileName(link string, title string, defaultExtension string) string {
