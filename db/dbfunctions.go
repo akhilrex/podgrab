@@ -100,6 +100,26 @@ func GetPodcastEpisodeStats() (*[]PodcastItemStatsModel, error) {
 	return &stats, result.Error
 }
 
+func GetEpisodeNumber(podcastItemId, podcastId string) (int, error) {
+	var id string
+	var sequence int
+	row := DB.Raw(`;With cte as(
+		SELECT 
+			id, 
+			RANK() OVER (ORDER BY pub_date) as sequence 
+		FROM 
+			podcast_items
+		WHERE
+			podcast_id=?
+	)
+	select * 
+	from cte 
+	where id = ?
+	`, podcastId, podcastItemId).Row()
+	error := row.Scan(&id, &sequence)
+	return sequence, error
+}
+
 func ForceSetLastEpisodeDate(podcastId string) {
 	DB.Exec("update podcasts set last_episode = (select max(pi.pub_date) from podcast_items pi where pi.podcast_id = @id) where id = @id", sql.Named("id", podcastId))
 }

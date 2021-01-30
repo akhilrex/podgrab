@@ -20,10 +20,11 @@ type SearchGPodderData struct {
 	Q string `binding:"required" form:"q" json:"q" query:"q"`
 }
 type SettingModel struct {
-	DownloadOnAdd        bool `form:"downloadOnAdd" json:"downloadOnAdd" query:"downloadOnAdd"`
-	InitialDownloadCount int  `form:"initialDownloadCount" json:"initialDownloadCount" query:"initialDownloadCount"`
-	AutoDownload         bool `form:"autoDownload" json:"autoDownload" query:"autoDownload"`
-	AppendDateToFileName bool `form:"appendDateToFileName" json:"appendDateToFileName" query:"appendDateToFileName"`
+	DownloadOnAdd                 bool `form:"downloadOnAdd" json:"downloadOnAdd" query:"downloadOnAdd"`
+	InitialDownloadCount          int  `form:"initialDownloadCount" json:"initialDownloadCount" query:"initialDownloadCount"`
+	AutoDownload                  bool `form:"autoDownload" json:"autoDownload" query:"autoDownload"`
+	AppendDateToFileName          bool `form:"appendDateToFileName" json:"appendDateToFileName" query:"appendDateToFileName"`
+	AppendEpisodeNumberToFileName bool `form:"appendEpisodeNumberToFileName" json:"appendEpisodeNumberToFileName" query:"appendEpisodeNumberToFileName"`
 }
 
 func AddPage(c *gin.Context) {

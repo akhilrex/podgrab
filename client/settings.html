@@ -50,28 +50,59 @@
     </div>
 
         <div v-if="downloadOnAdd">
-            <br>
-        <label for="initialDownloadCount" >
+           
+        <label for="initialDownloadCount" style="display: inline-block;" >
             <span class="label-body">How many episodes to be downloaded when a new podcast is added</span>
 
 
         </label>
+        &nbsp;
         <input type="number" name="initialDownloadCount" v-model.number="initialDownloadCount" min="0">
     </div>
-    <br>
+   
         <label for="autoDownload">
             <input type="checkbox" name="autoDownload" v-model="autoDownload">
             <span class="label-body">Automatically download new episodes to the disk</span>
         </label>
-        <br>
+     
         <label for="appendDateToFileName">
             <input type="checkbox" name="appendDateToFileName" v-model="appendDateToFileName">
             <span class="label-body">Append episode date to episode file name</span>
         </label>
-        <br>
+       
+        <label for="appendEpisodeNumberToFileName">
+            <input type="checkbox" name="appendEpisodeNumberToFileName" v-model="appendEpisodeNumberToFileName">
+            <span class="label-body">Append episode number to episode file name</span>
+        </label>
+      
         <input type="submit" value="Save" class="button button-primary">
     </form>
 </div>
+</div>
+<hr>
+<div class="row">
+    <div class="columns twelve">
+        <h3>More Info</h3>
+        <table>
+            <tr>
+                <td>Website</td>
+                <td><a href="https://github.com/akhilrex/podgrab" target="_blank">https://github.com/akhilrex/podgrab</a></td>
+            </tr>
+            <tr>
+                <td>Found a bug</td>
+                <td><a href="https://github.com/akhilrex/podgrab/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc" target="_blank" rel="noopener noreferrer">Report here</a></td>
+            </tr>
+            <tr>
+                <td>Feature Request</td>
+                <td><a href="https://github.com/akhilrex/podgrab/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc" target="_blank" rel="noopener noreferrer">Request here</a></td>
+            </tr>
+            <tr>
+                <td>Support development</td>
+                <td><a href="https://www.buymeacoffee.com/akhilrex" target="_blank" rel="noopener noreferrer">Support here</a></td>
+            </tr>
+        </table>
+        
+    </div>
 </div>
 
 {{template "scripts"}}
@@ -89,7 +120,8 @@ var app = new Vue({
             downloadOnAdd: self.downloadOnAdd,
             initialDownloadCount:self.initialDownloadCount,
             autoDownload:self.autoDownload,
-            appendDateToFileName:self.appendDateToFileName
+            appendDateToFileName:self.appendDateToFileName,
+            appendEpisodeNumberToFileName:self.appendEpisodeNumberToFileName
 
         })
         .then(function(response){
@@ -125,6 +157,7 @@ var app = new Vue({
     initialDownloadCount: {{ .setting.InitialDownloadCount }},
     autoDownload: {{ .setting.AutoDownload }},
     appendDateToFileName: {{ .setting.AppendDateToFileName }},
+    appendEpisodeNumberToFileName:{{ .setting.AppendEpisodeNumberToFileName }}
 
   },
 
