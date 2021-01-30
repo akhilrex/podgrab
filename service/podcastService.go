@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/akhilrex/podgrab/db"
+	id3 "github.com/akhilrex/podgrab/internal/id3"
 	"github.com/akhilrex/podgrab/model"
 	strip "github.com/grokify/html-strip-tags-go"
 	"go.uber.org/zap"
@@ -318,6 +319,7 @@ func DownloadMissingEpisodes() error {
 			defer wg.Done()
 			url, _ := Download(item.FileURL, item.Title, item.Podcast.Title, GetPodcastPrefix(&item, &setting))
 			SetPodcastItemAsDownloaded(item.ID, url)
+			go SetId3Tags(url, &item)
 		}(item, *setting)
 
 		if index%5 == 0 {
@@ -377,6 +379,7 @@ func DownloadSingleEpisode(podcastItemId string) error {
 	if err != nil {
 		return err
 	}
+	go SetId3Tags(url, &podcastItem)
 	return SetPodcastItemAsDownloaded(podcastItem.ID, url)
 }
 
@@ -500,4 +503,27 @@ func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload b
 
 func UnlockMissedJobs() {
 	db.UnlockMissedJobs()
+}
+
+func SetId3Tags(path string, item *db.PodcastItem) {
+	file, err := id3.Open(path, false)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	if file.Title() == "" {
+		file.SetTitle(item.Title)
+	}
+	if file.Artist() == "" {
+		file.SetArtist(item.Podcast.Title)
+	}
+	if file.Album() == "" {
+		file.SetAlbum(item.Podcast.Title)
+	}
+	if len(file.Comments()) == 0 {
+		file.SetComment(item.Summary)
+	}
+	file.SetGenre("Podcast")
+	file.SetYear(strconv.Itoa(item.PubDate.Year()))
+	defer file.Close()
 }
