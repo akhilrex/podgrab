@@ -290,8 +290,19 @@ func SetAllEpisodesToDownload(podcastId string) error {
 
 func GetPodcastPrefix(item *db.PodcastItem, setting *db.Setting) string {
 	prefix := ""
+	if setting.AppendEpisodeNumberToFileName {
+		seq, err := db.GetEpisodeNumber(item.ID, item.PodcastID)
+		if err == nil {
+			prefix = strconv.Itoa(seq)
+		}
+	}
 	if setting.AppendDateToFileName {
-		prefix = item.PubDate.Format("2006-01-02")
+		toAppend := item.PubDate.Format("2006-01-02")
+		if prefix == "" {
+			prefix = toAppend
+		} else {
+			prefix = prefix + "-" + toAppend
+		}
 	}
 	return prefix
 }
@@ -487,13 +498,14 @@ func GetSearchFromItunes(pod model.ItunesSingleResult) *model.CommonSearchResult
 	return p
 }
 
-func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload bool, appendDateToFileName bool) error {
+func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload bool, appendDateToFileName bool, appendEpisodeNumberToFileName bool) error {
 	setting := db.GetOrCreateSetting()
 
 	setting.AutoDownload = autoDownload
 	setting.DownloadOnAdd = downloadOnAdd
 	setting.InitialDownloadCount = initialDownloadCount
 	setting.AppendDateToFileName = appendDateToFileName
+	setting.AppendEpisodeNumberToFileName = appendEpisodeNumberToFileName
 
 	return db.UpdateSettings(setting)
 }

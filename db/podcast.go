@@ -63,10 +63,11 @@ const (
 
 type Setting struct {
 	Base
-	DownloadOnAdd        bool `gorm:"default:true"`
-	InitialDownloadCount int  `gorm:"default:5"`
-	AutoDownload         bool `gorm:"default:true"`
-	AppendDateToFileName bool `gorm:"default:false"`
+	DownloadOnAdd                 bool `gorm:"default:true"`
+	InitialDownloadCount          int  `gorm:"default:5"`
+	AutoDownload                  bool `gorm:"default:true"`
+	AppendDateToFileName          bool `gorm:"default:false"`
+	AppendEpisodeNumberToFileName bool `gorm:"default:false"`
 }
 type Migration struct {
 	Base

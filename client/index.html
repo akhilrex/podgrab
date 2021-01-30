@@ -68,8 +68,7 @@
 
           <div class="row">
             <div class="columns four">
-              {{if .LastEpisode}}
-              Last Ep : {{ formatDate .LastEpisode }}
+              {{if .LastEpisode}} Last Ep : {{ formatDate .LastEpisode }}
               {{end}}
             </div>
             {{$downloading:= .DownloadingEpisodesCount}}
@@ -79,9 +78,9 @@
               {{if gt $downloading 0}} {{$downloading}} episodes in queue {{end}}
               "
             >
-
-              {{if gt $downloading 0}} ({{$downloading}})/{{end}}{{.DownloadedEpisodesCount}}/{{.AllEpisodesCount}} episodes
-
+              {{if gt $downloading 0}}
+              ({{$downloading}})/{{end}}{{.DownloadedEpisodesCount}}/{{.AllEpisodesCount}}
+              episodes
             </div>
             <div class="columns three" style="">
               <button
@@ -113,10 +112,22 @@
 
       <hr />
       {{else}}
-      <h5>
-        You haven't added any podcasts yet. <a href="/add">Click here</a> to add
-        a new podcast to start monitoring.
-      </h5>
+      <div class="welcome">
+      <h5>Welcome</h5>
+      <p>It seems you have just setup Podgrab for the first time?</p>
+      <p>
+        Before you start adding and downloading podcasts I recommend that you
+        give a quick look to the <a href="/settings"><strong>Settings</strong> here</a> so that you can customize the
+        downloading behavior of the software as per your needs.
+      </p>
+      <p>
+        <a href="/add">Click here</a> to add
+        a new podcast to start downloading.
+      </p>
+      <p>
+        Please feel free to report any issues or request any features on our github page <a target="_blank" href="https://github.com/akhilrex/podgrab">here</a>
+      </p>
+    </div>
       {{end}}
       <!-- <div class="row">
   <div class="columns twelve" style="text-align: center;">
