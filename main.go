@@ -94,32 +94,42 @@ func main() {
 	//r.LoadHTMLGlob("client/*")
 	r.SetHTMLTemplate(tmpl)
 
-	r.POST("/podcasts", controllers.AddPodcast)
-	r.GET("/podcasts", controllers.GetAllPodcasts)
-	r.GET("/podcasts/:id", controllers.GetPodcastById)
-	r.DELETE("/podcasts/:id", controllers.DeletePodcastById)
-	r.GET("/podcasts/:id/items", controllers.GetPodcastItemsByPodcastId)
-	r.GET("/podcasts/:id/download", controllers.DownloadAllEpisodesByPodcastId)
-	r.DELETE("/podcasts/:id/items", controllers.DeletePodcastEpisodesById)
+	pass := os.Getenv("PASSWORD")
+	var router *gin.RouterGroup
+	if pass != "" {
+		router = r.Group("/", gin.BasicAuth(gin.Accounts{
+			"podgrab": pass,
+		}))
+	} else {
+		router = &r.RouterGroup
+	}
 
-	r.GET("/podcastitems", controllers.GetAllPodcastItems)
-	r.GET("/podcastitems/:id", controllers.GetPodcastItemById)
-	r.GET("/podcastitems/:id/markUnplayed", controllers.MarkPodcastItemAsUnplayed)
-	r.GET("/podcastitems/:id/markPlayed", controllers.MarkPodcastItemAsPlayed)
-	r.PATCH("/podcastitems/:id", controllers.PatchPodcastItemById)
-	r.GET("/podcastitems/:id/download", controllers.DownloadPodcastItem)
-	r.GET("/podcastitems/:id/delete", controllers.DeletePodcastItem)
+	router.POST("/podcasts", controllers.AddPodcast)
+	router.GET("/podcasts", controllers.GetAllPodcasts)
+	router.GET("/podcasts/:id", controllers.GetPodcastById)
+	router.DELETE("/podcasts/:id", controllers.DeletePodcastById)
+	router.GET("/podcasts/:id/items", controllers.GetPodcastItemsByPodcastId)
+	router.GET("/podcasts/:id/download", controllers.DownloadAllEpisodesByPodcastId)
+	router.DELETE("/podcasts/:id/items", controllers.DeletePodcastEpisodesById)
 
-	r.GET("/add", controllers.AddPage)
-	r.GET("/search", controllers.Search)
-	r.GET("/", controllers.HomePage)
-	r.GET("/podcasts/:id/view", controllers.PodcastPage)
-	r.GET("/episodes", controllers.AllEpisodesPage)
-	r.GET("/settings", controllers.SettingsPage)
-	r.POST("/settings", controllers.UpdateSetting)
-	r.GET("/backups", controllers.BackupsPage)
-	r.POST("/opml", controllers.UploadOpml)
-	r.GET("/opml", controllers.GetOmpl)
+	router.GET("/podcastitems", controllers.GetAllPodcastItems)
+	router.GET("/podcastitems/:id", controllers.GetPodcastItemById)
+	router.GET("/podcastitems/:id/markUnplayed", controllers.MarkPodcastItemAsUnplayed)
+	router.GET("/podcastitems/:id/markPlayed", controllers.MarkPodcastItemAsPlayed)
+	router.PATCH("/podcastitems/:id", controllers.PatchPodcastItemById)
+	router.GET("/podcastitems/:id/download", controllers.DownloadPodcastItem)
+	router.GET("/podcastitems/:id/delete", controllers.DeletePodcastItem)
+
+	router.GET("/add", controllers.AddPage)
+	router.GET("/search", controllers.Search)
+	router.GET("/", controllers.HomePage)
+	router.GET("/podcasts/:id/view", controllers.PodcastPage)
+	router.GET("/episodes", controllers.AllEpisodesPage)
+	router.GET("/settings", controllers.SettingsPage)
+	router.POST("/settings", controllers.UpdateSetting)
+	router.GET("/backups", controllers.BackupsPage)
+	router.POST("/opml", controllers.UploadOpml)
+	router.GET("/opml", controllers.GetOmpl)
 
 	go assetEnv()
 	go intiCron()

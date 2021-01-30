@@ -115,6 +115,7 @@ services:
     container_name: podgrab
     environment:
       - CHECK_FREQUENCY=240
+     # - PASSWORD=password     ## Uncomment to enable basic authentication, username = podgrab
     volumes:
       - /path/to/config:/config
       - /path/to/data:/assets
@@ -132,6 +133,7 @@ services:
 | Name            | Description                                                             | Default |
 | --------------- | ----------------------------------------------------------------------- | ------- |
 | CHECK_FREQUENCY | How frequently to check for new episodes and missing files (in minutes) | 30      |
+| PASSWORD        | Set to some no empty value to enable Basic Authentication, username `podgrab`|(empty)|
 
 <!-- LICENSE -->
 
@@ -141,11 +143,19 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Roadmap
 
-Following are the things that I plan to complete in the near future.
+- [x] Basic Authentication
+- [x] Append Date to filename
+- [x] iTunes Search
+- [x] Existing episodes detection (Will not redownload if files exist even with a fresh install)
+- [x] Rudimentary downloading/downloaded indicator
+- [x] Played/Unplayed Flag
+- [x] OPML import
+- [ ] OPML export
+- [ ] Set ID3 tags if not set 
+- [ ] Filtering and Sorting options
+- [ ] In built podcast player
 
-- Some more code refactoring.
-- API standardisation so that it can be used to build apps on top of it.
-- Better search and discovery
+
 
 <!-- CONTACT -->
 
