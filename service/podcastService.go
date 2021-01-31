@@ -13,6 +13,7 @@ import (
 
 	"github.com/akhilrex/podgrab/db"
 	id3 "github.com/akhilrex/podgrab/internal/id3"
+	v2 "github.com/akhilrex/podgrab/internal/id3/v2"
 	"github.com/akhilrex/podgrab/model"
 	strip "github.com/grokify/html-strip-tags-go"
 	"go.uber.org/zap"
@@ -521,9 +522,17 @@ func SetId3Tags(path string, item *db.PodcastItem) {
 		file.SetAlbum(item.Podcast.Title)
 	}
 	if len(file.Comments()) == 0 {
-		file.SetComment(item.Summary)
+		ft := v2.V23FrameTypeMap["COMM"]
+		utextFrame := v2.NewUnsynchTextFrame(ft, "Comment", item.Summary)
+		file.AddFrames(utextFrame)
 	}
+
+	trackFrameType := v2.V23FrameTypeMap["TRCK"]
+	tracktextFrame := v2.NewTextFrame(trackFrameType, "1")
+	file.AddFrames(tracktextFrame)
+
 	file.SetGenre("Podcast")
 	file.SetYear(strconv.Itoa(item.PubDate.Year()))
+	file.SetDate(item.PubDate.String())
 	defer file.Close()
 }
