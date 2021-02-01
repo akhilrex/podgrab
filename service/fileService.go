@@ -15,6 +15,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/akhilrex/podgrab/internal/sanitize"
 	stringy "github.com/gobeam/stringy"
 )
 
@@ -185,8 +186,8 @@ func httpClient() *http.Client {
 }
 
 func createFolder(folder string, parent string) string {
-	str := stringy.New(folder)
-	folder = str.RemoveSpecialCharacter()
+	folder = cleanFileName(folder)
+	//str := stringy.New(folder)
 	folderPath := path.Join(parent, folder)
 	if _, err := os.Stat(folderPath); os.IsNotExist(err) {
 		os.MkdirAll(folderPath, 0777)
@@ -197,11 +198,11 @@ func createFolder(folder string, parent string) string {
 
 func createDataFolderIfNotExists(folder string) string {
 	dataPath := os.Getenv("DATA")
-	return createFolder(folder,dataPath)
+	return createFolder(folder, dataPath)
 }
 func createConfigFolderIfNotExists(folder string) string {
 	dataPath := os.Getenv("CONFIG")
-	return createFolder(folder,dataPath)
+	return createFolder(folder, dataPath)
 }
 
 func getFileName(link string, title string, defaultExtension string) string {
@@ -214,10 +215,14 @@ func getFileName(link string, title string, defaultExtension string) string {
 	if len(ext) == 0 {
 		ext = defaultExtension
 	}
-	str := stringy.New(title)
-	str = stringy.New(str.RemoveSpecialCharacter())
+	//str := stringy.New(title)
+	str := stringy.New(cleanFileName(title))
 	return str.KebabCase().Get() + ext
 
+}
+
+func cleanFileName(original string) string {
+	return sanitize.Name(original)
 }
 
 func checkError(err error) {

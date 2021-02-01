@@ -14,7 +14,7 @@ require (
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.16.0
 	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
-	golang.org/x/net v0.0.0-20201002202402-0a1ea396d57c // indirect
+	golang.org/x/net v0.0.0-20201002202402-0a1ea396d57c
 	gorm.io/driver/sqlite v1.1.3
 	gorm.io/gorm v1.20.2
 )
