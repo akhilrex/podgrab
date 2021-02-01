@@ -5,11 +5,6 @@
 
 <script>
   Vue.use(Toasted);
-  function onImageError(image) {
-    image.onerror = "";
-    image.src = "/webassets/blank.png";
-    return true;
-  }
   const limit = 300;
   let elements = document.getElementsByClassName("useMore");
 

@@ -1,6 +1,9 @@
 package model
 
-import "encoding/xml"
+import (
+	"encoding/xml"
+	"time"
+)
 
 type OpmlModel struct {
 	XMLName xml.Name `xml:"opml"`
@@ -11,8 +14,9 @@ type OpmlModel struct {
 }
 
 type OpmlHead struct {
-	Text  string `xml:",chardata"`
-	Title string `xml:"title"`
+	Text        string    `xml:",chardata"`
+	Title       string    `xml:"title"`
+	DateCreated time.Time `xml:"dateCreated"`
 }
 
 type OpmlBody struct {
@@ -21,10 +25,10 @@ type OpmlBody struct {
 }
 
 type OpmlOutline struct {
+	Title    string        `xml:"title,attr"`
+	XmlUrl   string        `xml:"xmlUrl,attr"`
 	Text     string        `xml:",chardata"`
 	AttrText string        `xml:"text,attr"`
-	Title    string        `xml:"title,attr"`
 	Type     string        `xml:"type,attr"`
-	XmlUrl   string        `xml:"xmlUrl,attr"`
 	Outline  []OpmlOutline `xml:"outline"`
 }

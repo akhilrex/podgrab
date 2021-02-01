@@ -202,7 +202,8 @@ func GetOmpl(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid request"})
 		return
 	}
-	c.XML(200, data)
+	c.Header("Content-Disposition", "attachment; filename=podgrab-export.opml")
+	c.Data(200, "text/xml", data)
 }
 func UploadOpml(c *gin.Context) {
 	file, _, err := c.Request.FormFile("file")

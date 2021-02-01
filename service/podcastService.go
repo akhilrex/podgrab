@@ -98,32 +98,37 @@ func AddOpml(content string) error {
 
 }
 
-func ExportOmpl() (model.OpmlModel, error) {
+func ExportOmpl() ([]byte, error) {
 	podcasts := GetAllPodcasts("")
 	var outlines []model.OpmlOutline
 	for _, podcast := range *podcasts {
 		toAdd := model.OpmlOutline{
-			AttrText: podcast.Title,
+			AttrText: podcast.Summary,
 			Type:     "rss",
 			XmlUrl:   podcast.URL,
+			Title:    podcast.Title,
 		}
 		outlines = append(outlines, toAdd)
 	}
 
 	toExport := model.OpmlModel{
 		Head: model.OpmlHead{
-			Title: "Podgrab Feed Export",
+			Title:       "Podgrab Feed Export",
+			DateCreated: time.Now(),
 		},
 		Body: model.OpmlBody{
 			Outline: outlines,
 		},
-		Version: "1.0",
+		Version: "2.0",
 	}
 
-	data, err := xml.Marshal(toExport)
-	//return string(data), err
-	fmt.Println(string(data))
-	return toExport, err
+	if data, err := xml.MarshalIndent(toExport, "", "    "); err == nil {
+		//	fmt.Println(xml.Header + string(data))
+		data = []byte(xml.Header + string(data))
+		return data, err
+	} else {
+		return nil, err
+	}
 }
 func AddPodcast(url string) (db.Podcast, error) {
 	var podcast db.Podcast

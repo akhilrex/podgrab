@@ -151,4 +151,11 @@
   @media (min-width: 750px) {
   }
 </style>
+<script>
+   function onImageError(image) {
+    image.onerror = "";
+    image.src = "/webassets/blank.png";
+    return true;
+  }
+</script>
 {{end}}
