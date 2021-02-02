@@ -350,7 +350,7 @@ func cleanAttributes(a []parser.Attribute, allowed []string) []parser.Attribute 
 
 // A list of characters we consider separators in normal strings and replace with our canonical separator - rather than removing.
 var (
-	separators = regexp.MustCompile(`[ &_=+:]`)
+	separators = regexp.MustCompile(`[!&_=+:]`)
 
 	dashes = regexp.MustCompile(`[\-]+`)
 )
@@ -366,7 +366,7 @@ func cleanString(s string, r *regexp.Regexp) string {
 	s = Accents(s)
 
 	// Replace certain joining characters with a dash
-	//s = separators.ReplaceAllString(s, "-")
+	s = separators.ReplaceAllString(s, "-")
 
 	// Remove all other unrecognised characters - NB we do allow any printable characters
 	//s = r.ReplaceAllString(s, "")
