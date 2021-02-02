@@ -21,6 +21,45 @@
           display: block;
         }
       }
+      [v-cloak] {
+        display: none;
+      }
+
+      .grid .imageContainer{
+        height: 250px;
+      }
+
+      .grid .contentContainer{
+        display: none;
+      }
+      .grid .titleContainer{
+        height: 70px;
+        
+      }
+
+      .grid .titleContainer h5{
+        font-size: 2rem;
+      }
+
+      .grid .podcasts{
+
+        box-shadow: 0 0 0 0px rgb(0 0 0 / 20%);
+      }
+
+      .grid .podcasts:hover{
+        box-shadow: #ccc 10px 5px 16px 1px;
+        transition:all 0.25s;
+        transition-timing-function: ease-in-out;
+      }
+
+
+      .alignRight{
+        text-align: right;
+      }
+      .alignLeft{
+        text-align: left;
+      }
+   
     </style>
   </head>
   <body>
@@ -31,37 +70,69 @@
       <br />
 
       <div id="app" v-cloak>
-          <template  v-for="podcast in podcasts"  >
-        <div :key="podcast.ID" class="podcasts row" v-bind:id="'podcast-'+podcast.ID" >
-          <div class="columns two">
+        <div class="row">
+          <div class="columns six">&nbsp;</div>
+          <div class="columns six" :class="isMobile?'alignLeft':'alignRight'">
+            <select v-model="sortOrder" name="" id="">
+              <option v-for="option in sortOptions" v-bind:value="option.key">
+                ${option.label}
+              </option>
+
+            </select>
+
+            <select v-if="!isMobile" v-model="layout" name="" id="">
+              <option v-for="option in layoutOptions" v-bind:value="option">
+                ${option.capitalize()}
+              </option>
+
+            </select>
+
+          </div>
+
+        </div>
+        <div class="row" :class="layout">
+          <template  v-for="podcastGroup in podcastGroups"  >
+            <div class="row">
+              <template  v-for="podcast in podcastGroup"  >
+
+         
+         
+        <div :key="podcast.ID" class="podcasts" v-bind:class="{row:layout=='list', four:layout=='grid', columns:layout=='grid'}" v-bind:id="'podcast-'+podcast.ID"  >
+          <div class="columns imageContainer" v-bind:class="{two:layout=='list', twelve:layout=='grid'}">
+            <a style="text-decoration: none" :href="'/podcasts/'+podcast.ID+'/view'">
             <img
               onerror="onImageError(this)"
               class="u-full-width"
               v-bind:src="podcast.Image"
               v-bind:alt="podcast.Title"
             />
+          </a>
           </div>
-          <div class="columns ten">
+          <div class="columns" v-bind:class="{ten:layout=='list', twelve:layout=='grid'}">
+            <div class="titleContainer">
             <a style="text-decoration: none" :href="'/podcasts/'+podcast.ID+'/view'">
-              <h3>${podcast.Title}</h3></a
-            >
-            <p class="useMore">${podcast.Summary}</p>
+              <h3 v-if="layout=='list'">${podcast.Title}</h3>
+              <h5 v-if="layout=='grid'">${podcast.Title}</h5>
+              </a>
+            </div>
+           <div class="contentContainer">
+            <p class="useMore">${podcast.Summary}</p></div>
 
             <div class="row">
-              <div class="columns four">
+              <div class="columns" v-bind:class="{four:layout=='list', twelve:layout=='grid'}">
                 
                 <template v-if="podcast.LastEpisode">Last Ep : ${getFormattedLastEpisodeDate(podcast)}</template> 
               </div>
 
               <div
-              class="columns five"
+              class="columns"  v-bind:class="{five:layout=='list', twelve:layout=='grid'}"
               :title="getEpisodeCountTooltip(podcast)"
             >
               <template v-if="podcast.DownloadingEpisodesCount">
               (${podcast.DownloadingEpisodesCount})/</template>${podcast.DownloadedEpisodesCount}/${podcast.AllEpisodesCount}
               episodes
             </div>
-            <div class="columns three" style="">
+            <div class="columns"   v-bind:class="{three:layout=='list', twelve:layout=='grid'}">
               <button
                 class="button button-delete"
                 @click="deletePodcast(podcast.ID)"
@@ -88,73 +159,15 @@
             </div>
           </div>
         </div>
-        <hr>
+        <hr v-if="layout=='list'">
+     </template>
+    </div>
+    <br>
       </template>
-      </div>
+    </div>
 
-      {{range .podcasts}}
-      <div class="podcasts row" id="podcast-{{ .ID }}">
-        <div class="columns two">
-          <img
-            onerror="onImageError(this)"
-            class="u-full-width"
-            src="{{ .Image }}"
-            alt="{{ .Title }}"
-          />
-        </div>
-        <div class="columns ten">
-          <a style="text-decoration: none" href="/podcasts/{{ .ID }}/view">
-            <h3>{{.Title}}</h3></a
-          >
-
-          <p class="useMore">{{ .Summary }}</p>
-
-          <div class="row">
-            <div class="columns four">
-              {{if .LastEpisode}} Last Ep : {{ formatDate .LastEpisode }}
-              {{end}}
-            </div>
-            {{$downloading:= .DownloadingEpisodesCount}}
-            <div
-              class="columns five"
-              title="{{downloadedEpisodes .PodcastItems}} episodes downloaded out of total {{ len .PodcastItems}} episodes.
-              {{if gt $downloading 0}} {{$downloading}} episodes in queue {{end}}
-              "
-            >
-              {{if gt $downloading 0}}
-              ({{$downloading}})/{{end}}{{.DownloadedEpisodesCount}}/{{.AllEpisodesCount}}
-              episodes
-            </div>
-            <div class="columns three" style="">
-              <button
-                class="button button-delete"
-                onclick="deletePodcast('{{.ID}}')"
-                title="Delete Podcast and episode files"
-              >
-                <i class="fas fa-trash"></i>
-              </button>
-              <button
-                class="button button-delete"
-                title="Delete only episode files"
-                onclick="deletePodcastEpisodes('{{.ID}}')"
-              >
-                <i class="fas fa-folder-minus"></i>
-              </button>
-
-              <button
-                class="button"
-                title="Download all episode files"
-                onclick="downloadAllEpisodes('{{.ID}}')"
-              >
-                <i class="fas fa-download"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <hr />
-      {{else}}
+    
+     <template v-if="!podcasts.length">
       <div class="welcome">
       <h5>Welcome</h5>
       <p>It seems you have just setup Podgrab for the first time?</p>
@@ -171,19 +184,66 @@
         Please feel free to report any issues or request any features on our github page <a target="_blank" href="https://github.com/akhilrex/podgrab">here</a>
       </p>
     </div>
-      {{end}}
-      <!-- <div class="row">
-  <div class="columns twelve" style="text-align: center;">
-    <a href="/episodes" class="button button-primary">All Episodes</a>
-  </div>
-</div> -->
+  </template>
+ </div>
     </div>
     {{template "scripts"}}
     <script>
         var app = new Vue({
         delimiters: ["${", "}"],
         el: "#app",
+        computed:{
+            podcastGroups(){
+              var i,j,temparray,chunk = 3;
+              var toReturn=[];
+                for (i=0,j=this.podcasts.length; i<j; i+=chunk) {
+                  toReturn.push(this.podcasts.slice(i,i+chunk));
+                    // do whatever
+                }
+                return toReturn
+            }
+        },
+        created(){
+          
+        },
         methods:{
+          sortPodcasts(order){
+              let compareFunction;
+              switch(order){
+                case "dateAdded-asc":compareFunction=(a,b)=>Date.parse(a.CreatedAt)-Date.parse(b.CreatedAt);break;
+                case "dateAdded-desc":compareFunction=(a,b)=>Date.parse(b.CreatedAt)-Date.parse(a.CreatedAt);break;
+                case "lastEpisode-asc":compareFunction=(a,b)=>Date.parse(a.LastEpisode)-Date.parse(b.LastEpisode);break;
+                case "lastEpisode-desc":compareFunction=(a,b)=>Date.parse(b.LastEpisode)-Date.parse(a.LastEpisode);break;
+                case "name-asc":compareFunction=(a,b)=>{
+                               var nameA = a.Title.toUpperCase(); // ignore upper and lowercase
+                              var nameB = b.Title.toUpperCase(); // ignore upper and lowercase
+                              if (nameA < nameB) {
+                                return -1;
+                              }
+                              if (nameA > nameB) {
+                                return 1;
+                              }
+
+                              // names must be equal
+                              return 0;
+                };break;
+                case "name-desc":compareFunction=(a,b)=>{
+                               var nameA = b.Title.toUpperCase(); // ignore upper and lowercase
+                              var nameB = a.Title.toUpperCase(); // ignore upper and lowercase
+                              if (nameA < nameB) {
+                                return -1;
+                              }
+                              if (nameA > nameB) {
+                                return 1;
+                              }
+
+                              // names must be equal
+                              return 0;
+                };break;
+               
+              }
+              this.podcasts.sort(compareFunction)
+          },
           getEpisodeCountTooltip(podcast){
             let title=`${podcast.DownloadedEpisodesCount} episodes downloaded out of total ${podcast.AllEpisodesCount} episodes`
             if(podcast.DownloadingEpisodesCount){
@@ -196,15 +256,94 @@
            const options={month:"short", day:"numeric", year:"numeric"}
            //todo: this is a really dirty hack which needs to be fixed when we work on the episode page
            let dt=new Date(Date.parse(podcast.LastEpisode.substr(0,10)));
-         //  console.log(podcast.LastEpisode,dt);
            return dt.toDateString()
           },
           downloadAllEpisodes(id) { downloadAllEpisodes(id);},
-          deletePodcast(id){ deletePodcast(id);},
+          deletePodcast(id){ deletePodcast(id,()=>{
+           
+              const index= this.podcasts.findIndex(x=>x.ID===id);
+              this.podcasts.splice(index,1);
+          });},
           deletePodcastEpisodes(id){ deletePodcastEpisodes(id)},
         },
+        mounted(){
+          if(localStorage?.sortOrder){
+            this.sortOrder=localStorage.sortOrder;
+            this.sortPodcasts(this.sortOrder);
+          }
+          if(localStorage?.layout){
+            this.layout=localStorage.layout;
+          }else{
+              this.layout='list';
+          }
+
+          if (screen.width <= 760) {
+                this.isMobile= true
+              } else {
+                this.isMobile= false
+              }
+          
+          if (screen.width <= 760) {
+            this.layout='list'
+          }
+          checkUseMore();
+        },
+        watch:{
+          sortOrder(newOrder,oldOrder){
+            if(newOrder===oldOrder){
+              return;
+            }
+            if(localStorage){
+              localStorage.sortOrder=newOrder
+            }
+            this.sortPodcasts(newOrder);
+          },
+          layout(newLayout,oldLayout){
+            if(newLayout===oldLayout){
+              return;
+            }
+            if(localStorage){
+              localStorage.layout=newLayout
+            }
+          },
+        },
+        updated(){
+         
+        },
         data: {
-          podcasts: {{ .podcasts }},
+          isMobile:false,
+          layoutOptions:["list","grid"],
+          layout:"grid",
+          sortOrder:"dateAdded-asc",
+            sortOptions:[
+              {
+                key:"name-asc",
+                label:"Name (A-Z)"
+              },
+              {
+                key:"name-desc",
+                label:"Name (Z-A)"
+              },
+              {
+                key:"lastEpisode-asc",
+                label:"Latest Episode (Old First)"
+              },
+              {
+                key:"lastEpisode-desc",
+                label:"Latest Episode (New First)"
+              },
+              
+              {
+                key:"dateAdded-asc",
+                label:"Date Added (Old First)"
+              },
+              {
+                key:"dateAdded-desc",
+                label:"Date Added (New First)"
+              },
+            ],
+            {{ $len := len .podcasts}}
+            podcasts: {{if gt $len 0}} {{ .podcasts }} {{else}} [] {{end}},
         }})
       function downloadAllEpisodes(id) {
         var confirmed = confirm(
@@ -239,7 +378,7 @@
           .then(function () {});
         return false;
       }
-      function deletePodcast(id) {
+      function deletePodcast(id,onSuccess) {
         //  console.log(id);
         var confirmed = confirm(
           "Are you sure you want to delete this podcast and all files?"
@@ -256,8 +395,10 @@
               position: "top-right",
               duration: 5000,
             });
-            var row = document.getElementById("podcast-" + id);
-            row.remove();
+            if(onSuccess){
+              onSuccess();
+            }
+            
           })
           .catch(function (error) {
             if (error.response) {
