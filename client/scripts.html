@@ -5,7 +5,11 @@
 
 <script>
   Vue.use(Toasted);
+  String.prototype.capitalize = function() {
+    return this.charAt(0).toUpperCase() + this.slice(1);
+}
   const limit = 300;
+  function checkUseMore(){
   let elements = document.getElementsByClassName("useMore");
 
   for (let index = 0; index < elements.length; index++) {
@@ -45,5 +49,7 @@
     element.parentNode.insertBefore(newElement, element.nextSibling);
     element.style.display = "none";
   }
+}
+checkUseMore();
 </script>
 {{end}}
