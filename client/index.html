@@ -27,27 +27,70 @@
     <div class="container">
       {{template "navbar" .}}
 
-      <div class="row" style="display: none">
-        <form action="/" method="post">
-          <div class="nine columns">
-            <input
-              type="url"
-              name="url"
-              id="url"
-              placeholder="Enter Podcast RSS feed to add"
-              class="u-full-width"
-            />
-          </div>
-          <div class="three columns">
-            <input
-              type="submit"
-              value="Add Podcast"
-              class="u-full-width button-primary"
-            />
-          </div>
-        </form>
-      </div>
+   
       <br />
+
+      <div id="app" v-cloak>
+          <template  v-for="podcast in podcasts"  >
+        <div :key="podcast.ID" class="podcasts row" v-bind:id="'podcast-'+podcast.ID" >
+          <div class="columns two">
+            <img
+              onerror="onImageError(this)"
+              class="u-full-width"
+              v-bind:src="podcast.Image"
+              v-bind:alt="podcast.Title"
+            />
+          </div>
+          <div class="columns ten">
+            <a style="text-decoration: none" :href="'/podcasts/'+podcast.ID+'/view'">
+              <h3>${podcast.Title}</h3></a
+            >
+            <p class="useMore">${podcast.Summary}</p>
+
+            <div class="row">
+              <div class="columns four">
+                
+                <template v-if="podcast.LastEpisode">Last Ep : ${getFormattedLastEpisodeDate(podcast)}</template> 
+              </div>
+
+              <div
+              class="columns five"
+              :title="getEpisodeCountTooltip(podcast)"
+            >
+              <template v-if="podcast.DownloadingEpisodesCount">
+              (${podcast.DownloadingEpisodesCount})/</template>${podcast.DownloadedEpisodesCount}/${podcast.AllEpisodesCount}
+              episodes
+            </div>
+            <div class="columns three" style="">
+              <button
+                class="button button-delete"
+                @click="deletePodcast(podcast.ID)"
+                title="Delete Podcast and episode files"
+              >
+                <i class="fas fa-trash"></i>
+              </button>
+              <button
+                class="button button-delete"
+                title="Delete only episode files"
+                @click="deletePodcastEpisodes(podcast.ID)"
+              >
+                <i class="fas fa-folder-minus"></i>
+              </button>
+
+              <button
+                class="button"
+                title="Download all episode files"
+                @click="downloadAllEpisodes(podcast.ID)"
+              >
+                <i class="fas fa-download"></i>
+              </button>
+            </div>
+            </div>
+          </div>
+        </div>
+        <hr>
+      </template>
+      </div>
 
       {{range .podcasts}}
       <div class="podcasts row" id="podcast-{{ .ID }}">
@@ -137,6 +180,32 @@
     </div>
     {{template "scripts"}}
     <script>
+        var app = new Vue({
+        delimiters: ["${", "}"],
+        el: "#app",
+        methods:{
+          getEpisodeCountTooltip(podcast){
+            let title=`${podcast.DownloadedEpisodesCount} episodes downloaded out of total ${podcast.AllEpisodesCount} episodes`
+            if(podcast.DownloadingEpisodesCount){
+                    title+= '\n'+podcast.DownloadingEpisodesCount+' episodes in the queue.'
+            
+                }
+                return title
+          },
+          getFormattedLastEpisodeDate(podcast){
+           const options={month:"short", day:"numeric", year:"numeric"}
+           //todo: this is a really dirty hack which needs to be fixed when we work on the episode page
+           let dt=new Date(Date.parse(podcast.LastEpisode.substr(0,10)));
+         //  console.log(podcast.LastEpisode,dt);
+           return dt.toDateString()
+          },
+          downloadAllEpisodes(id) { downloadAllEpisodes(id);},
+          deletePodcast(id){ deletePodcast(id);},
+          deletePodcastEpisodes(id){ deletePodcastEpisodes(id)},
+        },
+        data: {
+          podcasts: {{ .podcasts }},
+        }})
       function downloadAllEpisodes(id) {
         var confirmed = confirm(
           "Are you sure you want to download all episodes of this podcast?"
