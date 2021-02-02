@@ -69,7 +69,9 @@
 
 Podgrab is a is a self-hosted podcast manager which automatically downloads latest podcast episodes. It is a light-weight application built using GO.
 
-It works best if you already know which podcasts you want to monitor. However there is an experimental podcast search system powered by iTunes built into Podgrab
+It works best if you already know which podcasts you want to monitor. However there is a podcast search system powered by iTunes built into Podgrab
+
+*Developers Note: This project is under active development which means I release new updates very frequently. It is recommended that you use something like [watchtower](https://github.com/containrrr/watchtower) which will automatically update your containers whenever I release a new version or periodically rebuild the container with the latest image manually.*
 
 ### Motivation
 
