@@ -3,6 +3,7 @@ module github.com/akhilrex/podgrab
 go 1.15
 
 require (
+	github.com/antchfx/xmlquery v1.3.3
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.6.3
 	github.com/gobeam/stringy v0.0.0-20200717095810-8a3637503f62

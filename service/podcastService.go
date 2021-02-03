@@ -8,11 +8,13 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/akhilrex/podgrab/db"
 	"github.com/akhilrex/podgrab/model"
+	"github.com/antchfx/xmlquery"
 	strip "github.com/grokify/html-strip-tags-go"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -33,14 +35,14 @@ func ParseOpml(content string) (model.OpmlModel, error) {
 }
 
 //FetchURL is
-func FetchURL(url string) (model.PodcastData, error) {
+func FetchURL(url string) (model.PodcastData, []byte, error) {
 	body, err := makeQuery(url)
 	if err != nil {
-		return model.PodcastData{}, err
+		return model.PodcastData{}, nil, err
 	}
 	var response model.PodcastData
 	err = xml.Unmarshal(body, &response)
-	return response, err
+	return response, body, err
 }
 func GetAllPodcasts(sorting string) *[]db.Podcast {
 	var podcasts []db.Podcast
@@ -130,12 +132,34 @@ func ExportOmpl() ([]byte, error) {
 		return nil, err
 	}
 }
+
+func getItunesImageUrl(body []byte) string {
+	doc, err := xmlquery.Parse(strings.NewReader(string(body)))
+	if err != nil {
+		return ""
+	}
+	channel, err := xmlquery.Query(doc, "//channel")
+	if err != nil {
+		return ""
+	}
+
+	iimage := channel.SelectElement("itunes:image")
+	for _, attr := range iimage.Attr {
+		if attr.Name.Local == "href" {
+			return attr.Value
+		}
+
+	}
+	return ""
+
+}
+
 func AddPodcast(url string) (db.Podcast, error) {
 	var podcast db.Podcast
 	err := db.GetPodcastByURL(url, &podcast)
 	fmt.Println(url)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		data, err := FetchURL(url)
+		data, body, err := FetchURL(url)
 		if err != nil {
 			fmt.Println("Error")
 			Logger.Errorw("Error adding podcast", err)
@@ -149,6 +173,11 @@ func AddPodcast(url string) (db.Podcast, error) {
 			Image:   data.Channel.Image.URL,
 			URL:     url,
 		}
+
+		if podcast.Image == "" {
+			podcast.Image = getItunesImageUrl(body)
+		}
+
 		err = db.CreatePodcast(&podcast)
 		return podcast, err
 	}
@@ -158,7 +187,7 @@ func AddPodcast(url string) (db.Podcast, error) {
 
 func AddPodcastItems(podcast *db.Podcast, newPodcast bool) error {
 	//fmt.Println("Creating: " + podcast.ID)
-	data, err := FetchURL(podcast.URL)
+	data, _, err := FetchURL(podcast.URL)
 	if err != nil {
 		//log.Fatal(err)
 		return err
