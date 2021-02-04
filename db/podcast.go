@@ -68,6 +68,7 @@ type Setting struct {
 	AutoDownload                  bool `gorm:"default:true"`
 	AppendDateToFileName          bool `gorm:"default:false"`
 	AppendEpisodeNumberToFileName bool `gorm:"default:false"`
+	DarkMode                      bool `gorm:"default:false"`
 }
 type Migration struct {
 	Base

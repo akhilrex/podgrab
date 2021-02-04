@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{.title}} - PodGrab</title>
-    {{template "commoncss"}}
+    {{template "commoncss" .}}
     <style>
       img {
         display: none;
@@ -120,7 +120,7 @@
 
           {{else}} {{if not $setting.AutoDownload}}
           <a
-            class="button button-primary"
+            class="button button"
             onclick="downloadToDisk('{{.ID}}')"
             title="Download to server"
             download
@@ -128,7 +128,7 @@
           ></a>
           {{else}} {{if eq .DownloadStatus 3}}
           <a
-            class="button button-primary"
+            class="button button"
             onclick="downloadToDisk('{{.ID}}')"
             title="Download to server"
             download
@@ -153,13 +153,13 @@
           {{if .previousPage }}
           <a
             href="?page={{.previousPage}}&downloadedOnly={{.downloadedOnly}}"
-            class="button button-primary"
+            class="button"
             >Newer</a
           >
           {{end}} {{if .nextPage }}
           <a
             href="?page={{.nextPage}}&downloadedOnly={{.downloadedOnly}}"
-            class="button button-primary"
+            class="button"
             >Older</a
           >
           {{end}}

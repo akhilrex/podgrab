@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Add Podcast - PodGrab</title>
-    {{template "commoncss"}}
+    {{template "commoncss" .}}
     <style>
       [v-cloak] {
         display: none;
@@ -33,7 +33,7 @@
               <input
                 type="submit"
                 value="Add Podcast"
-                class="u-full-width button-primary"
+                class="u-full-width button"
               />
             </div>
           </form>
@@ -72,7 +72,7 @@
               <input
                 type="submit"
                 value="Upload"
-                class="u-full-width button-primary"
+                class="u-full-width button"
               />
             </div>
           </form>
@@ -101,7 +101,7 @@
               <input
                 type="submit"
                 value="Search"
-                class="u-full-width button-primary"
+                class="u-full-width button"
               />
             </div>
           </form>
@@ -126,7 +126,7 @@
                   <button
                     v-if="!item.already_saved"
                     v-on:click="addPodcast(item)"
-                    class="button button-primary"
+                    class="button button"
                   >
                     + Add
                   </button>

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PodGrab</title>
-    {{template "commoncss"}}
+    {{template "commoncss" .}}
     <style>
         .button-delete{
             background-color: indianred;
@@ -77,8 +77,13 @@
             <input type="checkbox" name="appendEpisodeNumberToFileName" v-model="appendEpisodeNumberToFileName">
             <span class="label-body">Append episode number to episode file name</span>
         </label>
+
+        <label for="darkMode">
+            <input type="checkbox" name="darkMode" v-model="darkMode">
+            <span class="label-body">Use Dark Mode</span>
+        </label>
       
-        <input type="submit" value="Save" class="button button-primary">
+        <input type="submit" value="Save" class="button">
     </form>
 </div>
 </div>
@@ -116,7 +121,9 @@
 var app = new Vue({
   delimiters: ['${', '}'],
   el: '#app',
-
+  mounted(){
+    this.originalThemeSetting= this.darkMode;
+  },
   methods:{
       saveSettings:function(e){
           e.preventDefault();
@@ -127,7 +134,8 @@ var app = new Vue({
             initialDownloadCount:self.initialDownloadCount,
             autoDownload:self.autoDownload,
             appendDateToFileName:self.appendDateToFileName,
-            appendEpisodeNumberToFileName:self.appendEpisodeNumberToFileName
+            appendEpisodeNumberToFileName:self.appendEpisodeNumberToFileName,
+            darkMode:self.darkMode
 
         })
         .then(function(response){
@@ -137,8 +145,10 @@ var app = new Vue({
                 position: "top-right",
                 duration : 5000
             })
-
-
+            console.log(self.originalThemeSetting);
+            if(self.originalThemeSetting!= self.darkMode){
+                window.location.reload()
+            }
         })
         .catch(function(error){
             if(error.response){
@@ -163,8 +173,9 @@ var app = new Vue({
     initialDownloadCount: {{ .setting.InitialDownloadCount }},
     autoDownload: {{ .setting.AutoDownload }},
     appendDateToFileName: {{ .setting.AppendDateToFileName }},
-    appendEpisodeNumberToFileName:{{ .setting.AppendEpisodeNumberToFileName }}
-
+    appendEpisodeNumberToFileName:{{ .setting.AppendEpisodeNumberToFileName }},
+    darkMode:{{ .setting.DarkMode }},
+    originalThemeSetting:{{ .setting.DarkMode }}
   },
 
 })

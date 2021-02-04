@@ -7,6 +7,37 @@
 />
 <link rel="stylesheet" href="/webassets/fa/fontawesome.min.css" />
 <link rel="stylesheet" href="/webassets/fa/solid.min.css" />
+  {{if .setting.DarkMode}}
+<style>
+
+
+  html{
+    --text-color: #eeeeee;
+    --background: #121212; 
+    --overlay:#000; 
+  }
+  </style>
+  {{else}}
+  <style>
+
+
+    html{
+      --text-color: #222;
+      --background: #fff; 
+      --overlay:#ccc; 
+    }
+    </style>
+  {{end}}
+  <style>
+  *{
+    background: var(--background);
+    color: var(--text-color);
+  }
+  .button,input[type=submit],input[type=email],input[type=number],input[type=password],input[type=search],input[type=tel],input[type=text],input[type=url],select,textarea,button,a{
+    background-color: inherit;
+    color: inherit;
+  }
+</style>
 
 <style>
   .container {

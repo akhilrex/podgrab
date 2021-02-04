@@ -25,16 +25,18 @@ type SettingModel struct {
 	AutoDownload                  bool `form:"autoDownload" json:"autoDownload" query:"autoDownload"`
 	AppendDateToFileName          bool `form:"appendDateToFileName" json:"appendDateToFileName" query:"appendDateToFileName"`
 	AppendEpisodeNumberToFileName bool `form:"appendEpisodeNumberToFileName" json:"appendEpisodeNumberToFileName" query:"appendEpisodeNumberToFileName"`
+	DarkMode                      bool `form:"darkMode" json:"darkMode" query:"darkMode"`
 }
 
 func AddPage(c *gin.Context) {
-
-	c.HTML(http.StatusOK, "addPodcast.html", gin.H{"title": "Add Podcast"})
+	setting := c.MustGet("setting").(*db.Setting)
+	c.HTML(http.StatusOK, "addPodcast.html", gin.H{"title": "Add Podcast", "setting": setting})
 }
 func HomePage(c *gin.Context) {
 	//var podcasts []db.Podcast
 	podcasts := service.GetAllPodcasts("")
-	c.HTML(http.StatusOK, "index.html", gin.H{"title": "Podgrab", "podcasts": podcasts})
+	setting := c.MustGet("setting").(*db.Setting)
+	c.HTML(http.StatusOK, "index.html", gin.H{"title": "Podgrab", "podcasts": podcasts, "setting": setting})
 }
 func PodcastPage(c *gin.Context) {
 	var searchByIdQuery SearchByIdQuery

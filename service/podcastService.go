@@ -532,7 +532,7 @@ func GetSearchFromItunes(pod model.ItunesSingleResult) *model.CommonSearchResult
 	return p
 }
 
-func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload bool, appendDateToFileName bool, appendEpisodeNumberToFileName bool) error {
+func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload bool, appendDateToFileName bool, appendEpisodeNumberToFileName bool, darkMode bool) error {
 	setting := db.GetOrCreateSetting()
 
 	setting.AutoDownload = autoDownload
@@ -540,6 +540,7 @@ func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload b
 	setting.InitialDownloadCount = initialDownloadCount
 	setting.AppendDateToFileName = appendDateToFileName
 	setting.AppendEpisodeNumberToFileName = appendEpisodeNumberToFileName
+	setting.DarkMode = darkMode
 
 	return db.UpdateSettings(setting)
 }

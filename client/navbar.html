@@ -10,7 +10,7 @@
     display: block;
     width: 100%;
     height: 6.5rem;
-    background: #fff;
+    background:var(--background);
     z-index: 99;
     border-top: 1px solid #eee;
     border-bottom: 1px solid #eee; }
@@ -33,7 +33,7 @@
     margin-right: 35px;
     text-decoration: none;
     line-height: 6.5rem;
-    color: #222; }
+    color: var(--text-color);}
   .navbar-link.active {
     color: #33C3F0; }
   .has-docked-nav .navbar {
@@ -62,7 +62,6 @@
   z-index: 1000;
   top: 0;
   left: -160px;
-  background-color: #fff;
   overflow-x: hidden;
   padding-top: 20px;
   overflow-x: hidden; /* Disable horizontal scroll */
@@ -87,11 +86,11 @@
     font-weight: 600;
     letter-spacing: .2rem;
     line-height: 2.5rem;
-    color: #222;
+   
 }
 
 div#overlay{
-  background-color: #ccc;
+  background-color: var(--overlay);
   opacity: 0.5;
   height: 100%;
   width: 100%;
@@ -110,13 +109,13 @@ div#overlay{
 #burger div{
   width: 30px;
   height: 2px;
-  background-color: black;
+  background-color: var(--text-color);;
   margin: 6px 0;
 }
 .bar1, .bar2, .bar3 {
   width: 15px;
   height: 2px;
-  background-color: #333;
+  background-color: var(--text-color);;
   margin: 6px 0;
 }
 #closeDrawer{
