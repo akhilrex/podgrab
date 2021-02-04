@@ -44,6 +44,13 @@ func FetchURL(url string) (model.PodcastData, []byte, error) {
 	err = xml.Unmarshal(body, &response)
 	return response, body, err
 }
+func GetPodcastById(id string) *db.Podcast {
+	var podcast db.Podcast
+
+	db.GetPodcastById(id, &podcast)
+
+	return &podcast
+}
 func GetAllPodcasts(sorting string) *[]db.Podcast {
 	var podcasts []db.Podcast
 	db.GetAllPodcasts(&podcasts, sorting)

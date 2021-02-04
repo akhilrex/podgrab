@@ -131,6 +131,13 @@ func main() {
 	router.POST("/opml", controllers.UploadOpml)
 	router.GET("/opml", controllers.GetOmpl)
 
+	subsonic := router.Group("/rest")
+	subsonic.GET("/ping", controllers.Subsonic_Ping)
+	subsonic.GET("/ping.view", controllers.Subsonic_Ping)
+	subsonic.GET("/getLicense", controllers.Subsonic_License)
+	subsonic.GET("/getLicense.view", controllers.Subsonic_License)
+	subsonic.GET("/getPodcasts.view", controllers.Subsonic_GetPodcasts)
+
 	go assetEnv()
 	go intiCron()
 
