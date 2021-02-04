@@ -29,7 +29,7 @@
         height: 250px;
       }
 
-      .grid .contentContainer{
+      .grid .contentContainer, .grid .titleContainer{
         display: none;
       }
       .grid .titleContainer{
@@ -97,7 +97,7 @@
 
          
          
-        <div :key="podcast.ID" class="podcasts" v-bind:class="{row:layout=='list', four:layout=='grid', columns:layout=='grid'}" v-bind:id="'podcast-'+podcast.ID"  >
+        <div :key="podcast.ID" class="podcasts" :title="podcast.Title"  v-bind:class="{row:layout=='list', four:layout=='grid', columns:layout=='grid'}" v-bind:id="'podcast-'+podcast.ID"  >
           <div class="columns imageContainer" v-bind:class="{two:layout=='list', twelve:layout=='grid'}">
             <a style="text-decoration: none" :href="'/podcasts/'+podcast.ID+'/view'">
             <img
