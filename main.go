@@ -130,6 +130,7 @@ func main() {
 	router.GET("/backups", controllers.BackupsPage)
 	router.POST("/opml", controllers.UploadOpml)
 	router.GET("/opml", controllers.GetOmpl)
+	router.GET("/player", controllers.PlayerPage)
 
 	go assetEnv()
 	go intiCron()

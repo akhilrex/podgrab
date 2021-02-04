@@ -44,6 +44,20 @@ func FetchURL(url string) (model.PodcastData, []byte, error) {
 	err = xml.Unmarshal(body, &response)
 	return response, body, err
 }
+func GetPodcastById(id string) *db.Podcast {
+	var podcast db.Podcast
+
+	db.GetPodcastById(id, &podcast)
+
+	return &podcast
+}
+func GetPodcastItemById(id string) *db.PodcastItem {
+	var podcastItem db.PodcastItem
+
+	db.GetPodcastItemById(id, &podcastItem)
+
+	return &podcastItem
+}
 func GetAllPodcasts(sorting string) *[]db.Podcast {
 	var podcasts []db.Podcast
 	db.GetAllPodcasts(&podcasts, sorting)
@@ -401,6 +415,7 @@ func DeleteEpisodeFile(podcastItemId string) error {
 	err = DeleteFile(podcastItem.DownloadPath)
 
 	if err != nil && !os.IsNotExist(err) {
+		fmt.Println(err.Error())
 		return err
 	}
 

@@ -93,6 +93,45 @@ func PodcastPage(c *gin.Context) {
 	}
 
 }
+
+func PlayerPage(c *gin.Context) {
+
+	itemId, hasItemId := c.GetQuery("itemId")
+	podcastId, hasPodcastId := c.GetQuery("podcastId")
+	title := "Podgrab"
+	var items []db.PodcastItem
+	var totalCount int64
+	if hasItemId {
+		toAdd := service.GetPodcastItemById(itemId)
+		items = append(items, *toAdd)
+		totalCount = 1
+	} else if hasPodcastId {
+		pod := service.GetPodcastById(podcastId)
+		for _, item := range pod.PodcastItems {
+			if item.DownloadStatus == db.Downloaded {
+				items = append(items, item)
+			}
+		}
+		title = "Playing: " + pod.Title
+		totalCount = int64(len(items))
+	} else {
+		title = "Playing Latest Episodes"
+		if err := db.GetPaginatedPodcastItems(1, 10, true, &items, &totalCount); err != nil {
+			fmt.Println(err.Error())
+		}
+	}
+	setting := c.MustGet("setting").(*db.Setting)
+
+	c.HTML(http.StatusOK, "player.html", gin.H{
+		"title":          title,
+		"podcastItems":   items,
+		"setting":        setting,
+		"count":          len(items),
+		"totalCount":     totalCount,
+		"downloadedOnly": true,
+	})
+
+}
 func SettingsPage(c *gin.Context) {
 
 	setting := c.MustGet("setting").(*db.Setting)
