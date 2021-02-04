@@ -106,10 +106,10 @@
             </div>
           </form>
           <br />
-          <progress v-if="searching" class="u-full-width"></progress>
+          <progress v-show="searching" class="u-full-width"></progress>
           <div class="results">
-            <div v-for="item in results" :key="item.url">
-              <div class="row">
+            <div v-for="item in results" :key="item.url" class="row">
+            
                 <div class="columns two">
                   <img
                     class="u-full-width"
@@ -138,7 +138,7 @@
                     Already Added
                   </button>
                 </div>
-              </div>
+            
               <hr />
             </div>
           </div>

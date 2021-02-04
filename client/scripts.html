@@ -51,5 +51,16 @@
   }
 }
 checkUseMore();
+
+function openPlayer(itemId,podcastId){
+  let url="/player?";
+  if(itemId){
+    url+="&itemId="+itemId
+  }
+  if(podcastId){
+    url+="&podcastId="+podcastId
+  }
+  const player= window.open(url,"podgrab_player");
+}
 </script>
 {{end}}

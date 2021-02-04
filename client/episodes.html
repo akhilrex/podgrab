@@ -117,6 +117,12 @@
             title="Delete Podcast Episode File"
             ><i class="fas fa-trash"></i
           ></a>
+          <a
+          class="button button"
+          onclick="openPlayer('{{.ID}}')"
+          title="Play Episode"
+          ><i class="fas fa-play"></i
+        ></a>
 
           {{else}} {{if not $setting.AutoDownload}}
           <a
