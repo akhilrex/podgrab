@@ -26,7 +26,8 @@
       }
 
       .grid .imageContainer{
-        height: 250px;
+        max-height: 160px;
+        margin-bottom: 10px;
       }
 
       .grid .contentContainer, .grid .titleContainer{
@@ -97,7 +98,7 @@
 
          
          
-        <div :key="podcast.ID" class="podcasts" :title="podcast.Title"  v-bind:class="{row:layout=='list', four:layout=='grid', columns:layout=='grid'}" v-bind:id="'podcast-'+podcast.ID"  >
+        <div :key="podcast.ID" class="podcasts" :title="podcast.Title"  v-bind:class="{row:layout=='list', two:layout=='grid', columns:layout=='grid'}" v-bind:id="'podcast-'+podcast.ID"  >
           <div class="columns imageContainer" v-bind:class="{two:layout=='list', twelve:layout=='grid'}">
             <a style="text-decoration: none" :href="'/podcasts/'+podcast.ID+'/view'">
             <img
@@ -121,7 +122,7 @@
             <div class="row">
               <div class="columns" v-bind:class="{four:layout=='list', twelve:layout=='grid'}">
                 
-                <template v-if="podcast.LastEpisode">Last Ep : ${getFormattedLastEpisodeDate(podcast)}</template> 
+                <span v-if="podcast.LastEpisode" :title="'Last Episode aired on '+getFormattedLastEpisodeDate(podcast)">${getFormattedLastEpisodeDate(podcast)}</span> 
               </div>
 
               <div
@@ -216,7 +217,7 @@
         el: "#app",
         computed:{
             podcastGroups(){
-              var i,j,temparray,chunk = 3;
+              var i,j,temparray,chunk = 6;
               var toReturn=[];
                 for (i=0,j=this.podcasts.length; i<j; i+=chunk) {
                   toReturn.push(this.podcasts.slice(i,i+chunk));
