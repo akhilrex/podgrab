@@ -94,13 +94,37 @@ func DeletePodcastById(c *gin.Context) {
 
 	if c.ShouldBindUri(&searchByIdQuery) == nil {
 
-		service.DeletePodcast(searchByIdQuery.Id)
+		service.DeletePodcast(searchByIdQuery.Id, true)
 		c.JSON(http.StatusNoContent, gin.H{})
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 	}
 }
+
+func DeleteOnlyPodcastById(c *gin.Context) {
+	var searchByIdQuery SearchByIdQuery
+
+	if c.ShouldBindUri(&searchByIdQuery) == nil {
+
+		service.DeletePodcast(searchByIdQuery.Id, false)
+		c.JSON(http.StatusNoContent, gin.H{})
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+	}
+}
+
 func DeletePodcastEpisodesById(c *gin.Context) {
+	var searchByIdQuery SearchByIdQuery
+
+	if c.ShouldBindUri(&searchByIdQuery) == nil {
+
+		service.DeletePodcastEpisodes(searchByIdQuery.Id)
+		c.JSON(http.StatusNoContent, gin.H{})
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+	}
+}
+func DeletePodcasDeleteOnlyPodcasttEpisodesById(c *gin.Context) {
 	var searchByIdQuery SearchByIdQuery
 
 	if c.ShouldBindUri(&searchByIdQuery) == nil {

@@ -483,7 +483,7 @@ func DeletePodcastEpisodes(id string) error {
 	return nil
 
 }
-func DeletePodcast(id string) error {
+func DeletePodcast(id string, deleteFiles bool) error {
 	var podcast db.Podcast
 
 	err := db.GetPodcastById(id, &podcast)
@@ -497,7 +497,9 @@ func DeletePodcast(id string) error {
 		return err
 	}
 	for _, item := range podcastItems {
-		DeleteFile(item.DownloadPath)
+		if deleteFiles {
+			DeleteFile(item.DownloadPath)
+		}
 		db.DeletePodcastItemById(item.ID)
 
 	}
