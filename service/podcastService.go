@@ -455,10 +455,10 @@ func RefreshEpisodes() error {
 		}
 		AddPodcastItems(&item, isNewPodcast)
 	}
-	setting := db.GetOrCreateSetting()
-	if setting.AutoDownload {
-		go DownloadMissingEpisodes()
-	}
+	//	setting := db.GetOrCreateSetting()
+
+	go DownloadMissingEpisodes()
+
 	return nil
 }
 
