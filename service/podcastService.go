@@ -240,6 +240,15 @@ func AddPodcastItems(podcast *db.Podcast, newPodcast bool) error {
 				modifiedRFC1123 := "Mon, 2 Jan 2006 15:04:05 MST"
 				pubDate, _ = time.Parse(modifiedRFC1123, obj.PubDate)
 			}
+			if (pubDate == time.Time{}) {
+				//	RFC1123Z    = "Mon, 02 Jan 2006 15:04:05 -0700" // RFC1123 with numeric zone
+				modifiedRFC1123Z := "Mon, 2 Jan 2006 15:04:05 -0700"
+				pubDate, _ = time.Parse(modifiedRFC1123Z, obj.PubDate)
+			}
+
+			if (pubDate == time.Time{}) {
+				fmt.Printf("Cant format date : %s", obj.PubDate)
+			}
 
 			if latestDate.Before(pubDate) {
 				latestDate = pubDate
