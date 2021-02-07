@@ -5,62 +5,103 @@
 
 <script>
   Vue.use(Toasted);
-  String.prototype.capitalize = function() {
+  String.prototype.capitalize = function () {
     return this.charAt(0).toUpperCase() + this.slice(1);
-}
+  };
   const limit = 300;
-  function checkUseMore(){
-  let elements = document.getElementsByClassName("useMore");
+  function checkUseMore() {
+    let elements = document.getElementsByClassName("useMore");
 
-  for (let index = 0; index < elements.length; index++) {
-    const element = elements[index];
-    let display = element.style.display;
-    let originalText = element.textContent;
-    if (originalText.length <= limit) {
-      continue;
-    }
-    let newText = originalText.substr(0, limit);
+    for (let index = 0; index < elements.length; index++) {
+      const element = elements[index];
+      let display = element.style.display;
+      let originalText = element.textContent;
+      if (originalText.length <= limit) {
+        continue;
+      }
+      let newText = originalText.substr(0, limit);
 
-    let newElement = document.createElement(element.tagName);
-    newElement.textContent = newText;
+      let newElement = document.createElement(element.tagName);
+      newElement.textContent = newText;
 
-    newElement.classList.add("short-version");
-    element.classList.add("long-version");
+      newElement.classList.add("short-version");
+      element.classList.add("long-version");
 
-    let more = document.createElement("a");
-    more.textContent = " show more";
-    more.style.cursor = "pointer";
-    more.onclick = function () {
-      element.style.display = display;
-      newElement.style.display = "none";
-    };
+      let more = document.createElement("a");
+      more.textContent = " show more";
+      more.style.cursor = "pointer";
+      more.onclick = function () {
+        element.style.display = display;
+        newElement.style.display = "none";
+      };
 
-    let less = document.createElement("a");
-    less.textContent = " show less";
-    less.style.cursor = "pointer";
-    less.onclick = function () {
+      let less = document.createElement("a");
+      less.textContent = " show less";
+      less.style.cursor = "pointer";
+      less.onclick = function () {
+        element.style.display = "none";
+        newElement.style.display = display;
+      };
+
+      newElement.appendChild(more);
+      element.appendChild(less);
+
+      element.parentNode.insertBefore(newElement, element.nextSibling);
       element.style.display = "none";
-      newElement.style.display = display;
-    };
-
-    newElement.appendChild(more);
-    element.appendChild(less);
-
-    element.parentNode.insertBefore(newElement, element.nextSibling);
-    element.style.display = "none";
+    }
   }
-}
-checkUseMore();
+  checkUseMore();
 
-function openPlayer(itemId,podcastId){
-  let url="/player?";
-  if(itemId){
-    url+="&itemId="+itemId
+  function openPlayer(itemId, podcastId) {
+    let url = "/player?";
+    if (itemId) {
+      url += "&itemId=" + itemId;
+    }
+    if (podcastId) {
+      url += "&podcastId=" + podcastId;
+    }
+    const player = window.open(url, "podgrab_player");
   }
-  if(podcastId){
-    url+="&podcastId="+podcastId
+
+  function getIdentifier() {
+    if(localStorage){
+    if (localStorage.identifier) {
+      return localStorage?.identifier;
+    }
+    var id = +new Date();
+    localStorage.identifier = id;
+    return id;
   }
-  const player= window.open(url,"podgrab_player");
-}
+  }
+
+  function getWebsocketMessage(messageType, payload){
+    return JSON.stringify({
+      identifier:getIdentifier(),
+      messageType,
+      payload
+    });
+  }
+
+  function getWebsocketConnection(onOpen,onMessage){
+          // Create WebSocket connection.
+    const socket = new WebSocket('ws://'+window.location.host+'/ws');
+
+    socket.addEventListener('open', onOpen);
+
+    // Listen for messages
+    socket.addEventListener('message',onMessage);
+
+    return socket;
+    // Connection opened
+    // socket.addEventListener('open', function (event) {
+    //   const message= getWebsocketMessage("register","home")
+    //     socket.send(message);
+    // });
+
+    // // Listen for messages
+    // socket.addEventListener('message', function (event) {
+    //     console.log('Message from server ', event.data);
+    // });
+  }
 </script>
 {{end}}

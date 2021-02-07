@@ -46,6 +46,12 @@
           display: block;
         }
       }
+      .button-enqueue{
+        display: none;
+      }
+      body.playerExists .button-enqueue{
+        display: inline-block;
+      }
     </style>
   </head>
   <body>
@@ -123,6 +129,12 @@
           title="Play Episode"
           ><i class="fas fa-play"></i
         ></a>
+        <a
+        class="button button-enqueue"
+        onclick="enqueueEpisode('{{.ID}}')"
+        title="Add Episode to existing player playlist"
+        ><i class="fas fa-plus"></i
+      ></a>
 
           {{else}} {{if not $setting.AutoDownload}}
           <a
@@ -256,6 +268,27 @@
           .then(function () {});
         return false;
       }
+    </script>
+    <script>
+
+       const socket= getWebsocketConnection(function(event){
+              const message= getWebsocketMessage("Register","Home")
+              socket.send(message);
+            },function(x){
+              const msg= JSON.parse(x.data)
+              if(msg.messageType=="NoPlayer"){
+                document.body.classList.remove("playerExists")
+              }
+              if(msg.messageType=="PlayerExists"){
+                document.body.classList.add("playerExists")
+              }
+            });
+            function enqueueEpisode(id){
+            if(!socket){
+              return
+            }
+           socket.send(getWebsocketMessage("Enqueue",`{"itemId":"${id}"}`))
+          }
     </script>
   </body>
 </html>

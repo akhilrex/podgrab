@@ -175,6 +175,15 @@
             >
               <i class="fas fa-play"></i>
             </button>
+
+            <button
+            class="button"
+            title="Add all downloaded episodes to existing player playlist"
+            v-if="podcast.DownloadedEpisodesCount>0 && playerExists"
+            @click="enquePodcast(podcast.ID)"
+          >
+            <i class="fas fa-plus"></i>
+          </button>
             </div>
             </div>
           </div>
@@ -227,12 +236,30 @@
             }
         },
         created(){
-          
+          const self=this;
+         this.socket= getWebsocketConnection(function(event){
+              const message= getWebsocketMessage("Register","Home")
+                  self.socket.send(message);
+            },function(x){
+              const msg= JSON.parse(x.data)
+              if(msg.messageType=="NoPlayer"){
+                self.playerExists=false;
+              }
+              if(msg.messageType=="PlayerExists"){
+                self.playerExists=true;
+              }
+            });
         },
         methods:{
           removePodcast(id) {      
            const index= this.podcasts.findIndex(x=>x.ID===id);
            this.podcasts.splice(index,1);       
+          },
+          enquePodcast(id){
+            if(!this.playerExists){
+              return
+            }
+            this.socket.send(getWebsocketMessage("Enqueue",`{"podcastId":"${id}"}`))
           },
           sortPodcasts(order){
               let compareFunction;
@@ -353,6 +380,8 @@
           },
         },
         data: {
+          socket:null,
+          playerExists:false,
           isMobile:false,
           layoutOptions:["list","grid"],
           layout:"grid",
@@ -526,6 +555,10 @@
           .then(function () {});
         return false;
       }
+    </script>
+    <script>
+      
+
     </script>
   </body>
 </html>
