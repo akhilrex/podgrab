@@ -58,6 +58,7 @@
 - [About the Project](#about-the-project)
   - [Motivation](#motivation)
   - [Built With](#built-with)
+  - [Features](#features)
 - [Installation](#installation)
 - [License](#license)
 - [Roadmap](#roadmap)
@@ -86,6 +87,21 @@ Podgrab started a tool that I initially built to solve a specific problem I had.
 - [Go-Gin](https://github.com/gin-gonic/gin)
 - [GORM](https://github.com/go-gorm/gorm)
 - [SQLite](https://www.sqlite.org/index.html)
+
+### Features
+- Download/Archive complete podcast
+- Auto-download new episodes
+- Download on demand
+- Podcast Discovery - Search and Add podcasts using iTunes API
+- Full-fledged podcast player
+- Add using direct RSS feed url / OMPL import / Search
+- Basic Authentication
+- Existing episode detection
+- Easy OPML import/export
+- Customizable episode names
+- Dark Mode
+- Self Hosted / Open Source
+- Docker support
 
 ## Installation
 
@@ -137,7 +153,10 @@ services:
 | CHECK_FREQUENCY | How frequently to check for new episodes and missing files (in minutes) | 30      |
 | PASSWORD        | Set to some no empty value to enable Basic Authentication, username `podgrab`|(empty)|
 
-<!-- LICENSE -->
+### Setup
+
+- Enable *websocket support* if running behind a reverse proxy. This is needed for the "Add to playlist" functionality.
+- Go through the settings page once and change relevant settings before adding podcasts.
 
 ## License
 
@@ -152,10 +171,11 @@ Distributed under the MIT License. See `LICENSE` for more information.
 - [x] Rudimentary downloading/downloaded indicator
 - [x] Played/Unplayed Flag
 - [x] OPML import
-- [ ] OPML export
+- [x] OPML export
+- [x] In built podcast player
 - [ ] Set ID3 tags if not set 
 - [ ] Filtering and Sorting options
-- [ ] In built podcast player
+
 
 
 
