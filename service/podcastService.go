@@ -301,6 +301,20 @@ func SetPodcastItemAsQueuedForDownload(id string) error {
 	return db.UpdatePodcastItem(&podcastItem)
 }
 
+func SetPodcastItemBookmarkStatus(id string, bookmark bool) error {
+	var podcastItem db.PodcastItem
+	err := db.GetPodcastItemById(id, &podcastItem)
+	if err != nil {
+		return err
+	}
+	if bookmark {
+		podcastItem.BookmarkDate = time.Now()
+	} else {
+		podcastItem.BookmarkDate = time.Time{}
+	}
+	return db.UpdatePodcastItem(&podcastItem)
+}
+
 func SetPodcastItemAsDownloaded(id string, location string) error {
 	var podcastItem db.PodcastItem
 	err := db.GetPodcastItemById(id, &podcastItem)

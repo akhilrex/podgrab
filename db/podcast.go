@@ -50,6 +50,8 @@ type PodcastItem struct {
 	DownloadStatus DownloadStatus `gorm:"default:0"`
 
 	IsPlayed bool `gorm:"default:false"`
+
+	BookmarkDate time.Time
 }
 
 type DownloadStatus int
