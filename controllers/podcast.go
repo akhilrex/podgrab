@@ -204,6 +204,24 @@ func MarkPodcastItemAsPlayed(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 	}
 }
+func BookmarkPodcastItem(c *gin.Context) {
+	var searchByIdQuery SearchByIdQuery
+
+	if c.ShouldBindUri(&searchByIdQuery) == nil {
+		service.SetPodcastItemBookmarkStatus(searchByIdQuery.Id, true)
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+	}
+}
+func UnbookmarkPodcastItem(c *gin.Context) {
+	var searchByIdQuery SearchByIdQuery
+
+	if c.ShouldBindUri(&searchByIdQuery) == nil {
+		service.SetPodcastItemBookmarkStatus(searchByIdQuery.Id, false)
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+	}
+}
 func PatchPodcastItemById(c *gin.Context) {
 	var searchByIdQuery SearchByIdQuery
 

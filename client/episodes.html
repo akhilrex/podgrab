@@ -109,7 +109,26 @@
             onclick="changePlayedStatus('{{.ID}}',{{ not .IsPlayed }})"
             ><i class="fas fa-envelope-open"></i
           ></a>
-          {{ end }} {{if .DownloadPath}}
+          {{ end }}
+          
+          {{if isDateNull .BookmarkDate }}
+          <a
+            class="button button"
+            title="Bookmark Episode"
+            onclick="changeBookmarkStatus('{{.ID}}',true)"
+            ><i class="far fa-bookmark"></i
+          ></a>
+          {{ else }}
+          <a
+            class="button button"
+            title="Remove Bookmark"
+            onclick="changeBookmarkStatus('{{.ID}}',false)"
+            ><i class="fas fa-bookmark"></i
+          ></a>
+          
+          {{ end }}
+          
+          {{if .DownloadPath}}
           <a
             class="button"
             href="{{ .DownloadPath }}"
@@ -247,6 +266,36 @@
           })
           .then(function (response) {
             Vue.toasted.show("Podcast played status updated.", {
+              theme: "bubble",
+              type: "info",
+              position: "top-right",
+              duration: 5000,
+            });
+            var row = document.getElementById("podcast-" + id);
+            row.remove();
+          })
+          .catch(function (error) {
+            if (error.response) {
+              Vue.toasted.show(error.response.data?.message, {
+                theme: "bubble",
+                type: "error",
+                position: "top-right",
+                duration: 5000,
+              });
+            }
+          })
+          .then(function () {});
+        return false;
+      }
+      function changeBookmarkStatus(id, status) {
+        let endpoint = status ? "bookmark" : "unbookmark";
+        axios
+          .get("/podcastitems/" + id + "/" + endpoint, {
+            isPlayed: status,
+          })
+          .then(function (response) {
+            msg= status?"Bookmark Added": "Bookmark removed";
+            Vue.toasted.show(msg, {
               theme: "bubble",
               type: "info",
               position: "top-right",

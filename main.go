@@ -34,6 +34,9 @@ func main() {
 	r.Use(setupSettings())
 
 	funcMap := template.FuncMap{
+		"isDateNull": func(raw time.Time) bool {
+			return raw == (time.Time{})
+		},
 		"formatDate": func(raw time.Time) string {
 			if raw == (time.Time{}) {
 				return ""
@@ -117,6 +120,8 @@ func main() {
 	router.GET("/podcastitems/:id", controllers.GetPodcastItemById)
 	router.GET("/podcastitems/:id/markUnplayed", controllers.MarkPodcastItemAsUnplayed)
 	router.GET("/podcastitems/:id/markPlayed", controllers.MarkPodcastItemAsPlayed)
+	router.GET("/podcastitems/:id/bookmark", controllers.BookmarkPodcastItem)
+	router.GET("/podcastitems/:id/unbookmark", controllers.UnbookmarkPodcastItem)
 	router.PATCH("/podcastitems/:id", controllers.PatchPodcastItemById)
 	router.GET("/podcastitems/:id/download", controllers.DownloadPodcastItem)
 	router.GET("/podcastitems/:id/delete", controllers.DeletePodcastItem)
