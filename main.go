@@ -133,6 +133,11 @@ func main() {
 	router.GET("/opml", controllers.GetOmpl)
 	router.GET("/player", controllers.PlayerPage)
 
+	r.GET("/ws", func(c *gin.Context) {
+		controllers.Wshandler(c.Writer, c.Request)
+	})
+	go controllers.HandleWebsocketMessages()
+
 	go assetEnv()
 	go intiCron()
 
@@ -144,6 +149,7 @@ func setupSettings() gin.HandlerFunc {
 
 		setting := db.GetOrCreateSetting()
 		c.Set("setting", setting)
+
 		c.Next()
 	}
 }

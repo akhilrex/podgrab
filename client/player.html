@@ -656,6 +656,7 @@ div#large-visualization{
       {{template "navbar" .}}
 
       <br />{{$setting := .setting}}
+      <div id="app">
       <div id="blue-playlist-container">
 
         <!-- Amplitude Player -->
@@ -721,8 +722,8 @@ div#large-visualization{
   
           <!-- Right Side Player -->
           <div id="amplitude-right">
-            {{range $index,$item:=.podcastItems}}
-            <div class="song amplitude-song-container amplitude-play-pause" data-amplitude-song-index="{{ $index}}" title="{{.Title}}">
+          
+            <div  v-for="(item,index) in allItems"  class="song amplitude-song-container amplitude-play-pause" :data-amplitude-song-index="index" :title="item.Title">
               <div class="song-now-playing-icon-container">
                 <div class="play-button-container">
   
@@ -730,21 +731,21 @@ div#large-visualization{
                 <img class="now-playing" src="/webassets//now-playing.svg"/>
               </div>
               <div class="song-meta-data">
-                <span class="song-title">{{.Title}}</span>
-                <span class="song-date">{{formatDate .PubDate}}</span>
-                <span class="song-artist">{{.Podcast.Title}}</span>
+                <span class="song-title">${item.Title}</span>
+                <span class="song-date">${getFormattedLastEpisodeDate(item)}</span>
+                <span class="song-artist">${item.Podcast.Title}</span>
                
               </div>
-              <span class="song-duration">{{ formatDuration .Duration}}</span>
+              <span class="song-duration">${ formatDuration(item.Duration)}</span>
             </div>
-            {{end}}
+           
           </div>
           <!-- End Right Side Player -->
         </div>
         <!-- End Amplitdue Player -->
         
       </div>
-     
+    </div>
     </div>
      
    
@@ -752,88 +753,139 @@ div#large-visualization{
 
     {{template "scripts"}}
     <script src="/webassets/amplitude.min.js"></script>
+
+    <style>
+      .song {
+        background-color: inherit;
+
+      }
+      .song:not(.amplitude-active-song-container):hover .play-button-container{
+        display: block!important;;
+      }
+
+      .song:hover{
+        background-color:#00A0FF ;
+      }
+    </style>
     <script>
       
+    
+        var app = new Vue({
+        delimiters: ["${", "}"],
+        el: "#app",
+        methods:{
+          getSongsFromItems(items){
+            return items.map(x=>{
+                  return {
+                    id:x.ID,
+                    name:x.Title,
+                    url:x.DownloadPath,
+                    cover_art_url:x.Image,
+                    artist:x.Podcast.Title,
+                    album: new Date(x.PubDate.substr(0,10)).toDateString()
+                  }
+                });
+          },
+          getFormattedLastEpisodeDate(item){
+           let dt=new Date(Date.parse(item.PubDate.substr(0,10)));
+           return dt.toDateString()
+          },
+          formatDuration(total) {
+                if (total <= 0) {
+                  return ""
+                }
+                mins = total / 60
+                mins=Math.floor(mins)
+                secs = total % 60
+                hrs = 0
+                if (mins >= 60) {
+                  hrs = mins / 60
+                  mins = mins % 60
+                }
+              
+                hrs=Math.floor(hrs)
+                if (hrs > 0) {
+                  return `${hrs}:${mins}:${secs}`
+                }
+                return `${mins}:${secs}`
+              },
+        },
+        computed:{
+          songs(){
+             return this.getSongsFromItems(this.allItems)
+          }
+        },
+        updated(){
+          Amplitude.bindNewElements();
+        },
+       
+        created(){
+          const self=this;
+          this.socket= getWebsocketConnection(function(event){
+                const message= getWebsocketMessage("RegisterPlayer","")
+                self.socket.send(message);
+              },x=>{
+                if(!x.data){
+                  return
+                }
+                payload= JSON.parse(x.data);
+                if(payload.messageType=="Enqueue"){
+                  newItems=JSON.parse(payload.payload);
+                  newItems.forEach(x=>{this.allItems.push(x)});
+                    newSongs=self.getSongsFromItems(newItems);
+                    newSongs.forEach(x=>{Amplitude.addSong(x)});
+                }
+              });
+        },
+        mounted(){
+          Amplitude.init({
+            "songs": this.songs,
+            "start_song":0,
+            "autoplay": true,
+            "callbacks": {
+                  'play': function(){
+                      document.getElementById('album-art').style.visibility = 'hidden';
+                      document.getElementById('large-visualization').style.visibility = 'visible';
+                  },
+
+                  'pause': function(){
+                      document.getElementById('album-art').style.visibility = 'visible';
+                      document.getElementById('large-visualization').style.visibility = 'hidden';
+                  },
+                  'initialized':function(){
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const itemId = urlParams.get('itemId');
+                    const podcastId = urlParams.get('podcastId');
+                    if(itemId||podcastId){
+                    Amplitude.play();
+                    }
+                  },
+                  'ended':function(){
+                    console.log(Amplitude.getActiveSongMetadata());
+                  }
+              },
+            waveforms: {
+              sample_rate: 50
+            }
+          });
+        
+        },
+        data:{
+          socket:null,
+          allItems: {{ .podcastItems }},
+        }
+        });
+       
 
 
 let songElements = document.getElementsByClassName('song');
 
 for( var i = 0; i < songElements.length; i++ ){
-	/*
-		Ensure that on mouseover, CSS styles don't get messed up for active songs.
-	*/
-	songElements[i].addEventListener('mouseover', function(){
-		this.style.backgroundColor = '#00A0FF';
-
-		if( !this.classList.contains('amplitude-active-song-container') ){
-      this.querySelectorAll('.play-button-container')[0].style.display = 'block';
-      //this.querySelectorAll('.play-button-container')[0].style.backgroundColor = 'inherit';
-		}
-
-		//this.querySelectorAll('.song-duration')[0].style.color = '#FFFFFF';
-	});
-
-	/*
-		Ensure that on mouseout, CSS styles don't get messed up for active songs.
-	*/
-	songElements[i].addEventListener('mouseout', function(){
-		this.style.backgroundColor = 'inherit';
-		// this.querySelectorAll('.song-meta-data .song-title')[0].style.color = '#272726';
-		// this.querySelectorAll('.song-meta-data .song-artist')[0].style.color = '#607D8B';
-		this.querySelectorAll('.play-button-container')[0].style.display = 'none';
-	
-		//this.querySelectorAll('.song-duration')[0].style.color = '#607D8B';
-	});
-
-	/*
-		Show and hide the play button container on the song when the song is clicked.
-	*/
 	songElements[i].addEventListener('click', function(){
 		this.querySelectorAll('.play-button-container')[0].style.display = 'none';
 	});
 }
 
-/*
-	Initializes AmplitudeJS
-*/
-let items= {{ .podcastItems }}
-
-songs= items.map(x=>{
-  return {
-    name:x.Title,
-    url:x.DownloadPath,
-    cover_art_url:x.Image,
-    artist:x.Podcast.Title,
-    album: new Date(x.PubDate.substr(0,10)).toDateString()
-  }
-});
-Amplitude.init({
-  "songs": songs,
-  "start_song":0,
-  "autoplay": true,
-  "callbacks": {
-        'play': function(){
-            document.getElementById('album-art').style.visibility = 'hidden';
-            document.getElementById('large-visualization').style.visibility = 'visible';
-        },
-
-        'pause': function(){
-            document.getElementById('album-art').style.visibility = 'visible';
-            document.getElementById('large-visualization').style.visibility = 'hidden';
-        },
-        'initialized':function(){
-          const urlParams = new URLSearchParams(window.location.search);
-          const itemId = urlParams.get('itemId');
-          const podcastId = urlParams.get('podcastId');
-          if(itemId||podcastId){
-          Amplitude.play();
-          }
-        }
-    },
-  waveforms: {
-    sample_rate: 50
-  }
-});
     </script>
   </body>
 </html>

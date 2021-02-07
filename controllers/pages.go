@@ -94,6 +94,23 @@ func PodcastPage(c *gin.Context) {
 
 }
 
+func getItemsToPlay(itemId, podcastId string) []db.PodcastItem {
+	var items []db.PodcastItem
+	if itemId != "" {
+		toAdd := service.GetPodcastItemById(itemId)
+		items = append(items, *toAdd)
+
+	} else if podcastId != "" {
+		pod := service.GetPodcastById(podcastId)
+		for _, item := range pod.PodcastItems {
+			if item.DownloadStatus == db.Downloaded {
+				items = append(items, item)
+			}
+		}
+	}
+	return items
+}
+
 func PlayerPage(c *gin.Context) {
 
 	itemId, hasItemId := c.GetQuery("itemId")
