@@ -269,10 +269,15 @@ func AddPodcastItems(podcast *db.Podcast, newPodcast bool) error {
 				downloadStatus = db.Deleted
 			}
 
+			summary := strip.StripTags(obj.Summary)
+			if summary == "" {
+				summary = strip.StripTags(obj.Description)
+			}
+
 			podcastItem = db.PodcastItem{
 				PodcastID:      podcast.ID,
 				Title:          obj.Title,
-				Summary:        strip.StripTags(obj.Summary),
+				Summary:        summary,
 				EpisodeType:    obj.EpisodeType,
 				Duration:       duration,
 				PubDate:        pubDate,
