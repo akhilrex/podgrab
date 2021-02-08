@@ -961,6 +961,9 @@ div#large-visualization{
                     let secs=Math.floor(Amplitude.getSongPlayedSeconds());
                     if(secs%10===0){
                       song=Amplitude.getActiveSongMetadata();    
+                      if(Amplitude.getSongPlayedPercentage()>20){
+                          markSongAsPlayed(song.id)
+                      }
                       if(Amplitude.getSongPlayedPercentage()>95){
                           self.removeSongTime(song.id)
                       }else{
@@ -992,7 +995,7 @@ div#large-visualization{
                     }
 
                     time= self.getSavedSongTime();
-                    console.log(time)
+                  //  console.log(time)
                     if(time>0){
                         Amplitude.skipTo(time,0)
                     }
@@ -1027,6 +1030,26 @@ for( var i = 0; i < songElements.length; i++ ){
 	});
 }
 
+let markedAsPlayed=[];
+
+
+function markSongAsPlayed(id) {
+        let endpoint = "markPlayed";
+        if(markedAsPlayed.indexOf(id)!==-1){
+          return;
+        }
+        markedAsPlayed.push(id);
+        axios
+          .get("/podcastitems/" + id + "/" + endpoint, {
+            isPlayed: status,
+          })
+          .then(function (response) {
+          })
+          .catch(function (error) {
+          })
+          .then(function () {});
+        return false;
+      }
     </script>
   </body>
 </html>
