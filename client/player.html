@@ -346,7 +346,7 @@ div#control-container {
   margin-top: 25px;
   margin-top: 20px; }
   div#control-container div#repeat-container {
-    width: 25%;
+    width: 30%;
     float: left;
     padding-top: 20px; }
     div#control-container div#repeat-container div#repeat {
@@ -361,17 +361,26 @@ div#control-container {
       width: 23px;
       height: 19px;
       cursor: pointer;
-      float: right; }
+      float: left; }
       div#control-container div#repeat-container div#shuffle.amplitude-shuffle-off {
         background: url("/webassets/shuffle-off.svg"); }
       div#control-container div#repeat-container div#shuffle.amplitude-shuffle-on {
         background: url("/webassets/shuffle-on.svg"); }
+        div#control-container div#repeat-container .speed {
+     
+      cursor: pointer;
+      font-size: 23px;
+      float:left;
+      line-height: 0.9;
+      margin-left: 10px;
+      color:#00A0FF;
+       }
   @media all and (-ms-high-contrast: none) {
     div#control-container *::-ms-backdrop, div#control-container div#control-container {
       margin-top: 40px;
       float: none; } }
   div#control-container div#central-control-container {
-    width: 50%;
+    width: 40%;
     float: left; }
     div#control-container div#central-control-container div#central-controls {
       width: 130px;
@@ -407,7 +416,7 @@ div#control-container {
         margin-top: 10px;
         margin-left: -5px; }
   div#control-container div#volume-container {
-    width: 25%;
+    width: 30%;
     float: left;
     padding-top: 20px; }
     div#control-container div#volume-container div#shuffle-right {
@@ -438,11 +447,22 @@ div#control-container:after {
 
 /* Small only */
 @media screen and (max-width: 39.9375em) {
+  div#control-container div#central-control-container {
+    width: 50%;
+  }
+  div#control-container div#repeat-container {
+    width: 25%;
+  }
+  div#control-container div#volume-container {
+    width: 25%;
+  }
   div#amplitude-player div#repeat-container div#repeat {
     margin-left: auto;
     margin-right: auto;
     float: none; }
   div#amplitude-player div#repeat-container div#shuffle {
+    display: none; }
+  div#amplitude-player div#repeat-container div#repeat {
     display: none; }
   div#amplitude-player div#volume-container div.volume-controls {
     display: none; }
@@ -466,8 +486,8 @@ div#control-container:after {
     display: none;
   }
   div#amplitude-player div#repeat-container div#repeat {
-    margin-left: 10px;
-    margin-right: 20px;
+    margin-left: 0px;
+    margin-right: 10px;
     float: left; }
   div#amplitude-player div#volume-container div#shuffle-right {
     display: none; } }
@@ -688,6 +708,7 @@ div#large-visualization{
                 <div id="repeat-container">
                   <div class="amplitude-repeat" id="repeat"></div>
                   <div class="amplitude-shuffle amplitude-shuffle-off" id="shuffle"></div>
+                  <div class="speed" @click="changeSpeed">${speed}X</div>
                 </div>
   
                 <div id="central-control-container">
@@ -773,7 +794,23 @@ div#large-visualization{
         var app = new Vue({
         delimiters: ["${", "}"],
         el: "#app",
+        watch:{
+          speed(newSpeed){
+            Amplitude.setPlaybackSpeed(newSpeed);
+          }
+        },
         methods:{
+          changeSpeed(){
+            let currentSpeedIndex= this.speedOptions.indexOf(this.speed);
+            let nextIndex=0;
+            if(currentSpeedIndex===-1 || currentSpeedIndex===this.speedOptions.length-1){
+                nextIndex=0;
+            }else{
+              nextIndex=currentSpeedIndex+1;
+            }
+            this.speed=this.speedOptions[nextIndex];
+
+          },
           getSongsFromItems(items){
             return items.map(x=>{
                   let toReturn= {
@@ -888,6 +925,8 @@ div#large-visualization{
         
         },
         data:{
+          speed:1,
+          speedOptions:[0.75,1,1.1,1.25,1.5,1.75,2],
           socket:null,
           allItems: {{ .podcastItems }},
         }
