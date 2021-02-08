@@ -842,12 +842,24 @@ div#large-visualization{
               });
         },
         mounted(){
+          let volume=50;
+
+          if(localStorage?.playerVolume){
+            volume=parseInt(localStorage.playerVolume)
+          }
         
           Amplitude.init({
             "songs": this.songs,
             "start_song":0,
             "autoplay": true,
+            "volume":volume,
             "callbacks": {
+                  'volumechange':function(){
+                        volume=Amplitude.getVolume();
+                        if(localStorage){
+                          localStorage.playerVolume= volume.toString();
+                        }
+                  },
                   'play': function(){
                       document.getElementById('album-art').style.visibility = 'hidden';
                       document.getElementById('large-visualization').style.visibility = 'visible';
