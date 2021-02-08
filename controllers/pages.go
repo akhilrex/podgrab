@@ -102,11 +102,12 @@ func getItemsToPlay(itemId, podcastId string) []db.PodcastItem {
 
 	} else if podcastId != "" {
 		pod := service.GetPodcastById(podcastId)
-		for _, item := range pod.PodcastItems {
-			if item.DownloadStatus == db.Downloaded {
-				items = append(items, item)
-			}
-		}
+		// for _, item := range pod.PodcastItems {
+		// 	if item.DownloadStatus == db.Downloaded {
+		// 		items = append(items, item)
+		// 	}
+		// }
+		items = pod.PodcastItems
 	}
 	return items
 }
@@ -124,16 +125,17 @@ func PlayerPage(c *gin.Context) {
 		totalCount = 1
 	} else if hasPodcastId {
 		pod := service.GetPodcastById(podcastId)
-		for _, item := range pod.PodcastItems {
-			if item.DownloadStatus == db.Downloaded {
-				items = append(items, item)
-			}
-		}
+		// for _, item := range pod.PodcastItems {
+		// 	if item.DownloadStatus == db.Downloaded {
+		// 		items = append(items, item)
+		// 	}
+		// }
+		items = pod.PodcastItems
 		title = "Playing: " + pod.Title
 		totalCount = int64(len(items))
 	} else {
 		title = "Playing Latest Episodes"
-		if err := db.GetPaginatedPodcastItems(1, 10, true, &items, &totalCount); err != nil {
+		if err := db.GetPaginatedPodcastItems(1, 20, false, &items, &totalCount); err != nil {
 			fmt.Println(err.Error())
 		}
 	}

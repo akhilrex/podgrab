@@ -776,7 +776,7 @@ div#large-visualization{
         methods:{
           getSongsFromItems(items){
             return items.map(x=>{
-                  return {
+                  let toReturn= {
                     id:x.ID,
                     name:x.Title,
                     url:x.DownloadPath,
@@ -784,6 +784,10 @@ div#large-visualization{
                     artist:x.Podcast.Title,
                     album: new Date(x.PubDate.substr(0,10)).toDateString()
                   }
+                  if(!toReturn.url){
+                    toReturn.url=x.FileURL;
+                  }
+                  return toReturn;
                 });
           },
           getFormattedLastEpisodeDate(item){
@@ -838,6 +842,7 @@ div#large-visualization{
               });
         },
         mounted(){
+        
           Amplitude.init({
             "songs": this.songs,
             "start_song":0,

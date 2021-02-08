@@ -169,8 +169,7 @@
 
               <button
               class="button"
-              title="Play all downloaded episodes"
-              v-if="podcast.DownloadedEpisodesCount>0"
+              title="Play all episodes"
               @click="playPodcast(podcast.ID)"
             >
               <i class="fas fa-play"></i>
@@ -178,8 +177,8 @@
 
             <button
             class="button"
-            title="Add all downloaded episodes to existing player playlist"
-            v-if="podcast.DownloadedEpisodesCount>0 && playerExists"
+            title="Add all episodes to existing player playlist"
+            v-if="playerExists"
             @click="enquePodcast(podcast.ID)"
           >
             <i class="fas fa-plus"></i>
