@@ -17,9 +17,6 @@ import (
 )
 
 func main() {
-
-	//	os.Remove("./podgrab.db")
-
 	var err error
 	db.DB, err = db.Init()
 	if err != nil {
