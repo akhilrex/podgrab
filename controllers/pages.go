@@ -164,6 +164,7 @@ func BackupsPage(c *gin.Context) {
 
 	files, err := service.GetAllBackupFiles()
 	var allFiles []interface{}
+	setting := c.MustGet("setting").(*db.Setting)
 
 	for _, file := range files {
 		arr := strings.Split(file, string(os.PathSeparator))
@@ -185,6 +186,7 @@ func BackupsPage(c *gin.Context) {
 		c.HTML(http.StatusOK, "backups.html", gin.H{
 			"backups": allFiles,
 			"title":   "Backups",
+			"setting": setting,
 		})
 	} else {
 		c.JSON(http.StatusBadRequest, err)

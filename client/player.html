@@ -668,6 +668,9 @@ div#large-visualization{
     background-color: black;
     visibility: hidden;
   }
+  [v-cloak] {
+        display: none;
+      }
 
     </style>
   </head>
@@ -676,7 +679,7 @@ div#large-visualization{
       {{template "navbar" .}}
 
       <br />{{$setting := .setting}}
-      <div id="app">
+      <div id="app" v-cloak>
       <div id="blue-playlist-container">
 
         <!-- Amplitude Player -->

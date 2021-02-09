@@ -151,6 +151,7 @@ func setupSettings() gin.HandlerFunc {
 
 		setting := db.GetOrCreateSetting()
 		c.Set("setting", setting)
+		c.Writer.Header().Set("X-Clacks-Overhead", "GNU Terry Pratchett")
 
 		c.Next()
 	}

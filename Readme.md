@@ -93,10 +93,10 @@ Podgrab started a tool that I initially built to solve a specific problem I had.
 - Auto-download new episodes
 - Download on demand
 - Podcast Discovery - Search and Add podcasts using iTunes API
-- Full-fledged podcast player
-- Add using direct RSS feed url / OMPL import / Search
+- Full-fledged podcast player - Play downloaded files or stream from original source.
+- Add using direct RSS feed URL / OMPL import / Search
 - Basic Authentication
-- Existing episode detection
+- Existing episode file detection - Prevent re-downloading files if already present
 - Easy OPML import/export
 - Customizable episode names
 - Dark Mode
