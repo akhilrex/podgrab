@@ -31,15 +31,29 @@ func GetAllPodcastItems(podcasts *[]PodcastItem) error {
 	result := DB.Preload("Podcast").Order("pub_date desc").Find(&podcasts)
 	return result.Error
 }
-func GetPaginatedPodcastItems(page int, count int, downloadedOnly bool, podcasts *[]PodcastItem, total *int64) error {
+func GetPaginatedPodcastItems(page int, count int, downloadedOnly *bool, playedOnly *bool, fromDate time.Time, podcasts *[]PodcastItem, total *int64) error {
 	query := DB.Debug().Preload("Podcast")
-	if downloadedOnly {
-		query = query.Where("download_status=?", Downloaded)
+	if downloadedOnly != nil {
+		if *downloadedOnly {
+			query = query.Where("download_status=?", Downloaded)
+		} else {
+			query = query.Where("download_status!=?", Downloaded)
+		}
+	}
+	if playedOnly != nil {
+		if *playedOnly {
+			query = query.Where("is_played=?", 1)
+		} else {
+			query = query.Where("is_played=?", 0)
+		}
+	}
+	if (fromDate != time.Time{}) {
+		query = query.Where("pub_date>=?", fromDate)
 	}
 
 	result := query.Limit(count).Offset((page - 1) * count).Order("pub_date desc").Find(&podcasts)
 
-	DB.Model(&PodcastItem{}).Count(total)
+	query.Count(total)
 
 	return result.Error
 }

@@ -135,7 +135,7 @@ func PlayerPage(c *gin.Context) {
 		totalCount = int64(len(items))
 	} else {
 		title = "Playing Latest Episodes"
-		if err := db.GetPaginatedPodcastItems(1, 20, false, &items, &totalCount); err != nil {
+		if err := db.GetPaginatedPodcastItems(1, 20, nil, nil, time.Time{}, &items, &totalCount); err != nil {
 			fmt.Println(err.Error())
 		}
 	}
@@ -195,43 +195,60 @@ func BackupsPage(c *gin.Context) {
 }
 func AllEpisodesPage(c *gin.Context) {
 	var pagination Pagination
-	if c.ShouldBindQuery(&pagination) == nil {
-		var page, count int
-		if page = pagination.Page; page == 0 {
-			page = 1
-		}
-		if count = pagination.Count; count == 0 {
-			count = 10
-		}
-		var podcastItems []db.PodcastItem
-		var totalCount int64
-		if err := db.GetPaginatedPodcastItems(page, count, pagination.DownloadedOnly, &podcastItems, &totalCount); err == nil {
-			setting := c.MustGet("setting").(*db.Setting)
-			totalPages := math.Ceil(float64(totalCount) / float64(count))
-			nextPage, previousPage := 0, 0
-			if float64(page) < totalPages {
-				nextPage = page + 1
-			}
-			if page > 1 {
-				previousPage = page - 1
-			}
-			c.HTML(http.StatusOK, "episodes.html", gin.H{
-				"title":          "All Episodes",
-				"podcastItems":   podcastItems,
-				"setting":        setting,
-				"page":           page,
-				"count":          count,
-				"totalCount":     totalCount,
-				"totalPages":     totalPages,
-				"nextPage":       nextPage,
-				"previousPage":   previousPage,
-				"downloadedOnly": pagination.DownloadedOnly,
-			})
+	var page, count int
+	c.ShouldBindQuery(&pagination)
+	if page = pagination.Page; page == 0 {
+		page = 1
+	}
+	if count = pagination.Count; count == 0 {
+		count = 10
+	}
+
+	var filter EpisodesFilter
+	c.ShouldBindQuery(&filter)
+
+	var podcastItems []db.PodcastItem
+	var totalCount int64
+	//fmt.Printf("%+v\n", filter)
+	fromDate := time.Time{}
+	if filter.FromDate != "" {
+		parsedDate, err := time.Parse("2006-01-02", strings.Trim(filter.FromDate, "\""))
+		if err != nil {
+			fromDate = time.Time{}
 		} else {
-			c.JSON(http.StatusBadRequest, err)
+			fromDate = parsedDate
 		}
+	}
+
+	if err := db.GetPaginatedPodcastItems(page, count,
+		filter.DownloadedOnly, filter.PlayedOnly, fromDate,
+		&podcastItems, &totalCount); err == nil {
+
+		setting := c.MustGet("setting").(*db.Setting)
+		totalPages := math.Ceil(float64(totalCount) / float64(count))
+		nextPage, previousPage := 0, 0
+		if float64(page) < totalPages {
+			nextPage = page + 1
+		}
+		if page > 1 {
+			previousPage = page - 1
+		}
+		toReturn := gin.H{
+			"title":          "All Episodes",
+			"podcastItems":   podcastItems,
+			"setting":        setting,
+			"page":           page,
+			"count":          count,
+			"totalCount":     totalCount,
+			"totalPages":     totalPages,
+			"nextPage":       nextPage,
+			"previousPage":   previousPage,
+			"downloadedOnly": filter.DownloadedOnly,
+		}
+		fmt.Printf("%+v\n", totalCount)
+		c.HTML(http.StatusOK, "episodes.html", toReturn)
 	} else {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid request"})
+		c.JSON(http.StatusBadRequest, err)
 	}
 
 }

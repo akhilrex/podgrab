@@ -39,9 +39,14 @@ type SearchByIdQuery struct {
 }
 
 type Pagination struct {
-	Page           int  `uri:"page" query:"page" json:"page" form:"page"`
-	Count          int  `uri:"count" query:"count" json:"count" form:"count"`
-	DownloadedOnly bool `uri:"downloadedOnly" query:"downloadedOnly" json:"downloadedOnly" form:"downloadedOnly"`
+	Page  int `uri:"page" query:"page" json:"page" form:"page"`
+	Count int `uri:"count" query:"count" json:"count" form:"count"`
+}
+
+type EpisodesFilter struct {
+	DownloadedOnly *bool  `uri:"downloadedOnly" query:"downloadedOnly" json:"downloadedOnly" form:"downloadedOnly"`
+	PlayedOnly     *bool  `uri:"playedOnly" query:"playedOnly" json:"playedOnly" form:"playedOnly"`
+	FromDate       string `uri:"fromDate" query:"fromDate" json:"fromDate" form:"fromDate"`
 }
 
 type PatchPodcastItem struct {
