@@ -221,8 +221,8 @@
             row.remove();
           })
           .catch(function (error) {
-            if (error.response) {
-              Vue.toasted.show(error.response.data?.message, {
+            if (error.response && error.response.data && error.response.data.message) {
+              Vue.toasted.show(error.response.data.message, {
                 theme: "bubble",
                 type: "error",
                 position: "top-right",
@@ -247,8 +247,8 @@
             row.remove();
           })
           .catch(function (error) {
-            if (error.response) {
-              Vue.toasted.show(error.response.data?.message, {
+            if (error.response && error.response.data && error.response.data.message) {
+              Vue.toasted.show(error.response.data.message, {
                 theme: "bubble",
                 type: "error",
                 position: "top-right",
@@ -276,8 +276,9 @@
             row.remove();
           })
           .catch(function (error) {
-            if (error.response) {
-              Vue.toasted.show(error.response.data?.message, {
+            if (error.response && error.response.data && error.response.data.message) {
+
+              Vue.toasted.show(error.response.data.message, {
                 theme: "bubble",
                 type: "error",
                 position: "top-right",
@@ -306,8 +307,8 @@
             row.remove();
           })
           .catch(function (error) {
-            if (error.response) {
-              Vue.toasted.show(error.response.data?.message, {
+            if (error.response && error.response.data && error.response.data.message) {
+              Vue.toasted.show(error.response.data.message, {
                 theme: "bubble",
                 type: "error",
                 position: "top-right",

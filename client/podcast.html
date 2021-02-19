@@ -177,9 +177,10 @@ function downloadToDisk(id){
         row.remove();
     })
     .catch(function(error){
-        if(error.response){
+      if (error.response && error.response.data && error.response.data.message) {
 
-        Vue.toasted.show(error.response.data?.message, {
+
+        Vue.toasted.show(error.response.data.message, {
             theme: "bubble",
             position: "top-right",
             type: "error",

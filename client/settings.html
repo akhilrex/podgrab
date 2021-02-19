@@ -151,9 +151,10 @@ var app = new Vue({
             }
         })
         .catch(function(error){
-            if(error.response){
+            if (error.response && error.response.data && error.response.data.message) {
 
-            Vue.toasted.show(error.response.data?.message, {
+
+            Vue.toasted.show(error.response.data.message, {
                 theme: "bubble",
                 type: "error",
                 position: "top-right",

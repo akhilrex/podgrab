@@ -934,7 +934,7 @@ div#large-visualization{
         },
         mounted(){
           var volume=50;
-          if(localStorage?.playerVolume){
+          if(localStorage && localStorage.playerVolume){
             volume=parseInt(localStorage.playerVolume)
           }
           const self=this;

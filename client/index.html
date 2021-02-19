@@ -321,11 +321,11 @@
           playPodcast(id){openPlayer("",id)},
         },
         mounted(){
-          if(localStorage?.sortOrder){
+          if(localStorage && localStorage.sortOrder){
             this.sortOrder=localStorage.sortOrder;
             this.sortPodcasts(this.sortOrder);
           }
-          if(localStorage?.layout){
+          if(localStorage && localStorage.layout){
             this.layout=localStorage.layout;
           }else{
               this.layout='list';
@@ -436,8 +436,9 @@
             );
           })
           .catch(function (error) {
-            if (error.response) {
-              Vue.toasted.show(error.response.data?.message, {
+            if (error.response && error.response.data && error.response.data.message) {
+
+              Vue.toasted.show(error.response.data.message, {
                 theme: "bubble",
                 type: "error",
                 position: "top-right",
@@ -472,8 +473,9 @@
             
           })
           .catch(function (error) {
-            if (error.response) {
-              Vue.toasted.show(error.response.data?.message, {
+            if (error.response && error.response.data && error.response.data.message) {
+
+              Vue.toasted.show(error.response.data.message, {
                 theme: "bubble",
                 type: "error",
                 position: "top-right",
@@ -507,8 +509,9 @@
             });
           })
           .catch(function (error) {
-            if (error.response) {
-              Vue.toasted.show(error.response.data?.message, {
+            if (error.response && error.response.data && error.response.data.message) {
+
+              Vue.toasted.show(error.response.data.message, {
                 theme: "bubble",
                 type: "error",
                 position: "top-right",
@@ -542,8 +545,9 @@
             app.removePodcast(id)
           })
           .catch(function (error) {
-            if (error.response) {
-              Vue.toasted.show(error.response.data?.message, {
+            if (error.response && error.response.data && error.response.data.message) {
+
+              Vue.toasted.show(error.response.data.message, {
                 theme: "bubble",
                 type: "error",
                 position: "top-right",
