@@ -236,3 +236,29 @@ func UnlockMissedJobs() {
 		}
 	}
 }
+
+func GetAllTags(sorting string) (*[]Tag, error) {
+	var tags []Tag
+	if sorting == "" {
+		sorting = "created_at"
+	}
+	result := DB.Debug().Order(sorting).Find(&tags)
+	return &tags, result.Error
+}
+
+func GetTagById(id string) (*Tag, error) {
+	var tag Tag
+	result := DB.Preload(clause.Associations).
+		First(&tag, "id=?", id)
+
+	return &tag, result.Error
+}
+
+func CreateTag(tag *Tag) error {
+	tx := DB.Omit("Podcasts").Create(&tag)
+	return tx.Error
+}
+func UpdateTag(tag *Tag) error {
+	tx := DB.Omit("Podcast").Save(&tag)
+	return tx.Error
+}

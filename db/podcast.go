@@ -21,6 +21,8 @@ type Podcast struct {
 
 	PodcastItems []PodcastItem
 
+	Tag []*Tag `gorm:"many2many:podcast_tags;"`
+
 	DownloadedEpisodesCount  int `gorm:"-"`
 	DownloadingEpisodesCount int `gorm:"-"`
 	AllEpisodesCount         int `gorm:"-"`
@@ -83,6 +85,13 @@ type JobLock struct {
 	Date     time.Time
 	Name     string
 	Duration int
+}
+
+type Tag struct {
+	Base
+	Label       string
+	Description string     `gorm:"type:text"`
+	Podcasts    []*Podcast `gorm:"many2many:podcast_tags;"`
 }
 
 func (lock *JobLock) IsLocked() bool {
