@@ -59,6 +59,45 @@ func Download(link string, episodeTitle string, podcastName string, prefix strin
 	return finalPath, nil
 
 }
+
+func DownloadImage(link string, episodeId string, podcastName string) (string, error) {
+	if link == "" {
+		return "", errors.New("Download path empty")
+	}
+	client := httpClient()
+	resp, err := client.Get(link)
+	if err != nil {
+		Logger.Errorw("Error getting response: "+link, err)
+		return "", err
+	}
+
+	fileName := getFileName(link, episodeId, ".jpg")
+	folder := createDataFolderIfNotExists(podcastName)
+	imageFolder := createFolder("images", folder)
+	finalPath := path.Join(imageFolder, fileName)
+
+	if _, err := os.Stat(finalPath); !os.IsNotExist(err) {
+		changeOwnership(finalPath)
+		return finalPath, nil
+	}
+
+	file, err := os.Create(finalPath)
+	if err != nil {
+		Logger.Errorw("Error creating file"+link, err)
+		return "", err
+	}
+	defer resp.Body.Close()
+	_, erra := io.Copy(file, resp.Body)
+	//fmt.Println(size)
+	defer file.Close()
+	if erra != nil {
+		Logger.Errorw("Error saving file"+link, err)
+		return "", erra
+	}
+	changeOwnership(finalPath)
+	return finalPath, nil
+
+}
 func changeOwnership(path string) {
 	uid, err1 := strconv.Atoi(os.Getenv("PUID"))
 	gid, err2 := strconv.Atoi(os.Getenv("PGID"))

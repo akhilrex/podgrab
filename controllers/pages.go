@@ -26,6 +26,7 @@ type SettingModel struct {
 	AppendDateToFileName          bool `form:"appendDateToFileName" json:"appendDateToFileName" query:"appendDateToFileName"`
 	AppendEpisodeNumberToFileName bool `form:"appendEpisodeNumberToFileName" json:"appendEpisodeNumberToFileName" query:"appendEpisodeNumberToFileName"`
 	DarkMode                      bool `form:"darkMode" json:"darkMode" query:"darkMode"`
+	DownloadEpisodeImages         bool `form:"downloadEpisodeImages" json:"downloadEpisodeImages" query:"downloadEpisodeImages"`
 }
 
 func AddPage(c *gin.Context) {
