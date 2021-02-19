@@ -52,6 +52,8 @@ type PodcastItem struct {
 	IsPlayed bool `gorm:"default:false"`
 
 	BookmarkDate time.Time
+
+	LocalImage string
 }
 
 type DownloadStatus int
@@ -71,6 +73,7 @@ type Setting struct {
 	AppendDateToFileName          bool `gorm:"default:false"`
 	AppendEpisodeNumberToFileName bool `gorm:"default:false"`
 	DarkMode                      bool `gorm:"default:false"`
+	DownloadEpisodeImages         bool `gorm:"default:false"`
 }
 type Migration struct {
 	Base

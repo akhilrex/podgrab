@@ -148,13 +148,14 @@ Distributed under the MIT License. See `LICENSE` for more information.
 - [x] Append Date to filename
 - [x] iTunes Search
 - [x] Existing episodes detection (Will not redownload if files exist even with a fresh install)
-- [x] Rudimentary downloading/downloaded indicator
+- [x] Downloading/downloaded indicator
 - [x] Played/Unplayed Flag
 - [x] OPML import
 - [x] OPML export
 - [x] In built podcast player
 - [ ] Set ID3 tags if not set 
 - [ ] Filtering and Sorting options
+- [ ] Native installer for Windows/Linux/MacOS
 
 
 

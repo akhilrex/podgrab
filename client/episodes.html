@@ -65,7 +65,7 @@
           <img
             onerror="onImageError(this)"
             class="u-full-width"
-            src="{{ .Image }}"
+            {{if .LocalImage }} src="/{{ .LocalImage }}" {{ else }} src="{{ .Image }}"  {{end}}
             alt="{{ .Title }}"
             lazy="lazy"
           />

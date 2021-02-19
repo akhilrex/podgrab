@@ -867,11 +867,15 @@ div#large-visualization{
           },
           getSongsFromItems(items){
             return items.map(x=>{
+                  var image = x.LocalImage;
+                  if(!image){
+                    image=x.Image;
+                  }
                   var toReturn= {
                     id:x.ID,
                     name:x.Title,
                     url:x.DownloadPath,
-                    cover_art_url:x.Image,
+                    cover_art_url:image,
                     artist:x.Podcast.Title,
                     album: new Date(x.PubDate.substr(0,10)).toDateString()
                   }
