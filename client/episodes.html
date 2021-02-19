@@ -260,7 +260,7 @@
         return false;
       }
       function changePlayedStatus(id, status) {
-        let endpoint = status ? "markPlayed" : "markUnplayed";
+        var endpoint = status ? "markPlayed" : "markUnplayed";
         axios
           .get("/podcastitems/" + id + "/" + endpoint, {
             isPlayed: status,
@@ -289,7 +289,7 @@
         return false;
       }
       function changeBookmarkStatus(id, status) {
-        let endpoint = status ? "bookmark" : "unbookmark";
+        var endpoint = status ? "bookmark" : "unbookmark";
         axios
           .get("/podcastitems/" + id + "/" + endpoint, {
             isPlayed: status,

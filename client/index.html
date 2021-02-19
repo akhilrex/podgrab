@@ -261,7 +261,7 @@
             this.socket.send(getWebsocketMessage("Enqueue",`{"podcastId":"${id}"}`))
           },
           sortPodcasts(order){
-              let compareFunction;
+              var compareFunction;
               switch(order){
                 case "dateAdded-asc":compareFunction=(a,b)=>Date.parse(a.CreatedAt)-Date.parse(b.CreatedAt);break;
                 case "dateAdded-desc":compareFunction=(a,b)=>Date.parse(b.CreatedAt)-Date.parse(a.CreatedAt);break;
@@ -298,7 +298,7 @@
               this.podcasts.sort(compareFunction)
           },
           getEpisodeCountTooltip(podcast){
-            let title=`${podcast.DownloadedEpisodesCount} episodes downloaded out of total ${podcast.AllEpisodesCount} episodes`
+            var title=`${podcast.DownloadedEpisodesCount} episodes downloaded out of total ${podcast.AllEpisodesCount} episodes`
             if(podcast.DownloadingEpisodesCount){
                     title+= '\n'+podcast.DownloadingEpisodesCount+' episodes in the queue.'
             
@@ -308,7 +308,7 @@
           getFormattedLastEpisodeDate(podcast){
            const options={month:"short", day:"numeric", year:"numeric"}
            //todo: this is a really dirty hack which needs to be fixed when we work on the episode page
-           let dt=new Date(Date.parse(podcast.LastEpisode.substr(0,10)));
+           var dt=new Date(Date.parse(podcast.LastEpisode.substr(0,10)));
            return dt.toDateString()
           },
           downloadAllEpisodes(id) { downloadAllEpisodes(id);},
