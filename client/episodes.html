@@ -65,7 +65,7 @@
           <img
             onerror="onImageError(this)"
             class="u-full-width"
-            src="{{ .Image }}"
+            {{if .LocalImage }} src="/{{ .LocalImage }}" {{ else }} src="{{ .Image }}"  {{end}}
             alt="{{ .Title }}"
             lazy="lazy"
           />
@@ -221,8 +221,8 @@
             row.remove();
           })
           .catch(function (error) {
-            if (error.response) {
-              Vue.toasted.show(error.response.data?.message, {
+            if (error.response && error.response.data && error.response.data.message) {
+              Vue.toasted.show(error.response.data.message, {
                 theme: "bubble",
                 type: "error",
                 position: "top-right",
@@ -247,8 +247,8 @@
             row.remove();
           })
           .catch(function (error) {
-            if (error.response) {
-              Vue.toasted.show(error.response.data?.message, {
+            if (error.response && error.response.data && error.response.data.message) {
+              Vue.toasted.show(error.response.data.message, {
                 theme: "bubble",
                 type: "error",
                 position: "top-right",
@@ -260,7 +260,7 @@
         return false;
       }
       function changePlayedStatus(id, status) {
-        let endpoint = status ? "markPlayed" : "markUnplayed";
+        var endpoint = status ? "markPlayed" : "markUnplayed";
         axios
           .get("/podcastitems/" + id + "/" + endpoint, {
             isPlayed: status,
@@ -276,8 +276,9 @@
             row.remove();
           })
           .catch(function (error) {
-            if (error.response) {
-              Vue.toasted.show(error.response.data?.message, {
+            if (error.response && error.response.data && error.response.data.message) {
+
+              Vue.toasted.show(error.response.data.message, {
                 theme: "bubble",
                 type: "error",
                 position: "top-right",
@@ -289,7 +290,7 @@
         return false;
       }
       function changeBookmarkStatus(id, status) {
-        let endpoint = status ? "bookmark" : "unbookmark";
+        var endpoint = status ? "bookmark" : "unbookmark";
         axios
           .get("/podcastitems/" + id + "/" + endpoint, {
             isPlayed: status,
@@ -306,8 +307,8 @@
             row.remove();
           })
           .catch(function (error) {
-            if (error.response) {
-              Vue.toasted.show(error.response.data?.message, {
+            if (error.response && error.response.data && error.response.data.message) {
+              Vue.toasted.show(error.response.data.message, {
                 theme: "bubble",
                 type: "error",
                 position: "top-right",
@@ -338,6 +339,15 @@
               return
             }
            socket.send(getWebsocketMessage("Enqueue",`{"itemId":"${id}"}`))
+          }
+          function enquePodcast(id){
+            if(!socket){
+              return
+            }
+            socket.send(getWebsocketMessage("Enqueue",`{"podcastId":"${id}"}`))
+          }
+          function playPodcast(id){
+            openPlayer("",id)
           }
     </script>
   </body>

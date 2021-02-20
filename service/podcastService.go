@@ -306,6 +306,33 @@ func SetPodcastItemAsQueuedForDownload(id string) error {
 	return db.UpdatePodcastItem(&podcastItem)
 }
 
+func DownloadMissingImages() error {
+	setting := db.GetOrCreateSetting()
+	if !setting.DownloadEpisodeImages {
+		fmt.Println("No Need To Download Images")
+		return nil
+	}
+	items, err := db.GetAllPodcastItemsWithoutImage()
+	if err != nil {
+		return err
+	}
+	for _, item := range *items {
+		downloadImageLocally(item)
+	}
+	return nil
+}
+
+func downloadImageLocally(podcastItem db.PodcastItem) error {
+	path, err := DownloadImage(podcastItem.Image, podcastItem.ID, podcastItem.Podcast.Title)
+	if err != nil {
+		return err
+	}
+
+	podcastItem.LocalImage = path
+
+	return db.UpdatePodcastItem(&podcastItem)
+}
+
 func SetPodcastItemBookmarkStatus(id string, bookmark bool) error {
 	var podcastItem db.PodcastItem
 	err := db.GetPodcastItemById(id, &podcastItem)
@@ -447,6 +474,10 @@ func DeleteEpisodeFile(podcastItemId string) error {
 		return err
 	}
 
+	if podcastItem.LocalImage != "" {
+		go DeleteFile(podcastItem.LocalImage)
+	}
+
 	return SetPodcastItemAsNotDownloaded(podcastItem.ID, db.Deleted)
 }
 func DownloadSingleEpisode(podcastItemId string) error {
@@ -464,6 +495,9 @@ func DownloadSingleEpisode(podcastItemId string) error {
 	url, err := Download(podcastItem.FileURL, podcastItem.Title, podcastItem.Podcast.Title, GetPodcastPrefix(&podcastItem, setting))
 	if err != nil {
 		return err
+	}
+	if setting.DownloadEpisodeImages {
+		go downloadImageLocally(podcastItem)
 	}
 	return SetPodcastItemAsDownloaded(podcastItem.ID, url)
 }
@@ -527,6 +561,10 @@ func DeletePodcast(id string, deleteFiles bool) error {
 	for _, item := range podcastItems {
 		if deleteFiles {
 			DeleteFile(item.DownloadPath)
+			if item.LocalImage != "" {
+				DeleteFile(item.LocalImage)
+			}
+
 		}
 		db.DeletePodcastItemById(item.ID)
 
@@ -577,7 +615,7 @@ func GetSearchFromItunes(pod model.ItunesSingleResult) *model.CommonSearchResult
 	return p
 }
 
-func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload bool, appendDateToFileName bool, appendEpisodeNumberToFileName bool, darkMode bool) error {
+func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload bool, appendDateToFileName bool, appendEpisodeNumberToFileName bool, darkMode bool, downloadEpisodeImages bool) error {
 	setting := db.GetOrCreateSetting()
 
 	setting.AutoDownload = autoDownload
@@ -586,6 +624,7 @@ func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload b
 	setting.AppendDateToFileName = appendDateToFileName
 	setting.AppendEpisodeNumberToFileName = appendEpisodeNumberToFileName
 	setting.DarkMode = darkMode
+	setting.DownloadEpisodeImages = downloadEpisodeImages
 
 	return db.UpdateSettings(setting)
 }

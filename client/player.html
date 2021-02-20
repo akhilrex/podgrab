@@ -809,7 +809,7 @@ div#large-visualization{
           removeSongTime(songId){
           
           if(localStorage){                              
-            let songTimes=localStorage.songTimes;                 
+            var songTimes=localStorage.songTimes;                 
             if(!songTimes){
                 songTimes={};
             }else{
@@ -825,7 +825,7 @@ div#large-visualization{
           ,saveSongTime(songId,time){
           
             if(localStorage){                              
-              let songTimes=localStorage.songTimes;                 
+              var songTimes=localStorage.songTimes;                 
               if(!songTimes){
                   songTimes={};
               }else{
@@ -840,8 +840,8 @@ div#large-visualization{
           getSavedSongTime(){
            
             if(localStorage){
-              let song=Amplitude.getActiveSongMetadata();  
-              let songTimes=localStorage.songTimes;                 
+              var song=Amplitude.getActiveSongMetadata();  
+              var songTimes=localStorage.songTimes;                 
               if(!songTimes){
                   songTimes={};
               }else{
@@ -855,8 +855,8 @@ div#large-visualization{
             return 0;
           },
           changeSpeed(){
-            let currentSpeedIndex= this.speedOptions.indexOf(this.speed);
-            let nextIndex=0;
+            var currentSpeedIndex= this.speedOptions.indexOf(this.speed);
+            var nextIndex=0;
             if(currentSpeedIndex===-1 || currentSpeedIndex===this.speedOptions.length-1){
                 nextIndex=0;
             }else{
@@ -867,11 +867,15 @@ div#large-visualization{
           },
           getSongsFromItems(items){
             return items.map(x=>{
-                  let toReturn= {
+                  var image = x.LocalImage;
+                  if(!image){
+                    image=x.Image;
+                  }
+                  var toReturn= {
                     id:x.ID,
                     name:x.Title,
                     url:x.DownloadPath,
-                    cover_art_url:x.Image,
+                    cover_art_url:image,
                     artist:x.Podcast.Title,
                     album: new Date(x.PubDate.substr(0,10)).toDateString()
                   }
@@ -882,7 +886,7 @@ div#large-visualization{
                 });
           },
           getFormattedLastEpisodeDate(item){
-           let dt=new Date(Date.parse(item.PubDate.substr(0,10)));
+           var dt=new Date(Date.parse(item.PubDate.substr(0,10)));
            return dt.toDateString()
           },
           formatDuration(total) {
@@ -933,8 +937,8 @@ div#large-visualization{
               });
         },
         mounted(){
-          let volume=50;
-          if(localStorage?.playerVolume){
+          var volume=50;
+          if(localStorage && localStorage.playerVolume){
             volume=parseInt(localStorage.playerVolume)
           }
           const self=this;
@@ -961,7 +965,7 @@ div#large-visualization{
               // },
                 'timeupdate':function(){
                     
-                    let secs=Math.floor(Amplitude.getSongPlayedSeconds());
+                    var secs=Math.floor(Amplitude.getSongPlayedSeconds());
                     if(secs%10===0){
                       song=Amplitude.getActiveSongMetadata();    
                       if(Amplitude.getSongPlayedPercentage()>20){
@@ -1025,7 +1029,7 @@ div#large-visualization{
        
 
 
-let songElements = document.getElementsByClassName('song');
+var songElements = document.getElementsByClassName('song');
 
 for( var i = 0; i < songElements.length; i++ ){
 	songElements[i].addEventListener('click', function(){
@@ -1033,11 +1037,11 @@ for( var i = 0; i < songElements.length; i++ ){
 	});
 }
 
-let markedAsPlayed=[];
+var markedAsPlayed=[];
 
 
 function markSongAsPlayed(id) {
-        let endpoint = "markPlayed";
+        var endpoint = "markPlayed";
         if(markedAsPlayed.indexOf(id)!==-1){
           return;
         }

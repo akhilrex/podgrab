@@ -96,6 +96,13 @@ func UpdateLastEpisodeDateForPodcast(podcastId string, lastEpisode time.Time) er
 	return result.Error
 }
 
+func GetAllPodcastItemsWithoutImage() (*[]PodcastItem, error) {
+	var podcastItems []PodcastItem
+	result := DB.Debug().Preload(clause.Associations).Where("local_image is ?", nil).Where("image != ?", "").Where("download_status=?", Downloaded).Order("created_at desc").Find(&podcastItems)
+	//fmt.Println("To be downloaded : " + string(len(podcastItems)))
+	return &podcastItems, result.Error
+}
+
 func GetAllPodcastItemsToBeDownloaded() (*[]PodcastItem, error) {
 	var podcastItems []PodcastItem
 	result := DB.Debug().Preload(clause.Associations).Where("download_status=?", NotDownloaded).Find(&podcastItems)

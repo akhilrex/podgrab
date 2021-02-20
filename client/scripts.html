@@ -10,24 +10,24 @@
   };
   const limit = 300;
   function checkUseMore() {
-    let elements = document.getElementsByClassName("useMore");
+    var elements = document.getElementsByClassName("useMore");
 
-    for (let index = 0; index < elements.length; index++) {
+    for (var index = 0; index < elements.length; index++) {
       const element = elements[index];
-      let display = element.style.display;
-      let originalText = element.textContent;
+      var display = element.style.display;
+      var originalText = element.textContent;
       if (originalText.length <= limit) {
         continue;
       }
-      let newText = originalText.substr(0, limit);
+      var newText = originalText.substr(0, limit);
 
-      let newElement = document.createElement(element.tagName);
+      var newElement = document.createElement(element.tagName);
       newElement.textContent = newText;
 
       newElement.classList.add("short-version");
       element.classList.add("long-version");
 
-      let more = document.createElement("a");
+      var more = document.createElement("a");
       more.textContent = " show more";
       more.style.cursor = "pointer";
       more.onclick = function () {
@@ -35,7 +35,7 @@
         newElement.style.display = "none";
       };
 
-      let less = document.createElement("a");
+      var less = document.createElement("a");
       less.textContent = " show less";
       less.style.cursor = "pointer";
       less.onclick = function () {
@@ -53,7 +53,7 @@
   checkUseMore();
 
   function openPlayer(itemId, podcastId) {
-    let url = "/player?";
+    var url = "/player?";
     if (itemId) {
       url += "&itemId=" + itemId;
     }
@@ -66,7 +66,7 @@
   function getIdentifier() {
     if(localStorage){
     if (localStorage.identifier) {
-      return localStorage?.identifier;
+      return localStorage.identifier;
     }
     var id = +new Date();
     localStorage.identifier = id;
@@ -103,5 +103,148 @@
     //     console.log('Message from server ', event.data);
     // });
   }
+  function downloadAllEpisodes(id) {
+        var confirmed = confirm(
+          "Are you sure you want to download all episodes of this podcast?"
+        );
+        if (!confirmed) {
+          return false;
+        }
+        axios
+          .get("/podcasts/" + id + "/download")
+          .then(function (response) {
+            Vue.toasted.show(
+              "All episodes of this podcast have been enqueued to download.",
+              {
+                theme: "bubble",
+                type: "info",
+                position: "top-right",
+                duration: 5000,
+              }
+            );
+          })
+          .catch(function (error) {
+            if (error.response && error.response.data && error.response.data.message) {
+
+              Vue.toasted.show(error.response.data.message, {
+                theme: "bubble",
+                type: "error",
+                position: "top-right",
+                duration: 5000,
+              });
+            }
+          })
+          .then(function () {});
+        return false;
+      }
+      function deletePodcast(id,onSuccess) {
+        if (typeof id !== 'string'){
+            id= id.getAttribute('data-id')
+        }
+        console.log(id)
+        var confirmed = confirm(
+          "Are you sure you want to delete this podcast and all files?"
+        );
+        if (!confirmed) {
+          return false;
+        }
+        axios
+          .delete("/podcasts/" + id)
+          .then(function (response) {
+            Vue.toasted.show("Podcast deleted successfully.", {
+              theme: "bubble",
+              type: "success",
+              position: "top-right",
+              duration: 5000,
+            });
+            app.removePodcast(id)
+            
+          })
+          .catch(function (error) {
+            if (error.response && error.response.data && error.response.data.message) {
+
+              Vue.toasted.show(error.response.data.message, {
+                theme: "bubble",
+                type: "error",
+                position: "top-right",
+                duration: 5000,
+              });
+            }
+          })
+          .then(function () {});
+        return false;
+      }
+
+      function deletePodcastEpisodes(id) {
+        if (typeof id !== 'string'){
+            id= id.getAttribute('data-id')
+        }
+        console.log(id);
+        var confirmed = confirm(
+          "Are you sure you want to delete all episodes of this podcast?"
+        );
+        if (!confirmed) {
+          return false;
+        }
+        axios
+          .delete("/podcasts/" + id + "/items")
+          .then(function (response) {
+            Vue.toasted.show("Podcast Episodes deleted successfully.", {
+              theme: "bubble",
+              type: "success",
+              position: "top-right",
+              duration: 5000,
+            });
+          })
+          .catch(function (error) {
+            if (error.response && error.response.data && error.response.data.message) {
+
+              Vue.toasted.show(error.response.data.message, {
+                theme: "bubble",
+                type: "error",
+                position: "top-right",
+                duration: 5000,
+              });
+            }
+          })
+          .then(function () {});
+        return false;
+      }
+      function deleteOnlyPodcast(id) {
+        if (typeof id !== 'string'){
+            id= id.getAttribute('data-id')
+        }
+        console.log(id);
+        var confirmed = confirm(
+          "Are you sure you want to delete this podcast (without deleting the files)?"
+        );
+        if (!confirmed) {
+          return false;
+        }
+        axios
+          .delete("/podcasts/" + id + "/podcast")
+          .then(function (response) {
+            Vue.toasted.show("Podcast deleted successfully.", {
+              theme: "bubble",
+              type: "success",
+              position: "top-right",
+              duration: 5000,
+            });
+            app.removePodcast(id)
+          })
+          .catch(function (error) {
+            if (error.response && error.response.data && error.response.data.message) {
+
+              Vue.toasted.show(error.response.data.message, {
+                theme: "bubble",
+                type: "error",
+                position: "top-right",
+                duration: 5000,
+              });
+            }
+          })
+          .then(function () {});
+        return false;
+      }
 </script>
 {{end}}

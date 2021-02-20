@@ -82,6 +82,11 @@
             <input type="checkbox" name="darkMode" v-model="darkMode">
             <span class="label-body">Use Dark Mode</span>
         </label>
+        <label for="downloadEpisodeImages">
+            <input type="checkbox" name="downloadEpisodeImages" v-model="downloadEpisodeImages">
+            <span class="label-body">Download Episode Images with files</span>
+        </label>
+        
       
         <input type="submit" value="Save" class="button">
     </form>
@@ -135,7 +140,8 @@ var app = new Vue({
             autoDownload:self.autoDownload,
             appendDateToFileName:self.appendDateToFileName,
             appendEpisodeNumberToFileName:self.appendEpisodeNumberToFileName,
-            darkMode:self.darkMode
+            darkMode:self.darkMode,
+            downloadEpisodeImages:self.downloadEpisodeImages
 
         })
         .then(function(response){
@@ -151,9 +157,10 @@ var app = new Vue({
             }
         })
         .catch(function(error){
-            if(error.response){
+            if (error.response && error.response.data && error.response.data.message) {
 
-            Vue.toasted.show(error.response.data?.message, {
+
+            Vue.toasted.show(error.response.data.message, {
                 theme: "bubble",
                 type: "error",
                 position: "top-right",
@@ -175,7 +182,8 @@ var app = new Vue({
     appendDateToFileName: {{ .setting.AppendDateToFileName }},
     appendEpisodeNumberToFileName:{{ .setting.AppendEpisodeNumberToFileName }},
     darkMode:{{ .setting.DarkMode }},
-    originalThemeSetting:{{ .setting.DarkMode }}
+    originalThemeSetting:{{ .setting.DarkMode }},
+    downloadEpisodeImages:{{.setting.DownloadEpisodeImages }},
   },
 
 })
