@@ -142,6 +142,31 @@ div#overlay{
 <div></div>
   </a>
   <h1>{{ .title }}</h1>
+  {{if .podcastId }}
+  <button
+  class="button"
+  title="Download all episode files"
+  onclick="downloadAllEpisodes({{ .podcastId }})"
+>
+  <i class="fas fa-download"></i>
+</button>
+
+<button
+class="button"
+title="Play all episodes"
+onclick="playPodcast({{ .podcastId }})"
+>
+<i class="fas fa-play"></i>
+</button>
+
+<button
+class="button  button-enqueue"
+title="Add all episodes to existing player playlist"
+onclick="enquePodcast({{ .podcastId }})"
+>
+<i class="fas fa-plus"></i>
+</button>
+  {{end}}
 </section>
 <nav class="navbar">
     <div class="container">

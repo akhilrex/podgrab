@@ -340,6 +340,15 @@
             }
            socket.send(getWebsocketMessage("Enqueue",`{"itemId":"${id}"}`))
           }
+          function enquePodcast(id){
+            if(!socket){
+              return
+            }
+            socket.send(getWebsocketMessage("Enqueue",`{"podcastId":"${id}"}`))
+          }
+          function playPodcast(id){
+            openPlayer("",id)
+          }
     </script>
   </body>
 </html>

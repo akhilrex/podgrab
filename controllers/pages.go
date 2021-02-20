@@ -82,6 +82,7 @@ func PodcastPage(c *gin.Context) {
 					"nextPage":       nextPage,
 					"previousPage":   previousPage,
 					"downloadedOnly": false,
+					"podcastId":      searchByIdQuery.Id,
 				})
 			} else {
 				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
