@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/akhilrex/podgrab/model"
@@ -186,6 +187,26 @@ func GetPodcastItemById(c *gin.Context) {
 		err := db.GetPodcastItemById(searchByIdQuery.Id, &podcast)
 		fmt.Println(err)
 		c.JSON(200, podcast)
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+	}
+}
+
+func GetPodcastItemImageById(c *gin.Context) {
+	var searchByIdQuery SearchByIdQuery
+
+	if c.ShouldBindUri(&searchByIdQuery) == nil {
+
+		var podcast db.PodcastItem
+
+		err := db.GetPodcastItemById(searchByIdQuery.Id, &podcast)
+		if err == nil {
+			if _, err = os.Stat(podcast.LocalImage); os.IsNotExist(err) {
+				c.Redirect(301, podcast.Image)
+			} else {
+				c.Redirect(302, fmt.Sprintf("/%s", podcast.LocalImage))
+			}
+		}
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 	}

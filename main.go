@@ -115,6 +115,7 @@ func main() {
 
 	router.GET("/podcastitems", controllers.GetAllPodcastItems)
 	router.GET("/podcastitems/:id", controllers.GetPodcastItemById)
+	router.GET("/podcastitems/:id/image", controllers.GetPodcastItemImageById)
 	router.GET("/podcastitems/:id/markUnplayed", controllers.MarkPodcastItemAsUnplayed)
 	router.GET("/podcastitems/:id/markPlayed", controllers.MarkPodcastItemAsPlayed)
 	router.GET("/podcastitems/:id/bookmark", controllers.BookmarkPodcastItem)
