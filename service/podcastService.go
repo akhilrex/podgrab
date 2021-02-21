@@ -632,3 +632,22 @@ func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload b
 func UnlockMissedJobs() {
 	db.UnlockMissedJobs()
 }
+
+func AddTag(label, description string) (db.Tag, error) {
+
+	tag, err := db.GetTagByLabel(label)
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+
+		tag := db.Tag{
+			Label:       label,
+			Description: description,
+		}
+
+		err = db.CreateTag(&tag)
+		return tag, err
+	}
+
+	return *tag, &model.TagAlreadyExistsError{Label: label}
+
+}

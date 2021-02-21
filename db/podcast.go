@@ -21,7 +21,7 @@ type Podcast struct {
 
 	PodcastItems []PodcastItem
 
-	Tag []*Tag `gorm:"many2many:podcast_tags;"`
+	Tags []*Tag `gorm:"many2many:podcast_tags;"`
 
 	DownloadedEpisodesCount  int `gorm:"-"`
 	DownloadingEpisodesCount int `gorm:"-"`
