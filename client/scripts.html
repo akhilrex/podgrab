@@ -246,5 +246,23 @@
           .then(function () {});
         return false;
       }
+
+      function showError(error){
+        var message="An error has occured."
+        if(typeof(error)==="string"){
+          message=error;
+        }
+        if (error.response && error.response.data && error.response.data.message) {
+          message=error.response.data.message;
+        }
+        console.log(error)
+          Vue.toasted.show(message, {
+            theme: "bubble",
+            type: "error",
+            position: "top-right",
+            duration: 5000,
+          });
+          }
+      
 </script>
 {{end}}

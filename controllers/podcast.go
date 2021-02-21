@@ -39,6 +39,11 @@ type SearchByIdQuery struct {
 	Id string `binding:"required" uri:"id" json:"id" form:"id"`
 }
 
+type AddRemoveTagQuery struct {
+	Id    string `binding:"required" uri:"id" json:"id" form:"id"`
+	TagId string `binding:"required" uri:"tagId" json:"tagId" form:"tagId"`
+}
+
 type Pagination struct {
 	Page  int `uri:"page" query:"page" json:"page" form:"page"`
 	Count int `uri:"count" query:"count" json:"count" form:"count"`
@@ -57,6 +62,10 @@ type PatchPodcastItem struct {
 
 type AddPodcastData struct {
 	Url string `binding:"required" form:"url" json:"url"`
+}
+type AddTagData struct {
+	Label       string `binding:"required" form:"label" json:"label"`
+	Description string `form:"description" json:"description"`
 }
 
 func GetAllPodcasts(c *gin.Context) {
@@ -317,6 +326,74 @@ func AddPodcast(c *gin.Context) {
 	} else {
 		log.Println(err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+	}
+}
+
+func GetAllTags(c *gin.Context) {
+	tags, err := db.GetAllTags("")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+	} else {
+		c.JSON(200, tags)
+	}
+
+}
+
+func GetTagById(c *gin.Context) {
+	var searchByIdQuery SearchByIdQuery
+	if c.ShouldBindUri(&searchByIdQuery) == nil {
+		tag, err := db.GetTagById(searchByIdQuery.Id)
+		if err == nil {
+			c.JSON(200, tag)
+		}
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+	}
+}
+func AddTag(c *gin.Context) {
+	var addTagData AddTagData
+	err := c.ShouldBindJSON(&addTagData)
+	if err == nil {
+		tag, err := service.AddTag(addTagData.Label, addTagData.Description)
+		if err == nil {
+			c.JSON(200, tag)
+		} else {
+			if v, ok := err.(*model.TagAlreadyExistsError); ok {
+				c.JSON(409, gin.H{"message": v.Error()})
+			} else {
+				log.Println(err.Error())
+				c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+			}
+		}
+	} else {
+		log.Println(err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+	}
+}
+
+func AddTagToPodcast(c *gin.Context) {
+	var addRemoveTagQuery AddRemoveTagQuery
+
+	if c.ShouldBindUri(&addRemoveTagQuery) == nil {
+		err := db.AddTagToPodcast(addRemoveTagQuery.Id, addRemoveTagQuery.TagId)
+		if err == nil {
+			c.JSON(200, gin.H{})
+		}
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+	}
+}
+
+func RemoveTagFromPodcast(c *gin.Context) {
+	var addRemoveTagQuery AddRemoveTagQuery
+
+	if c.ShouldBindUri(&addRemoveTagQuery) == nil {
+		err := db.RemoveTagFromPodcast(addRemoveTagQuery.Id, addRemoveTagQuery.TagId)
+		if err == nil {
+			c.JSON(200, gin.H{})
+		}
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 	}
 }
 
