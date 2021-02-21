@@ -23,7 +23,7 @@ func GetAllPodcasts(podcasts *[]Podcast, sorting string) error {
 	if sorting == "" {
 		sorting = "created_at"
 	}
-	result := DB.Debug().Order(sorting).Find(&podcasts)
+	result := DB.Debug().Preload("Tags").Order(sorting).Find(&podcasts)
 	return result.Error
 }
 func GetAllPodcastItems(podcasts *[]PodcastItem) error {
@@ -242,4 +242,45 @@ func UnlockMissedJobs() {
 			Unlock(job.Name)
 		}
 	}
+}
+
+func GetAllTags(sorting string) (*[]Tag, error) {
+	var tags []Tag
+	if sorting == "" {
+		sorting = "created_at"
+	}
+	result := DB.Debug().Preload(clause.Associations).Order(sorting).Find(&tags)
+	return &tags, result.Error
+}
+
+func GetTagById(id string) (*Tag, error) {
+	var tag Tag
+	result := DB.Preload(clause.Associations).
+		First(&tag, "id=?", id)
+
+	return &tag, result.Error
+}
+func GetTagByLabel(label string) (*Tag, error) {
+	var tag Tag
+	result := DB.Preload(clause.Associations).
+		First(&tag, "label=?", label)
+
+	return &tag, result.Error
+}
+
+func CreateTag(tag *Tag) error {
+	tx := DB.Debug().Omit("Podcasts").Create(&tag)
+	return tx.Error
+}
+func UpdateTag(tag *Tag) error {
+	tx := DB.Omit("Podcast").Save(&tag)
+	return tx.Error
+}
+func AddTagToPodcast(id, tagId string) error {
+	tx := DB.Debug().Exec("INSERT INTO `podcast_tags` (`podcast_id`,`tag_id`) VALUES (?,?) ON CONFLICT DO NOTHING", id, tagId)
+	return tx.Error
+}
+func RemoveTagFromPodcast(id, tagId string) error {
+	tx := DB.Debug().Exec("DELETE FROM `podcast_tags` WHERE `podcast_id`=? AND `tag_id`=?", id, tagId)
+	return tx.Error
 }

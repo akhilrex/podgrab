@@ -53,6 +53,15 @@
         transition-timing-function: ease-in-out;
       }
 
+      .grid .tags{
+        font-size: 0.85em;
+        padding-bottom: 10px;
+        display: inline-block;
+      }
+
+      .mobile.tags{
+        margin-bottom: 10px;
+      }
 
       .alignRight{
         text-align: right;
@@ -60,7 +69,38 @@
       .alignLeft{
         text-align: left;
       }
-   
+      .tag-editor{
+        position: absolute;
+        border:1px solid;
+        padding: 10px;
+        width: 300px;
+      }
+
+      .tag-editor a.pill{
+        margin-right: 5px;
+        background: blue;
+        border-radius: 5px;
+        padding: 2px 5px;
+        text-decoration: none;
+        display: inline-block;
+        margin-bottom: 5px;
+      }  
+
+      a.pill i{
+        background-color: inherit;
+        margin-right: 2px;
+      }
+
+      .tag-editor .available a.pill{
+        background: green;
+      }
+      .tag-editor .existing a.pill{
+        background: palevioletred;
+      }
+
+      .tag-editor>div{
+        margin-bottom: 15px;;
+      } 
     </style>
   </head>
   <body>
@@ -77,6 +117,14 @@
             <select v-model="sortOrder" name="" id="">
               <option v-for="option in sortOptions" v-bind:value="option.key">
                 ${option.label}
+              </option>
+
+            </select>
+
+            <select v-model="filterTag" name="" id="">
+              <option value="">All</option>
+              <option v-for="option in allTags" v-bind:value="option.ID">
+                ${option.Label} (${option.Podcasts.length})
               </option>
 
             </select>
@@ -120,18 +168,22 @@
             <p class="useMore">${podcast.Summary}</p></div>
 
             <div class="row">
-              <div class="columns" v-bind:class="{four:layout=='list', twelve:layout=='grid'}">
+              <div class="columns" v-bind:class="{two:layout=='list', twelve:layout=='grid'}">
                 
                 <span v-if="podcast.LastEpisode" :title="'Last Episode aired on '+getFormattedLastEpisodeDate(podcast)">${getFormattedLastEpisodeDate(podcast)}</span> 
               </div>
 
               <div
-              class="columns"  v-bind:class="{four:layout=='list', twelve:layout=='grid'}"
+              class="columns"  v-bind:class="{two:layout=='list', twelve:layout=='grid'}"
               :title="getEpisodeCountTooltip(podcast)"
             >
               <template v-if="podcast.DownloadingEpisodesCount">
               (${podcast.DownloadingEpisodesCount})/</template>${podcast.DownloadedEpisodesCount}/${podcast.AllEpisodesCount}
               episodes
+            </div>
+            <div class="columns" v-bind:class="{four:layout=='list', twelve:layout=='grid'}">
+              <tagger :class="isMobile?'mobile':'desktop'" v-bind:podcast="podcast" v-on:getalltags="getAllTags()"></tagger>
+              
             </div>
             <div class="columns"   v-bind:class="{four:layout=='list', twelve:layout=='grid'}">
               <button
@@ -194,11 +246,16 @@
       </template>
     </div>
 
-    
-     <template v-if="!podcasts.length">
+    <template v-if="allPodcasts.length && !podcasts.length">
+      <div class="welcome">
+        <h5>No results!</h5>
+      <p>There doesn't seem to be any podcast for this filter criteria.</p></div>
+      </template>
+    </template>
+     <template v-if="!allPodcasts.length">
       <div class="welcome">
       <h5>Welcome</h5>
-      <p>It seems you have just setup Podgrab for the first time?</p>
+      <p>It seems you have just setup Podgrab for the first time.</p>
       <p>
         Before you start adding and downloading podcasts I recommend that you
         give a quick look to the <a href="/settings"><strong>Settings</strong> here</a> so that you can customize the
@@ -219,6 +276,137 @@
     <script src="/webassets/popper.min.js"></script>
     <script src="/webassets/tippy-bundle.umd.min.js"></script>
 
+    <template id="editTags">
+      <div class="tags">
+        <div @click="editTags" style="cursor: pointer;">
+        <i class="fas fa-tags"></i> 
+       ${ commaSeparatedTags() }        
+      </div>
+       <div v-if="editing" class="tag-editor">
+         <h5>Tags: ${podcast.Title}</h5>
+          <div class="available">
+           Add: <a style="cursor: pointer;" href="#"  @click.prevent="addTag(tag.ID, $event);return false;" v-for="tag in availableTags" class="pill"><i class="fa fa-plus-circle"></i>${tag.Label}</a>
+         </div>
+         <div class="existing" v-if="tags.length">
+           Remove: <a style="cursor: pointer;"  @click.prevent="removeTag(tag.ID, $event);return false;" href="#" v-for="tag in tags" class="pill"><i class="fa fa-minus-circle"></i>${tag.Label}</a>
+         </div>
+         <div class="create">
+           <form @submit.prevent="createNewTag" method="post">
+           <input type="text" name="newTag" id="" placeholder="Create New Tag" v-model="newTag">
+           <input type="submit" value="Add">
+          </form>
+         </div>
+         <button class="button" @click="editing=false">Close</button>
+       </div>
+       </div>
+    </template>
+    <script>
+      Vue.component('tagger',{
+        delimiters: ["${", "}"],
+        data:function(){
+          return {
+            newTag:'',
+            allTags:[],
+            tags:[],
+            availableTags:[],
+            editing:false,
+          }
+        },
+        template: '#editTags',
+        props:['podcast'],
+        computed:{
+        
+        },
+        methods:{
+          createNewTag(){
+            var self=this;
+            if(!self.newTag){
+              return;
+            }
+             axios
+              .post("/tags",{label:self.newTag})
+              .then(function (response) {
+                self.tags.push(response.data);
+                self.addTag(response.data.ID);
+                self.getAllTags();
+               
+              }).catch(showError);
+          },
+          setAvailableTags(){
+              existingTags= this.tags.map(x=>x.ID);
+              this.availableTags= this.allTags.filter(x=>existingTags.indexOf(x.ID)===-1);
+              this.$emit('getalltags')
+            }
+          ,
+          commaSeparatedTags(){
+            if(!this.tags.length){
+              return "";
+            }
+         
+            toReturn= this.tags.map(function(x){return x.Label}).join(", ");
+            return toReturn;
+          },
+          editTags(){
+            this.editing=!this.editing;
+            if(this.editing){
+              this.getAllTags();
+            }
+          },
+          getAllTags(){
+            var self=this;
+             axios
+              .get("/tags")
+              .then(function (response) {
+                self.allTags=response.data;
+                self.setAvailableTags();
+              })
+          },
+        
+        addTag(tagId,e){
+         
+
+          var self=this;
+             axios
+              .post("/podcasts/"+this.podcast.ID+"/tags/"+tagId)
+              .then(function (response) {
+                var i=-1;
+                for(i=0;i<self.allTags.length;i++){
+                    if(self.allTags[i].ID===tagId){
+                      self.tags.push(self.allTags[i]);
+                      break;
+                    }
+                }
+
+                self.setAvailableTags();
+              }).catch(showError);
+              return false;
+        },
+        removeTag(tagId,e){
+        
+
+          var self=this;
+             axios
+              .delete("/podcasts/"+this.podcast.ID+"/tags/"+tagId)
+              .then(function (response) {
+                var i=-1;
+                for(i=0;i<self.tags.length;i++){
+                    if(self.tags[i].ID===tagId){
+                      break;
+                    }
+                }
+                self.tags.splice(i,1)
+              
+                self.setAvailableTags();
+              });
+            return false;
+        },
+      },
+        mounted(){
+          this.tags=this.podcast.Tags;
+        }
+      });
+
+    </script>
     <script>
         var app = new Vue({
         delimiters: ["${", "}"],
@@ -235,6 +423,7 @@
             }
         },
         created(){
+          this.podcasts=this.allPodcasts;
           const self=this;
          this.socket= getWebsocketConnection(function(event){
               const message= getWebsocketMessage("Register","Home")
@@ -248,6 +437,7 @@
                 self.playerExists=true;
               }
             });
+
         },
         methods:{
           removePodcast(id) {      
@@ -259,6 +449,23 @@
               return
             }
             this.socket.send(getWebsocketMessage("Enqueue",`{"podcastId":"${id}"}`))
+          },
+          filterPodcasts(){
+            if(this.filterTag===""){
+              this.podcasts=this.allPodcasts;
+            }else{
+              var filtered=[];
+              for (var podast of this.allPodcasts) {
+                  for(var tag of podast.Tags){
+                    if(tag.ID===this.filterTag){
+                      filtered.push(podast);
+                      break;
+                    }
+                  }
+              }
+              this.podcasts=filtered;
+          }
+            this.sortPodcasts();
           },
           sortPodcasts(order){
               var compareFunction;
@@ -319,6 +526,14 @@
           });},
           deletePodcastEpisodes(id){ deletePodcastEpisodes(id)},
           playPodcast(id){openPlayer("",id)},
+          getAllTags(){
+            var self=this;
+             axios
+              .get("/tags")
+              .then(function (response) {
+                self.allTags=response.data;
+              })
+          },
         },
         mounted(){
           if(localStorage && localStorage.sortOrder){
@@ -331,6 +546,12 @@
               this.layout='list';
           }
 
+          if(localStorage && localStorage.filterTag){
+            this.filterTag=localStorage.filterTag;
+          }else{
+              this.filterTag='';
+          }
+
           if (screen.width <= 760) {
                 this.isMobile= true
               } else {
@@ -340,6 +561,7 @@
           if (screen.width <= 760) {
             this.layout='list'
           }
+          this.getAllTags();
           
           this.$nextTick(function () {
 
@@ -369,6 +591,16 @@
             }
             this.sortPodcasts(newOrder);
           },
+          filterTag(newTag,oldTag){
+            
+            if(newTag===oldTag){
+              return;
+            }
+            if(localStorage){
+              localStorage.filterTag=newTag
+            }
+            this.filterPodcasts();
+          },
           layout(newLayout,oldLayout){
             if(newLayout===oldLayout){
               return;
@@ -385,6 +617,8 @@
           layoutOptions:["list","grid"],
           layout:"grid",
           sortOrder:"dateAdded-asc",
+          allTags:[],
+          filterTag:'',
             sortOptions:[
               {
                 key:"name-asc",
@@ -412,14 +646,12 @@
                 label:"Date Added (New First)"
               },
             ],
+            podcasts:[],
             {{ $len := len .podcasts}}
-            podcasts: {{if gt $len 0}} {{ .podcasts }} {{else}} [] {{end}},
+            allPodcasts: {{if gt $len 0}} {{ .podcasts }} {{else}} [] {{end}},
         }})
      
     </script>
-    <script>
-      
-
-    </script>
+    
   </body>
 </html>
