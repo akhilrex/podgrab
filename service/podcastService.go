@@ -318,12 +318,18 @@ func DownloadMissingImages() error {
 		return err
 	}
 	for _, item := range *items {
-		downloadImageLocally(item)
+		downloadImageLocally(item.ID)
 	}
 	return nil
 }
 
-func downloadImageLocally(podcastItem db.PodcastItem) error {
+func downloadImageLocally(podcastItemId string) error {
+	var podcastItem db.PodcastItem
+	err := db.GetPodcastItemById(podcastItemId, &podcastItem)
+	if err != nil {
+		return err
+	}
+
 	path, err := DownloadImage(podcastItem.Image, podcastItem.ID, podcastItem.Podcast.Title)
 	if err != nil {
 		return err
@@ -350,8 +356,10 @@ func SetPodcastItemBookmarkStatus(id string, bookmark bool) error {
 
 func SetPodcastItemAsDownloaded(id string, location string) error {
 	var podcastItem db.PodcastItem
+
 	err := db.GetPodcastItemById(id, &podcastItem)
 	if err != nil {
+		fmt.Println("Location", err.Error())
 		return err
 	}
 	podcastItem.DownloadDate = time.Now()
@@ -494,13 +502,17 @@ func DownloadSingleEpisode(podcastItemId string) error {
 	SetPodcastItemAsQueuedForDownload(podcastItemId)
 
 	url, err := Download(podcastItem.FileURL, podcastItem.Title, podcastItem.Podcast.Title, GetPodcastPrefix(&podcastItem, setting))
+
 	if err != nil {
+		fmt.Println(err.Error())
 		return err
 	}
+	err = SetPodcastItemAsDownloaded(podcastItem.ID, url)
+
 	if setting.DownloadEpisodeImages {
-		go downloadImageLocally(podcastItem)
+		downloadImageLocally(podcastItem.ID)
 	}
-	return SetPodcastItemAsDownloaded(podcastItem.ID, url)
+	return err
 }
 
 func RefreshEpisodes() error {
