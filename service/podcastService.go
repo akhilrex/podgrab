@@ -58,6 +58,19 @@ func GetPodcastItemById(id string) *db.PodcastItem {
 
 	return &podcastItem
 }
+func GetAllPodcastItemsByPodcastIds(podcastIds []string) *[]db.PodcastItem {
+	var podcastItems []db.PodcastItem
+
+	db.GetAllPodcastItemsByPodcastIds(podcastIds, &podcastItems)
+	return &podcastItems
+}
+
+func GetTagsByIds(ids []string) *[]db.Tag {
+
+	tags, _ := db.GetTagsByIds(ids)
+
+	return tags
+}
 func GetAllPodcasts(sorting string) *[]db.Podcast {
 	var podcasts []db.Podcast
 	db.GetAllPodcasts(&podcasts, sorting)
@@ -583,6 +596,15 @@ func DeletePodcast(id string, deleteFiles bool) error {
 
 	}
 	err = db.DeletePodcastById(id)
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+func DeleteTag(id string) error {
+	db.UntagAllByTagId(id)
+	err := db.DeleteTagById(id)
 	if err != nil {
 		return err
 	}

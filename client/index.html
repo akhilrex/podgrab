@@ -121,7 +121,7 @@
 
             </select>
 
-            <select v-model="filterTag" name="" id="">
+            <select v-model="filterTag" v-if="allTags.length">
               <option value="">All</option>
               <option v-for="option in allTags" v-bind:value="option.ID">
                 ${option.Label} (${option.Podcasts.length})

@@ -79,13 +79,18 @@
   }
   checkUseMore();
 
-  function openPlayer(itemId, podcastId) {
+  function openPlayer(itemId, podcastId,tagIds) {
     var url = "/player?";
     if (itemId) {
       url += "&itemId=" + itemId;
     }
     if (podcastId) {
       url += "&podcastId=" + podcastId;
+    }
+    if(tagIds && tagIds.length>0){
+      for (const tagId of tagIds) {
+        url += "&tagIds=" + tagId;
+      }
     }
     const player = window.open(url, "podgrab_player");
   }

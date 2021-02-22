@@ -96,7 +96,7 @@ func PodcastPage(c *gin.Context) {
 
 }
 
-func getItemsToPlay(itemId, podcastId string) []db.PodcastItem {
+func getItemsToPlay(itemId, podcastId string, tagIds []string) []db.PodcastItem {
 	var items []db.PodcastItem
 	if itemId != "" {
 		toAdd := service.GetPodcastItemById(itemId)
@@ -104,12 +104,18 @@ func getItemsToPlay(itemId, podcastId string) []db.PodcastItem {
 
 	} else if podcastId != "" {
 		pod := service.GetPodcastById(podcastId)
-		// for _, item := range pod.PodcastItems {
-		// 	if item.DownloadStatus == db.Downloaded {
-		// 		items = append(items, item)
-		// 	}
-		// }
 		items = pod.PodcastItems
+	} else if len(tagIds) != 0 {
+		tags := service.GetTagsByIds(tagIds)
+		var tagNames []string
+		var podIds []string
+		for _, tag := range *tags {
+			tagNames = append(tagNames, tag.Label)
+			for _, pod := range tag.Podcasts {
+				podIds = append(podIds, pod.ID)
+			}
+		}
+		items = *service.GetAllPodcastItemsByPodcastIds(podIds)
 	}
 	return items
 }
@@ -118,6 +124,7 @@ func PlayerPage(c *gin.Context) {
 
 	itemId, hasItemId := c.GetQuery("itemId")
 	podcastId, hasPodcastId := c.GetQuery("podcastId")
+	tagIds, hasTagIds := c.GetQueryArray("tagIds")
 	title := "Podgrab"
 	var items []db.PodcastItem
 	var totalCount int64
@@ -127,14 +134,25 @@ func PlayerPage(c *gin.Context) {
 		totalCount = 1
 	} else if hasPodcastId {
 		pod := service.GetPodcastById(podcastId)
-		// for _, item := range pod.PodcastItems {
-		// 	if item.DownloadStatus == db.Downloaded {
-		// 		items = append(items, item)
-		// 	}
-		// }
 		items = pod.PodcastItems
 		title = "Playing: " + pod.Title
 		totalCount = int64(len(items))
+	} else if hasTagIds {
+		tags := service.GetTagsByIds(tagIds)
+		var tagNames []string
+		var podIds []string
+		for _, tag := range *tags {
+			tagNames = append(tagNames, tag.Label)
+			for _, pod := range tag.Podcasts {
+				podIds = append(podIds, pod.ID)
+			}
+		}
+		items = *service.GetAllPodcastItemsByPodcastIds(podIds)
+		if len(tagNames) == 1 {
+			title = fmt.Sprintf("Playing episodes with tag : %s", (tagNames[0]))
+		} else {
+			title = fmt.Sprintf("Playing episodes with tags : %s", strings.Join(tagNames, ", "))
+		}
 	} else {
 		title = "Playing Latest Episodes"
 		if err := db.GetPaginatedPodcastItems(1, 20, nil, nil, time.Time{}, &items, &totalCount); err != nil {
@@ -249,6 +267,51 @@ func AllEpisodesPage(c *gin.Context) {
 		}
 		fmt.Printf("%+v\n", totalCount)
 		c.HTML(http.StatusOK, "episodes.html", toReturn)
+	} else {
+		c.JSON(http.StatusBadRequest, err)
+	}
+
+}
+
+func AllTagsPage(c *gin.Context) {
+	var pagination Pagination
+	var page, count int
+	c.ShouldBindQuery(&pagination)
+	if page = pagination.Page; page == 0 {
+		page = 1
+	}
+	if count = pagination.Count; count == 0 {
+		count = 10
+	}
+
+	var tags []db.Tag
+	var totalCount int64
+	//fmt.Printf("%+v\n", filter)
+
+	if err := db.GetPaginatedTags(page, count,
+		&tags, &totalCount); err == nil {
+
+		setting := c.MustGet("setting").(*db.Setting)
+		totalPages := math.Ceil(float64(totalCount) / float64(count))
+		nextPage, previousPage := 0, 0
+		if float64(page) < totalPages {
+			nextPage = page + 1
+		}
+		if page > 1 {
+			previousPage = page - 1
+		}
+		toReturn := gin.H{
+			"title":        "Tags",
+			"tags":         tags,
+			"setting":      setting,
+			"page":         page,
+			"count":        count,
+			"totalCount":   totalCount,
+			"totalPages":   totalPages,
+			"nextPage":     nextPage,
+			"previousPage": previousPage,
+		}
+		c.HTML(http.StatusOK, "tags.html", toReturn)
 	} else {
 		c.JSON(http.StatusBadRequest, err)
 	}

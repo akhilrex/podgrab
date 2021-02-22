@@ -71,9 +71,10 @@ Podgrab started a tool that I initially built to solve a specific problem I had.
 ### Features
 - Download/Archive complete podcast
 - Auto-download new episodes
+- Tag/Label podcasts into groups
 - Download on demand
 - Podcast Discovery - Search and Add podcasts using iTunes API
-- Full-fledged podcast player - Play downloaded files or stream from original source.
+- Full-fledged podcast player - Play downloaded files or stream from original source. Play single episodes, full podcasts and podcast groups(tags)
 - Add using direct RSS feed URL / OMPL import / Search
 - Basic Authentication
 - Existing episode file detection - Prevent re-downloading files if already present

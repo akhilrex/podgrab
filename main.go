@@ -126,6 +126,7 @@ func main() {
 
 	router.GET("/tags", controllers.GetAllTags)
 	router.GET("/tags/:id", controllers.GetTagById)
+	router.DELETE("/tags/:id", controllers.DeleteTagById)
 	router.POST("/tags", controllers.AddTag)
 	router.POST("/podcasts/:id/tags/:tagId", controllers.AddTagToPodcast)
 	router.DELETE("/podcasts/:id/tags/:tagId", controllers.RemoveTagFromPodcast)
@@ -135,6 +136,7 @@ func main() {
 	router.GET("/", controllers.HomePage)
 	router.GET("/podcasts/:id/view", controllers.PodcastPage)
 	router.GET("/episodes", controllers.AllEpisodesPage)
+	router.GET("/allTags", controllers.AllTagsPage)
 	router.GET("/settings", controllers.SettingsPage)
 	router.POST("/settings", controllers.UpdateSetting)
 	router.GET("/backups", controllers.BackupsPage)

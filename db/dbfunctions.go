@@ -57,6 +57,15 @@ func GetPaginatedPodcastItems(page int, count int, downloadedOnly *bool, playedO
 
 	return result.Error
 }
+func GetPaginatedTags(page int, count int, tags *[]Tag, total *int64) error {
+	query := DB.Preload("Podcasts")
+
+	result := query.Limit(count).Offset((page - 1) * count).Order("created_at desc").Find(&tags)
+
+	query.Count(total)
+
+	return result.Error
+}
 func GetPodcastById(id string, podcast *Podcast) error {
 
 	result := DB.Preload("PodcastItems", func(db *gorm.DB) *gorm.DB {
@@ -81,9 +90,20 @@ func DeletePodcastById(id string) error {
 	return result.Error
 }
 
+func DeleteTagById(id string) error {
+
+	result := DB.Where("id=?", id).Delete(&Tag{})
+	return result.Error
+}
+
 func GetAllPodcastItemsByPodcastId(podcastId string, podcastItems *[]PodcastItem) error {
 
 	result := DB.Preload(clause.Associations).Where(&PodcastItem{PodcastID: podcastId}).Find(&podcastItems)
+	return result.Error
+}
+func GetAllPodcastItemsByPodcastIds(podcastIds []string, podcastItems *[]PodcastItem) error {
+
+	result := DB.Preload(clause.Associations).Where("podcast_id in ?", podcastIds).Order("pub_date desc").Find(&podcastItems)
 	return result.Error
 }
 
@@ -260,6 +280,12 @@ func GetTagById(id string) (*Tag, error) {
 
 	return &tag, result.Error
 }
+func GetTagsByIds(ids []string) (*[]Tag, error) {
+	var tag []Tag
+	result := DB.Preload(clause.Associations).Where("id in ?", ids).Find(&tag)
+
+	return &tag, result.Error
+}
 func GetTagByLabel(label string) (*Tag, error) {
 	var tag Tag
 	result := DB.Preload(clause.Associations).
@@ -282,5 +308,10 @@ func AddTagToPodcast(id, tagId string) error {
 }
 func RemoveTagFromPodcast(id, tagId string) error {
 	tx := DB.Debug().Exec("DELETE FROM `podcast_tags` WHERE `podcast_id`=? AND `tag_id`=?", id, tagId)
+	return tx.Error
+}
+
+func UntagAllByTagId(tagId string) error {
+	tx := DB.Debug().Exec("DELETE FROM `podcast_tags` WHERE `tag_id`=?", tagId)
 	return tx.Error
 }
