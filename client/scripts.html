@@ -30,17 +30,44 @@
       var more = document.createElement("a");
       more.textContent = " show more";
       more.style.cursor = "pointer";
+      more.classList.add("link-show-more")
+      
       more.onclick = function () {
-        element.style.display = display;
-        newElement.style.display = "none";
+        var short= this.parentNode;
+        var sibling= short.parentNode.firstChild;
+        var long;
+        while (sibling) {
+          if(sibling.classList && sibling.classList.contains('long-version')){
+            long=sibling;
+            break;
+          }
+          sibling = sibling.nextSibling;
+
+        }
+       
+        long.style.display = display;
+        short.style.display = "none";
       };
 
       var less = document.createElement("a");
       less.textContent = " show less";
       less.style.cursor = "pointer";
+      less.classList.add("link-show-less")
       less.onclick = function () {
-        element.style.display = "none";
-        newElement.style.display = display;
+        var long= this.parentNode;
+        var sibling= long.parentNode.firstChild;
+        var short;
+        while (sibling) {
+          if(sibling.classList && sibling.classList.contains('short-version')){
+            short=sibling;
+            break;
+          }
+          sibling = sibling.nextSibling;
+
+        }
+       
+        short.style.display = display;
+        long.style.display = "none";
       };
 
       newElement.appendChild(more);

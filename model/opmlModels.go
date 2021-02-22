@@ -12,8 +12,20 @@ type OpmlModel struct {
 	Head    OpmlHead `xml:"head"`
 	Body    OpmlBody `xml:"body"`
 }
+type OpmlExportModel struct {
+	XMLName xml.Name       `xml:"opml"`
+	Text    string         `xml:",chardata"`
+	Version string         `xml:"version,attr"`
+	Head    OpmlExportHead `xml:"head"`
+	Body    OpmlBody       `xml:"body"`
+}
 
 type OpmlHead struct {
+	Text  string `xml:",chardata"`
+	Title string `xml:"title"`
+	//DateCreated time.Time `xml:"dateCreated"`
+}
+type OpmlExportHead struct {
 	Text        string    `xml:",chardata"`
 	Title       string    `xml:"title"`
 	DateCreated time.Time `xml:"dateCreated"`

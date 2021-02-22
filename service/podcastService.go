@@ -85,6 +85,7 @@ func GetAllPodcasts(sorting string) *[]db.Podcast {
 func AddOpml(content string) error {
 	model, err := ParseOpml(content)
 	if err != nil {
+		fmt.Println(err.Error())
 		return errors.New("Invalid file format")
 	}
 	var wg sync.WaitGroup
@@ -127,8 +128,8 @@ func ExportOmpl() ([]byte, error) {
 		outlines = append(outlines, toAdd)
 	}
 
-	toExport := model.OpmlModel{
-		Head: model.OpmlHead{
+	toExport := model.OpmlExportModel{
+		Head: model.OpmlExportHead{
 			Title:       "Podgrab Feed Export",
 			DateCreated: time.Now(),
 		},
