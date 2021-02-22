@@ -29,6 +29,7 @@ func main() {
 	r.Static("/webassets", "./webassets")
 	r.Static("/assets", dataPath)
 	r.Use(setupSettings())
+	r.Use(gin.Recovery())
 
 	funcMap := template.FuncMap{
 		"isDateNull": func(raw time.Time) bool {
