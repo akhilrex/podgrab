@@ -14,7 +14,18 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jasonlvhit/gocron"
 	_ "github.com/joho/godotenv/autoload"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	_ "github.com/akhilrex/podgrab/docs"
 )
+
+// @title Podgrab API
+// @version 1.0
+// @description This is the api documentation for Podgrab.
+// @contact.name Podgrab Github
+// @contact.url https://www.github.com/akhilrex/podgrab
+// @securityDefinitions.basic BasicAuth
 
 func main() {
 	var err error
@@ -144,6 +155,7 @@ func main() {
 	router.POST("/opml", controllers.UploadOpml)
 	router.GET("/opml", controllers.GetOmpl)
 	router.GET("/player", controllers.PlayerPage)
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	r.GET("/ws", func(c *gin.Context) {
 		controllers.Wshandler(c.Writer, c.Request)
