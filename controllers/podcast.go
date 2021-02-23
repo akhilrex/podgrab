@@ -68,6 +68,16 @@ type AddTagData struct {
 	Description string `form:"description" json:"description"`
 }
 
+// GetPodcasts godoc
+// @Summary Get all Podcasts
+// @Description  Get all Podcasts
+// @ID get-all-podcasts
+// @Accept  json
+// @Produce  json
+// @Param sort query string false "Sort by property"
+// @Param order query string false "Sort by asc/desc"
+// @Success 200 {array} db.Podcast
+// @Router /podcasts [get]
 func GetAllPodcasts(c *gin.Context) {
 	var podcastListQuery PodcastListQuery
 
@@ -90,6 +100,17 @@ func GetAllPodcasts(c *gin.Context) {
 	}
 }
 
+// GetPodcastById godoc
+// @Summary Get single podcast by ID
+// @Description  Get single podcast by ID
+// @ID get-podcast-by-id
+// @Accept  json
+// @Produce  json
+// @Param id path string true "Podcast id"
+// @Success 200 {object} db.Podcast
+// @Failure 400,404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /podcasts/{id} [get]
 func GetPodcastById(c *gin.Context) {
 	var searchByIdQuery SearchByIdQuery
 
@@ -98,12 +119,26 @@ func GetPodcastById(c *gin.Context) {
 		var podcast db.Podcast
 
 		err := db.GetPodcastById(searchByIdQuery.Id, &podcast)
-		fmt.Println(err)
-		c.JSON(200, podcast)
+		if err == nil {
+			c.JSON(200, podcast)
+		} else {
+			c.JSON(500, gin.H{"error": err.Error()})
+		}
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 	}
 }
+
+// DeletePodcastById godoc
+// @Summary Delete single podcast by ID (podcast and files)
+// @Description  Delete single podcast by ID
+// @ID delete-podcast-by-id
+// @Accept  json
+// @Produce  json
+// @Param id path string true "Podcast id"
+// @Success 204
+// @Failure 400,404 {object} map[string]interface{}
+// @Router /podcasts/{id} [delete]
 func DeletePodcastById(c *gin.Context) {
 	var searchByIdQuery SearchByIdQuery
 

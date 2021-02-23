@@ -1,0 +1,196 @@
+definitions:
+  db.Podcast:
+    properties:
+      allEpisodesCount:
+        type: integer
+      author:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      downloadedEpisodesCount:
+        type: integer
+      downloadingEpisodesCount:
+        type: integer
+      id:
+        type: string
+      image:
+        type: string
+      lastEpisode:
+        type: string
+      podcastItems:
+        items:
+          $ref: '#/definitions/db.PodcastItem'
+        type: array
+      summary:
+        type: string
+      tags:
+        items:
+          $ref: '#/definitions/db.Tag'
+        type: array
+      title:
+        type: string
+      updatedAt:
+        type: string
+      url:
+        type: string
+    type: object
+  db.PodcastItem:
+    properties:
+      bookmarkDate:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      downloadDate:
+        type: string
+      downloadPath:
+        type: string
+      downloadStatus:
+        type: integer
+      duration:
+        type: integer
+      episodeType:
+        type: string
+      fileURL:
+        type: string
+      guid:
+        type: string
+      id:
+        type: string
+      image:
+        type: string
+      isPlayed:
+        type: boolean
+      localImage:
+        type: string
+      podcast:
+        $ref: '#/definitions/db.Podcast'
+      podcastID:
+        type: string
+      pubDate:
+        type: string
+      summary:
+        type: string
+      title:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  db.Tag:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      label:
+        type: string
+      podcasts:
+        items:
+          $ref: '#/definitions/db.Podcast'
+        type: array
+      updatedAt:
+        type: string
+    type: object
+info:
+  contact:
+    name: Podgrab Github
+    url: https://www.github.com/akhilrex/podgrab
+  description: This is the api documentation for Podgrab.
+  title: Podgrab API
+  version: "1.0"
+paths:
+  /podcasts:
+    get:
+      consumes:
+      - application/json
+      description: Get all Podcasts
+      operationId: get-all-podcasts
+      parameters:
+      - description: Sort by property
+        in: query
+        name: sort
+        type: string
+      - description: Sort by asc/desc
+        in: query
+        name: order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/db.Podcast'
+            type: array
+      summary: Get all Podcasts
+  /podcasts/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete single podcast by ID
+      operationId: delete-podcast-by-id
+      parameters:
+      - description: Podcast id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete single podcast by ID
+    get:
+      consumes:
+      - application/json
+      description: Get single podcast by ID
+      operationId: get-podcast-by-id
+      parameters:
+      - description: Podcast id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/db.Podcast'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get single podcast by ID
+swagger: "2.0"
