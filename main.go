@@ -11,6 +11,7 @@ import (
 	"github.com/akhilrex/podgrab/controllers"
 	"github.com/akhilrex/podgrab/db"
 	"github.com/akhilrex/podgrab/service"
+	"github.com/gin-contrib/location"
 	"github.com/gin-gonic/gin"
 	"github.com/jasonlvhit/gocron"
 	_ "github.com/joho/godotenv/autoload"
@@ -30,6 +31,7 @@ func main() {
 	r.Static("/assets", dataPath)
 	r.Use(setupSettings())
 	r.Use(gin.Recovery())
+	r.Use(location.Default())
 
 	funcMap := template.FuncMap{
 		"isDateNull": func(raw time.Time) bool {
@@ -117,6 +119,7 @@ func main() {
 	router.GET("/podcastitems", controllers.GetAllPodcastItems)
 	router.GET("/podcastitems/:id", controllers.GetPodcastItemById)
 	router.GET("/podcastitems/:id/image", controllers.GetPodcastItemImageById)
+	router.GET("/podcastitems/:id/file", controllers.GetPodcastItemFileById)
 	router.GET("/podcastitems/:id/markUnplayed", controllers.MarkPodcastItemAsUnplayed)
 	router.GET("/podcastitems/:id/markPlayed", controllers.MarkPodcastItemAsPlayed)
 	router.GET("/podcastitems/:id/bookmark", controllers.BookmarkPodcastItem)
