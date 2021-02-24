@@ -9,6 +9,7 @@ import (
 
 	"github.com/akhilrex/podgrab/model"
 	"github.com/akhilrex/podgrab/service"
+	"github.com/gin-contrib/location"
 
 	"github.com/akhilrex/podgrab/db"
 	"github.com/gin-gonic/gin"
@@ -214,6 +215,28 @@ func GetPodcastItemImageById(c *gin.Context) {
 				c.Redirect(301, podcast.Image)
 			} else {
 				c.Redirect(302, fmt.Sprintf("/%s", podcast.LocalImage))
+			}
+		}
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+	}
+}
+
+func GetPodcastItemFileById(c *gin.Context) {
+	var searchByIdQuery SearchByIdQuery
+
+	if c.ShouldBindUri(&searchByIdQuery) == nil {
+
+		var podcast db.PodcastItem
+
+		err := db.GetPodcastItemById(searchByIdQuery.Id, &podcast)
+		if err == nil {
+			if _, err = os.Stat(podcast.DownloadPath); !os.IsNotExist(err) {
+				url := location.Get(c)
+				filePath := fmt.Sprintf("%s://%s/%s", url.Scheme, url.Host, podcast.DownloadPath)
+				c.Redirect(301, filePath)
+			} else {
+				c.Redirect(302, fmt.Sprintf("/%s", podcast.FileURL))
 			}
 		}
 	} else {
