@@ -93,9 +93,10 @@ type PodcastData struct {
 }
 
 type CommonSearchResultModel struct {
-	URL          string `json:"url"`
-	Title        string `json:"title"`
-	Image        string `json:"image"`
-	AlreadySaved bool   `json:"already_saved"`
-	Description  string `json:"description"`
+	URL          string   `json:"url"`
+	Title        string   `json:"title"`
+	Image        string   `json:"image"`
+	AlreadySaved bool     `json:"already_saved"`
+	Description  string   `json:"description"`
+	Categories   []string `json:"categories"`
 }

@@ -12,6 +12,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/TheHippo/podcastindex"
 	"github.com/akhilrex/podgrab/db"
 	"github.com/akhilrex/podgrab/model"
 	"github.com/antchfx/xmlquery"
@@ -646,6 +647,23 @@ func GetSearchFromItunes(pod model.ItunesSingleResult) *model.CommonSearchResult
 	p.URL = pod.FeedURL
 	p.Image = pod.ArtworkURL600
 	p.Title = pod.TrackName
+
+	return p
+}
+func GetSearchFromPodcastIndex(pod *podcastindex.Podcast) *model.CommonSearchResultModel {
+	p := new(model.CommonSearchResultModel)
+	p.URL = pod.URL
+	p.Image = pod.Image
+	p.Title = pod.Title
+	p.Description = pod.Description
+
+	if pod.Categories != nil {
+		values := make([]string, 0, len(pod.Categories))
+		for _, val := range pod.Categories {
+			values = append(values, val)
+		}
+		p.Categories = values
+	}
 
 	return p
 }

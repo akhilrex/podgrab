@@ -87,7 +87,7 @@
           >
           <br />
           <form action="/search" method="post" @submit="search">
-            <div class="nine columns">
+            <div class="seven columns">
               <input
                 type="search"
                 name="search"
@@ -98,6 +98,19 @@
               />
             </div>
             <div class="three columns">
+              <select
+                type="submit"
+                class="u-full-width button"
+                v-model="searchSource"
+                name="searchSource"
+              >
+            {{range $key, $value := .searchOptions}}
+            <option value="{{$key}}">{{$value}}</option>
+            {{end}}
+            </select>
+
+            </div>
+            <div class="two columns">
               <input
                 type="submit"
                 value="Search"
@@ -118,9 +131,12 @@
                   />
                 </div>
                 <div class="columns nine">
-                  <h5>${item.title}</h5>
+                  <h5 style="margin-bottom: 0px;">${item.title}</h5>
+                  <small v-if="item.categories && item.categories.length">
 
-                  <p>${ item.description }</p>
+                    Categories: ${item.categories.join(', ')}
+                  </small>
+                  <p v-if="item.description">${ item.description }</p>
                 </div>
                 <div class="columns one">
                   <button
@@ -154,9 +170,25 @@
         data: {
           results: [],
           query: "",
+          searchSource:"itunes",
           searching: false,
           url: "",
           selectedFiles: undefined,
+        },
+        mounted(){
+          if(localStorage && localStorage.searchSource){
+            this.searchSource=localStorage.searchSource;
+          }
+        },
+        watch:{
+          searchSource(newSource,oldSource){
+            if(newSource===oldSource){
+              return;
+            }
+            if(localStorage){
+              localStorage.searchSource=newSource
+            }
+          }
         },
         methods: {
           selectFile: function () {
@@ -212,7 +244,7 @@
             var self = this;
             self.searching = true;
             axios
-              .get("/search?q=" + this.query)
+              .get("/search?q=" + this.query+"&searchSource="+this.searchSource)
               .then(function (response) {
                 self.results = response.data;
               })

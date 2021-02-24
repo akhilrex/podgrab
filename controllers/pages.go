@@ -7,7 +7,6 @@ import (
 	"math"
 	"net/http"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -17,7 +16,8 @@ import (
 )
 
 type SearchGPodderData struct {
-	Q string `binding:"required" form:"q" json:"q" query:"q"`
+	Q            string `binding:"required" form:"q" json:"q" query:"q"`
+	SearchSource string `binding:"required" form:"searchSource" json:"searchSource" query:"searchSource"`
 }
 type SettingModel struct {
 	DownloadOnAdd                 bool `form:"downloadOnAdd" json:"downloadOnAdd" query:"downloadOnAdd"`
@@ -29,9 +29,18 @@ type SettingModel struct {
 	DownloadEpisodeImages         bool `form:"downloadEpisodeImages" json:"downloadEpisodeImages" query:"downloadEpisodeImages"`
 }
 
+var searchOptions = map[string]string{
+	"itunes":       "iTunes",
+	"podcastindex": "PodcastIndex",
+}
+var searchProvider = map[string]service.SearchService{
+	"itunes":       new(service.ItunesService),
+	"podcastindex": new(service.PodcastIndexService),
+}
+
 func AddPage(c *gin.Context) {
 	setting := c.MustGet("setting").(*db.Setting)
-	c.HTML(http.StatusOK, "addPodcast.html", gin.H{"title": "Add Podcast", "setting": setting})
+	c.HTML(http.StatusOK, "addPodcast.html", gin.H{"title": "Add Podcast", "setting": setting, "searchOptions": searchOptions})
 }
 func HomePage(c *gin.Context) {
 	//var podcasts []db.Podcast
@@ -321,18 +330,21 @@ func AllTagsPage(c *gin.Context) {
 func Search(c *gin.Context) {
 	var searchQuery SearchGPodderData
 	if c.ShouldBindQuery(&searchQuery) == nil {
-		itunesService := new(service.ItunesService)
-		data := itunesService.Query(searchQuery.Q)
+		var searcher service.SearchService
+		var isValidSearchProvider bool
+		if searcher, isValidSearchProvider = searchProvider[searchQuery.SearchSource]; !isValidSearchProvider {
+			searcher = new(service.PodcastIndexService)
+		}
+
+		data := searcher.Query(searchQuery.Q)
 		allPodcasts := service.GetAllPodcasts("")
 
 		urls := make(map[string]string, len(*allPodcasts))
 		for _, pod := range *allPodcasts {
-			fmt.Println(pod.URL)
 			urls[pod.URL] = pod.ID
 		}
 		for _, pod := range data {
 			_, ok := urls[pod.URL]
-			fmt.Println(pod.URL + " " + strconv.FormatBool(ok))
 			pod.AlreadySaved = ok
 		}
 		c.JSON(200, data)
