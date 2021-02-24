@@ -34,6 +34,13 @@ func main() {
 	r.Use(location.Default())
 
 	funcMap := template.FuncMap{
+		"removeStartingSlash": func(raw string) string {
+			fmt.Println(raw)
+			if string(raw[0]) == "/" {
+				return raw
+			}
+			return "/" + raw
+		},
 		"isDateNull": func(raw time.Time) bool {
 			return raw == (time.Time{})
 		},
