@@ -34,6 +34,14 @@ func main() {
 	r.Use(location.Default())
 
 	funcMap := template.FuncMap{
+		"intRange": func(start, end int) []int {
+			n := end - start + 1
+			result := make([]int, n)
+			for i := 0; i < n; i++ {
+				result[i] = start + i
+			}
+			return result
+		},
 		"removeStartingSlash": func(raw string) string {
 			fmt.Println(raw)
 			if string(raw[0]) == "/" {

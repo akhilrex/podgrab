@@ -66,9 +66,9 @@ func PodcastPage(c *gin.Context) {
 				}
 				setting := c.MustGet("setting").(*db.Setting)
 				totalCount := len(podcast.PodcastItems)
-				totalPages := math.Ceil(float64(totalCount) / float64(count))
+				totalPages := int(math.Ceil(float64(totalCount) / float64(count)))
 				nextPage, previousPage := 0, 0
-				if float64(page) < totalPages {
+				if page < totalPages {
 					nextPage = page + 1
 				}
 				if page > 1 {
@@ -250,17 +250,22 @@ func AllEpisodesPage(c *gin.Context) {
 	}
 
 	if err := db.GetPaginatedPodcastItems(page, count,
-		filter.DownloadedOnly, filter.PlayedOnly, fromDate,
+		nil, filter.PlayedOnly, fromDate,
 		&podcastItems, &totalCount); err == nil {
 
 		setting := c.MustGet("setting").(*db.Setting)
-		totalPages := math.Ceil(float64(totalCount) / float64(count))
+		totalPages := int(math.Ceil(float64(totalCount) / float64(count)))
 		nextPage, previousPage := 0, 0
-		if float64(page) < totalPages {
+		if page < totalPages {
 			nextPage = page + 1
 		}
 		if page > 1 {
 			previousPage = page - 1
+		}
+		downloadedOnly := false
+		if filter.DownloadedOnly != nil {
+			downloadedOnly = *filter.DownloadedOnly
+			fmt.Println(downloadedOnly)
 		}
 		toReturn := gin.H{
 			"title":          "All Episodes",
@@ -272,7 +277,7 @@ func AllEpisodesPage(c *gin.Context) {
 			"totalPages":     totalPages,
 			"nextPage":       nextPage,
 			"previousPage":   previousPage,
-			"downloadedOnly": filter.DownloadedOnly,
+			"downloadedOnly": downloadedOnly,
 		}
 		fmt.Printf("%+v\n", totalCount)
 		c.HTML(http.StatusOK, "episodes.html", toReturn)

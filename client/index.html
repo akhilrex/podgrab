@@ -474,6 +474,8 @@
                 case "dateAdded-desc":compareFunction=(a,b)=>Date.parse(b.CreatedAt)-Date.parse(a.CreatedAt);break;
                 case "lastEpisode-asc":compareFunction=(a,b)=>Date.parse(a.LastEpisode)-Date.parse(b.LastEpisode);break;
                 case "lastEpisode-desc":compareFunction=(a,b)=>Date.parse(b.LastEpisode)-Date.parse(a.LastEpisode);break;
+                case "episodesCount-asc":compareFunction=(a,b)=>a.AllEpisodesCount-b.AllEpisodesCount;break;
+                case "episodesCount-desc":compareFunction=(a,b)=>b.AllEpisodesCount-a.AllEpisodesCount;break;
                 case "name-asc":compareFunction=(a,b)=>{
                                var nameA = a.Title.toUpperCase(); // ignore upper and lowercase
                               var nameB = b.Title.toUpperCase(); // ignore upper and lowercase
@@ -644,6 +646,14 @@
               {
                 key:"dateAdded-desc",
                 label:"Date Added (New First)"
+              },
+              {
+                key:"episodesCount-asc",
+                label:"Episodes Count (Asc)"
+              },
+              {
+                key:"episodesCount-desc",
+                label:"Episodes Count (Desc)"
               },
             ],
             podcasts:[],

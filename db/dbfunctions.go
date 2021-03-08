@@ -51,10 +51,10 @@ func GetPaginatedPodcastItems(page int, count int, downloadedOnly *bool, playedO
 		query = query.Where("pub_date>=?", fromDate)
 	}
 
+	totalsQuery := query.Order("pub_date desc").Find(&podcasts)
+	totalsQuery.Count(total)
+
 	result := query.Limit(count).Offset((page - 1) * count).Order("pub_date desc").Find(&podcasts)
-
-	query.Count(total)
-
 	return result.Error
 }
 func GetPaginatedTags(page int, count int, tags *[]Tag, total *int64) error {

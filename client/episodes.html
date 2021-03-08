@@ -190,15 +190,39 @@
         <div class="columns twelve" style="text-align: center">
           {{if .previousPage }}
           <a
+            href="?page=1&downloadedOnly={{.downloadedOnly}}"
+            class="button"
+            >Newest</a
+          >
+          {{end}}
+          {{if .previousPage }}
+          <a
             href="?page={{.previousPage}}&downloadedOnly={{.downloadedOnly}}"
             class="button"
-            >Newer</a
+            >Newer</a 
           >
-          {{end}} {{if .nextPage }}
+          {{end}} 
+          
+          <select name="page" id="pageDdl">
+            {{ $page:=.page }}
+            {{range $y := intRange 1 .totalPages}}
+              <option {{if eq $page $y }} selected="selected" {{end}}}>{{$y}}</option>
+            {{end}}
+          </select>
+          
+          {{if .nextPage }}
           <a
             href="?page={{.nextPage}}&downloadedOnly={{.downloadedOnly}}"
             class="button"
             >Older</a
+          >
+          {{end}}
+          {{if gt .totalPages .page }}
+        
+          <a
+            href="?page={{.totalPages}}&downloadedOnly={{.downloadedOnly}}"
+            class="button"
+            >Oldest</a
           >
           {{end}}
         </div>
@@ -319,6 +343,18 @@
           .then(function () {});
         return false;
       }
+      document.getElementById('pageDdl').addEventListener('change', function() {
+        currentPage= {{.page}};
+        if(parseInt(this.value)===currentPage){
+          return;
+        }
+        var queryParams = new URLSearchParams(window.location.search);
+ 
+          // Set new or modify existing parameter value. 
+          queryParams.set("page", this.value);
+          
+          window.top.location= window.top.location.origin+window.top.location.pathname+"?"+queryParams.toString();
+      });
     </script>
     <script>
 
