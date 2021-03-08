@@ -56,7 +56,7 @@ It works best if you already know which podcasts you want to monitor. However th
 
 ### Motivation
 
-Podgrab started a tool that I initially built to solve a specific problem I had. During the COVID pandemic times I started going for a run. I do not prefer taking by phone along so I would add podcast episodes to my smart watch which could be connected with my bluetooth earphones. Most podcasting apps do not expose the mp3 files directly which is why I decided to build this quick tool for myself. Once it reached a stage where my requirements were fulfilled I decided to make it a little pretty and share it with everyone else.
+Podgrab started as a tool that I initially built to solve a specific problem I had. During the COVID pandemic times I started going for a run. I do not prefer taking by phone along so I would add podcast episodes to my smart watch which could be connected with my bluetooth earphones. Most podcasting apps do not expose the mp3 files directly which is why I decided to build this quick tool for myself. Once it reached a stage where my requirements were fulfilled I decided to make it a little pretty and share it with everyone else.
 
 ![Product Name Screen Shot][product-screenshot]
 [More Screenshots](Screenshots.md)
