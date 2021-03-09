@@ -23,16 +23,20 @@ func GetAllPodcasts(podcasts *[]Podcast, sorting string) error {
 	if sorting == "" {
 		sorting = "created_at"
 	}
-	result := DB.Debug().Preload("Tags").Order(sorting).Find(&podcasts)
+	result := DB.Preload("Tags").Order(sorting).Find(&podcasts)
 	return result.Error
 }
 func GetAllPodcastItems(podcasts *[]PodcastItem) error {
-
 	result := DB.Preload("Podcast").Order("pub_date desc").Find(&podcasts)
 	return result.Error
 }
+func GetAllPodcastItemsWithoutSize() (*[]PodcastItem, error) {
+	var podcasts []PodcastItem
+	result := DB.Where("file_size<=?", 0).Order("pub_date desc").Find(&podcasts)
+	return &podcasts, result.Error
+}
 func GetPaginatedPodcastItems(page int, count int, downloadedOnly *bool, playedOnly *bool, fromDate time.Time, podcasts *[]PodcastItem, total *int64) error {
-	query := DB.Debug().Preload("Podcast")
+	query := DB.Preload("Podcast")
 	if downloadedOnly != nil {
 		if *downloadedOnly {
 			query = query.Where("download_status=?", Downloaded)
@@ -108,30 +112,35 @@ func GetAllPodcastItemsByPodcastIds(podcastIds []string, podcastItems *[]Podcast
 }
 
 func SetAllEpisodesToDownload(podcastId string) error {
-	result := DB.Debug().Model(PodcastItem{}).Where(&PodcastItem{PodcastID: podcastId, DownloadStatus: Deleted}).Update("download_status", NotDownloaded)
+	result := DB.Model(PodcastItem{}).Where(&PodcastItem{PodcastID: podcastId, DownloadStatus: Deleted}).Update("download_status", NotDownloaded)
 	return result.Error
 }
 func UpdateLastEpisodeDateForPodcast(podcastId string, lastEpisode time.Time) error {
-	result := DB.Debug().Model(Podcast{}).Where("id=?", podcastId).Update("last_episode", lastEpisode)
+	result := DB.Model(Podcast{}).Where("id=?", podcastId).Update("last_episode", lastEpisode)
+	return result.Error
+}
+
+func UpdatePodcastItemFileSize(podcastItemId string, size int64) error {
+	result := DB.Model(PodcastItem{}).Where("id=?", podcastItemId).Update("file_size", size)
 	return result.Error
 }
 
 func GetAllPodcastItemsWithoutImage() (*[]PodcastItem, error) {
 	var podcastItems []PodcastItem
-	result := DB.Debug().Preload(clause.Associations).Where("local_image is ?", nil).Where("image != ?", "").Where("download_status=?", Downloaded).Order("created_at desc").Find(&podcastItems)
+	result := DB.Preload(clause.Associations).Where("local_image is ?", nil).Where("image != ?", "").Where("download_status=?", Downloaded).Order("created_at desc").Find(&podcastItems)
 	//fmt.Println("To be downloaded : " + string(len(podcastItems)))
 	return &podcastItems, result.Error
 }
 
 func GetAllPodcastItemsToBeDownloaded() (*[]PodcastItem, error) {
 	var podcastItems []PodcastItem
-	result := DB.Debug().Preload(clause.Associations).Where("download_status=?", NotDownloaded).Find(&podcastItems)
+	result := DB.Preload(clause.Associations).Where("download_status=?", NotDownloaded).Find(&podcastItems)
 	//fmt.Println("To be downloaded : " + string(len(podcastItems)))
 	return &podcastItems, result.Error
 }
 func GetAllPodcastItemsAlreadyDownloaded() (*[]PodcastItem, error) {
 	var podcastItems []PodcastItem
-	result := DB.Debug().Preload(clause.Associations).Where("download_status=?", Downloaded).Find(&podcastItems)
+	result := DB.Preload(clause.Associations).Where("download_status=?", Downloaded).Find(&podcastItems)
 	return &podcastItems, result.Error
 }
 
@@ -246,7 +255,7 @@ func Unlock(name string) {
 func UnlockMissedJobs() {
 	var jobLocks []JobLock
 
-	result := DB.Debug().Find(&jobLocks)
+	result := DB.Find(&jobLocks)
 	if result.Error != nil {
 		return
 	}
@@ -269,7 +278,7 @@ func GetAllTags(sorting string) (*[]Tag, error) {
 	if sorting == "" {
 		sorting = "created_at"
 	}
-	result := DB.Debug().Preload(clause.Associations).Order(sorting).Find(&tags)
+	result := DB.Preload(clause.Associations).Order(sorting).Find(&tags)
 	return &tags, result.Error
 }
 
@@ -295,7 +304,7 @@ func GetTagByLabel(label string) (*Tag, error) {
 }
 
 func CreateTag(tag *Tag) error {
-	tx := DB.Debug().Omit("Podcasts").Create(&tag)
+	tx := DB.Omit("Podcasts").Create(&tag)
 	return tx.Error
 }
 func UpdateTag(tag *Tag) error {
@@ -303,15 +312,15 @@ func UpdateTag(tag *Tag) error {
 	return tx.Error
 }
 func AddTagToPodcast(id, tagId string) error {
-	tx := DB.Debug().Exec("INSERT INTO `podcast_tags` (`podcast_id`,`tag_id`) VALUES (?,?) ON CONFLICT DO NOTHING", id, tagId)
+	tx := DB.Exec("INSERT INTO `podcast_tags` (`podcast_id`,`tag_id`) VALUES (?,?) ON CONFLICT DO NOTHING", id, tagId)
 	return tx.Error
 }
 func RemoveTagFromPodcast(id, tagId string) error {
-	tx := DB.Debug().Exec("DELETE FROM `podcast_tags` WHERE `podcast_id`=? AND `tag_id`=?", id, tagId)
+	tx := DB.Exec("DELETE FROM `podcast_tags` WHERE `podcast_id`=? AND `tag_id`=?", id, tagId)
 	return tx.Error
 }
 
 func UntagAllByTagId(tagId string) error {
-	tx := DB.Debug().Exec("DELETE FROM `podcast_tags` WHERE `tag_id`=?", tagId)
+	tx := DB.Exec("DELETE FROM `podcast_tags` WHERE `tag_id`=?", tagId)
 	return tx.Error
 }

@@ -56,6 +56,8 @@ type PodcastItem struct {
 	BookmarkDate time.Time
 
 	LocalImage string
+
+	FileSize int64
 }
 
 type DownloadStatus int

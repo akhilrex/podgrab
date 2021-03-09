@@ -196,6 +196,7 @@ func intiCron() {
 	gocron.Every(uint64(checkFrequency)).Minutes().Do(service.RefreshEpisodes)
 	gocron.Every(uint64(checkFrequency)).Minutes().Do(service.CheckMissingFiles)
 	gocron.Every(uint64(checkFrequency) * 2).Minutes().Do(service.UnlockMissedJobs)
+	gocron.Every(uint64(checkFrequency) * 3).Minutes().Do(service.UpdateAllFileSizes)
 	gocron.Every(uint64(checkFrequency)).Minutes().Do(service.DownloadMissingImages)
 	gocron.Every(2).Days().Do(service.CreateBackup)
 	<-gocron.Start()
