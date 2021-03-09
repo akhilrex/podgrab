@@ -136,6 +136,14 @@ func GetAllBackupFiles() ([]string, error) {
 	return files, err
 }
 
+func GetFileSize(path string) (int64, error) {
+	info, err := os.Stat(path)
+	if err != nil {
+		return 0, err
+	}
+	return info.Size(), nil
+}
+
 func deleteOldBackup() {
 	files, err := GetAllBackupFiles()
 	if err != nil {
@@ -150,6 +158,26 @@ func deleteOldBackup() {
 		fmt.Println(file)
 		DeleteFile(file)
 	}
+}
+
+func GetFileSizeFromUrl(url string) (int64, error) {
+	resp, err := http.Head(url)
+	if err != nil {
+		return 0, err
+	}
+
+	// Is our request ok?
+
+	if resp.StatusCode != http.StatusOK {
+		return 0, fmt.Errorf("Did not receive 200")
+	}
+
+	size, err := strconv.Atoi(resp.Header.Get("Content-Length"))
+	if err != nil {
+		return 0, err
+	}
+
+	return int64(size), nil
 }
 
 func CreateBackup() (string, error) {

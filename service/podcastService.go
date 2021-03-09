@@ -239,7 +239,7 @@ func AddPodcastItems(podcast *db.Podcast, newPodcast bool) error {
 		keyMap[item.GUID] = 1
 	}
 	var latestDate = time.Time{}
-
+	var itemsAdded = make(map[string]string)
 	for i := 0; i < len(data.Channel.Item); i++ {
 		obj := data.Channel.Item[i]
 		var podcastItem db.PodcastItem
@@ -302,12 +302,43 @@ func AddPodcastItems(podcast *db.Podcast, newPodcast bool) error {
 				DownloadStatus: downloadStatus,
 			}
 			db.CreatePodcastItem(&podcastItem)
+			itemsAdded[podcastItem.ID] = podcastItem.FileURL
 		}
 	}
 	if (latestDate != time.Time{}) {
 		db.UpdateLastEpisodeDateForPodcast(podcast.ID, latestDate)
 	}
+	//go updateSizeFromUrl(itemsAdded)
 	return err
+}
+
+func updateSizeFromUrl(itemUrlMap map[string]string) {
+
+	for id, url := range itemUrlMap {
+		size, err := GetFileSizeFromUrl(url)
+		if err != nil {
+			size = 1
+		}
+
+		db.UpdatePodcastItemFileSize(id, size)
+	}
+
+}
+
+func UpdateAllFileSizes() {
+	items, err := db.GetAllPodcastItemsWithoutSize()
+	if err != nil {
+		return
+	}
+	for _, item := range *items {
+		var size int64 = 1
+		if item.DownloadStatus == db.Downloaded {
+			size, _ = GetFileSize(item.DownloadPath)
+		} else {
+			size, _ = GetFileSizeFromUrl(item.FileURL)
+		}
+		db.UpdatePodcastItemFileSize(item.ID, size)
+	}
 }
 
 func SetPodcastItemAsQueuedForDownload(id string) error {
@@ -376,6 +407,12 @@ func SetPodcastItemAsDownloaded(id string, location string) error {
 		fmt.Println("Location", err.Error())
 		return err
 	}
+
+	size, err := GetFileSize(location)
+	if err == nil {
+		podcastItem.FileSize = size
+	}
+
 	podcastItem.DownloadDate = time.Now()
 	podcastItem.DownloadPath = location
 	podcastItem.DownloadStatus = db.Downloaded
