@@ -146,8 +146,27 @@ func GetAllPodcastItemsAlreadyDownloaded() (*[]PodcastItem, error) {
 
 func GetPodcastEpisodeStats() (*[]PodcastItemStatsModel, error) {
 	var stats []PodcastItemStatsModel
-	result := DB.Model(&PodcastItem{}).Select("download_status,podcast_id, count(1) as count").Group("podcast_id,download_status").Find(&stats)
+	result := DB.Model(&PodcastItem{}).Select("download_status,podcast_id, count(1) as count,sum(file_size) as size").Group("podcast_id,download_status").Find(&stats)
 	return &stats, result.Error
+}
+
+func GetPodcastEpisodeDiskStats() (PodcastItemConsolidateDiskStatsModel, error) {
+	var stats []PodcastItemDiskStatsModel
+	result := DB.Model(&PodcastItem{}).Select("download_status,count(1) as count,sum(file_size) as size").Group("download_status").Find(&stats)
+	dict := make(map[DownloadStatus]int64)
+	for _, stat := range stats {
+		dict[stat.DownloadStatus] = stat.Size
+	}
+
+	toReturn := PodcastItemConsolidateDiskStatsModel{
+		Downloaded:      dict[Downloaded],
+		Downloading:     dict[Downloading],
+		Deleted:         dict[Deleted],
+		NotDownloaded:   dict[NotDownloaded],
+		PendingDownload: dict[NotDownloaded] + dict[Downloading],
+	}
+
+	return toReturn, result.Error
 }
 
 func GetEpisodeNumber(podcastItemId, podcastId string) (int, error) {

@@ -520,12 +520,33 @@
               }
               this.podcasts.sort(compareFunction)
           },
+
+          getReadableSize(bytes){
+            if(bytes<1024){
+              return `${bytes} bytes`;
+            }
+            bytes=bytes/1024
+            if(bytes<1024){
+              return `${bytes.toFixed(2)} KB`;
+            }
+            bytes=bytes/1024
+            if(bytes<1024){
+              return `${bytes.toFixed(2)} MB`;
+            }
+            bytes=bytes/1024
+            if(bytes<1024){
+              return `${bytes.toFixed(2)} GB`;
+            }
+            bytes=bytes/1024
+            return `${bytes.toFixed(2)} TB`;
+          
+          },
           getEpisodeCountTooltip(podcast){
-            var title=`${podcast.DownloadedEpisodesCount} episodes downloaded out of total ${podcast.AllEpisodesCount} episodes`
+            var title=`${podcast.DownloadedEpisodesCount} episodes (${this.getReadableSize(podcast.DownloadedEpisodesSize)}) downloaded out of total ${podcast.AllEpisodesCount} episodes (${this.getReadableSize(podcast.AllEpisodesSize)})`
             if(podcast.DownloadingEpisodesCount){
-                    title+= '\n'+podcast.DownloadingEpisodesCount+' episodes in the queue.'
+                    title+= '\n'+podcast.DownloadingEpisodesCount+' episodes ('+ this.getReadableSize(podcast.DownloadingEpisodesSize)+') in the queue.'
             
-                }
+            }
                 return title
           },
           getFormattedLastEpisodeDate(podcast){

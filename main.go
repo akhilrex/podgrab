@@ -90,6 +90,27 @@ func main() {
 			}
 			return count
 		},
+		"formatFileSize": func(inputSize int64) string {
+			size := float64(inputSize)
+			const divisor float64 = 1024
+			if size < divisor {
+				return fmt.Sprintf("%.0f bytes", size)
+			}
+			size = size / divisor
+			if size < divisor {
+				return fmt.Sprintf("%.2f KB", size)
+			}
+			size = size / divisor
+			if size < divisor {
+				return fmt.Sprintf("%.2f MB", size)
+			}
+			size = size / divisor
+			if size < divisor {
+				return fmt.Sprintf("%.2f GB", size)
+			}
+			size = size / divisor
+			return fmt.Sprintf("%.2f TB", size)
+		},
 		"formatDuration": func(total int) string {
 			if total <= 0 {
 				return ""

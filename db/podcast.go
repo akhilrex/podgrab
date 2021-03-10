@@ -26,6 +26,10 @@ type Podcast struct {
 	DownloadedEpisodesCount  int `gorm:"-"`
 	DownloadingEpisodesCount int `gorm:"-"`
 	AllEpisodesCount         int `gorm:"-"`
+
+	DownloadedEpisodesSize  int64 `gorm:"-"`
+	DownloadingEpisodesSize int64 `gorm:"-"`
+	AllEpisodesSize         int64 `gorm:"-"`
 }
 
 //PodcastItem is
@@ -107,4 +111,19 @@ type PodcastItemStatsModel struct {
 	PodcastID      string
 	DownloadStatus DownloadStatus
 	Count          int
+	Size           int64
+}
+
+type PodcastItemDiskStatsModel struct {
+	DownloadStatus DownloadStatus
+	Count          int
+	Size           int64
+}
+
+type PodcastItemConsolidateDiskStatsModel struct {
+	Downloaded      int64
+	Downloading     int64
+	NotDownloaded   int64
+	Deleted         int64
+	PendingDownload int64
 }

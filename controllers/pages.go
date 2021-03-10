@@ -183,9 +183,11 @@ func PlayerPage(c *gin.Context) {
 func SettingsPage(c *gin.Context) {
 
 	setting := c.MustGet("setting").(*db.Setting)
+	diskStats, _ := db.GetPodcastEpisodeDiskStats()
 	c.HTML(http.StatusOK, "settings.html", gin.H{
-		"setting": setting,
-		"title":   "Update your preferences",
+		"setting":   setting,
+		"title":     "Update your preferences",
+		"diskStats": diskStats,
 	})
 
 }

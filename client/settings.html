@@ -42,7 +42,7 @@
 </div>
 <hr>
 <div class="row" id="app">
-    <div class="columns twelve">
+    <div class="columns six">
     <form action="/saveSettings" method="post" @submit="saveSettings" >
         <div class="row">
             <h3>Settings</h3>
@@ -91,6 +91,21 @@
         <input type="submit" value="Save" class="button">
     </form>
 </div>
+<div class="columns six">
+    <div class="row">
+        <h3>Disk Stats</h3>
+        <table>
+            <tr>
+                <td>Disk Used</td>
+                <td>{{formatFileSize .diskStats.Downloaded}}</td>
+            </tr>
+            <tr>
+                <td>Pending Download</td>
+                <td>{{ formatFileSize .diskStats.PendingDownload }}</td>
+            </tr>
+        </table>
+    </div>
+</div>
 </div>
 <hr>
 <div class="row">
@@ -113,7 +128,7 @@
                 <td><a href="https://github.com/akhilrex/podgrab/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc" target="_blank" rel="noopener noreferrer">Request here</a></td>
             </tr>
             <tr>
-                <td>Support development</td>
+                <td>Support the developer</td>
                 <td><a href="https://www.buymeacoffee.com/akhilrex" target="_blank" rel="noopener noreferrer">Support here</a></td>
             </tr>
         </table>

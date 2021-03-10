@@ -82,15 +82,23 @@ func GetAllPodcasts(sorting string) *[]db.Podcast {
 		PodcastID      string
 		DownloadStatus db.DownloadStatus
 	}
-	statsMap := make(map[Key]int)
+	countMap := make(map[Key]int)
+	sizeMap := make(map[Key]int64)
 	for _, stat := range *stats {
-		statsMap[Key{stat.PodcastID, stat.DownloadStatus}] = stat.Count
+		countMap[Key{stat.PodcastID, stat.DownloadStatus}] = stat.Count
+		sizeMap[Key{stat.PodcastID, stat.DownloadStatus}] = stat.Size
+
 	}
 	var toReturn []db.Podcast
 	for _, podcast := range podcasts {
-		podcast.DownloadedEpisodesCount = statsMap[Key{podcast.ID, db.Downloaded}]
-		podcast.DownloadingEpisodesCount = statsMap[Key{podcast.ID, db.NotDownloaded}]
-		podcast.AllEpisodesCount = podcast.DownloadedEpisodesCount + podcast.DownloadingEpisodesCount + statsMap[Key{podcast.ID, db.Deleted}]
+		podcast.DownloadedEpisodesCount = countMap[Key{podcast.ID, db.Downloaded}]
+		podcast.DownloadingEpisodesCount = countMap[Key{podcast.ID, db.NotDownloaded}]
+		podcast.AllEpisodesCount = podcast.DownloadedEpisodesCount + podcast.DownloadingEpisodesCount + countMap[Key{podcast.ID, db.Deleted}]
+
+		podcast.DownloadedEpisodesSize = sizeMap[Key{podcast.ID, db.Downloaded}]
+		podcast.DownloadingEpisodesSize = sizeMap[Key{podcast.ID, db.NotDownloaded}]
+		podcast.AllEpisodesSize = podcast.DownloadedEpisodesSize + podcast.DownloadingEpisodesSize + sizeMap[Key{podcast.ID, db.Deleted}]
+
 		toReturn = append(toReturn, podcast)
 	}
 	return &toReturn
