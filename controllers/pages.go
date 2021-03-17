@@ -7,6 +7,7 @@ import (
 	"math"
 	"net/http"
 	"os"
+	"sort"
 	"strings"
 	"time"
 
@@ -124,7 +125,7 @@ func getItemsToPlay(itemId, podcastId string, tagIds []string) []db.PodcastItem 
 				podIds = append(podIds, pod.ID)
 			}
 		}
-		items = *service.GetAllPodcastItemsByPodcastIds(podIds)
+		items = *service.GetAllPodcastItemsByPodcastIds(podIds, "")
 	}
 	return items
 }
@@ -134,6 +135,15 @@ func PlayerPage(c *gin.Context) {
 	itemId, hasItemId := c.GetQuery("itemId")
 	podcastId, hasPodcastId := c.GetQuery("podcastId")
 	tagIds, hasTagIds := c.GetQueryArray("tagIds")
+	sortOrder, hasSortOrder := c.GetQuery("sort")
+
+	if !hasSortOrder {
+		sortOrder = "desc"
+	}
+	sorting := "pub_date desc"
+	if sortOrder == "asc" {
+		sorting = "pub_date asc"
+	}
 	title := "Podgrab"
 	var items []db.PodcastItem
 	var totalCount int64
@@ -156,7 +166,7 @@ func PlayerPage(c *gin.Context) {
 				podIds = append(podIds, pod.ID)
 			}
 		}
-		items = *service.GetAllPodcastItemsByPodcastIds(podIds)
+		items = *service.GetAllPodcastItemsByPodcastIds(podIds, sorting)
 		if len(tagNames) == 1 {
 			title = fmt.Sprintf("Playing episodes with tag : %s", (tagNames[0]))
 		} else {
@@ -164,12 +174,17 @@ func PlayerPage(c *gin.Context) {
 		}
 	} else {
 		title = "Playing Latest Episodes"
-		if err := db.GetPaginatedPodcastItems(1, 20, nil, nil, time.Time{}, &items, &totalCount); err != nil {
+
+		if err := db.GetPaginatedPodcastItems(1, 20, nil, nil, time.Time{}, sorting, &items, &totalCount); err != nil {
 			fmt.Println(err.Error())
 		}
 	}
 	setting := c.MustGet("setting").(*db.Setting)
-
+	if sortOrder == "asc" {
+		sort.Slice(items, func(i, j int) bool {
+			return items[i].PubDate.Before(items[j].PubDate)
+		})
+	}
 	c.HTML(http.StatusOK, "player.html", gin.H{
 		"title":          title,
 		"podcastItems":   items,
@@ -252,7 +267,7 @@ func AllEpisodesPage(c *gin.Context) {
 	}
 
 	if err := db.GetPaginatedPodcastItems(page, count,
-		nil, filter.PlayedOnly, fromDate,
+		nil, filter.PlayedOnly, fromDate, "",
 		&podcastItems, &totalCount); err == nil {
 
 		setting := c.MustGet("setting").(*db.Setting)

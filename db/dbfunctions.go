@@ -35,7 +35,7 @@ func GetAllPodcastItemsWithoutSize() (*[]PodcastItem, error) {
 	result := DB.Where("file_size<=?", 0).Order("pub_date desc").Find(&podcasts)
 	return &podcasts, result.Error
 }
-func GetPaginatedPodcastItems(page int, count int, downloadedOnly *bool, playedOnly *bool, fromDate time.Time, podcasts *[]PodcastItem, total *int64) error {
+func GetPaginatedPodcastItems(page int, count int, downloadedOnly *bool, playedOnly *bool, fromDate time.Time, sortOrder string, podcasts *[]PodcastItem, total *int64) error {
 	query := DB.Preload("Podcast")
 	if downloadedOnly != nil {
 		if *downloadedOnly {
@@ -54,8 +54,11 @@ func GetPaginatedPodcastItems(page int, count int, downloadedOnly *bool, playedO
 	if (fromDate != time.Time{}) {
 		query = query.Where("pub_date>=?", fromDate)
 	}
+	if sortOrder == "" {
+		sortOrder = "pub_date desc"
+	}
 
-	totalsQuery := query.Order("pub_date desc").Find(&podcasts)
+	totalsQuery := query.Order(sortOrder).Find(&podcasts)
 	totalsQuery.Count(total)
 
 	result := query.Limit(count).Offset((page - 1) * count).Order("pub_date desc").Find(&podcasts)
@@ -105,9 +108,11 @@ func GetAllPodcastItemsByPodcastId(podcastId string, podcastItems *[]PodcastItem
 	result := DB.Preload(clause.Associations).Where(&PodcastItem{PodcastID: podcastId}).Find(&podcastItems)
 	return result.Error
 }
-func GetAllPodcastItemsByPodcastIds(podcastIds []string, podcastItems *[]PodcastItem) error {
-
-	result := DB.Preload(clause.Associations).Where("podcast_id in ?", podcastIds).Order("pub_date desc").Find(&podcastItems)
+func GetAllPodcastItemsByPodcastIds(podcastIds []string, sortOrder string, podcastItems *[]PodcastItem) error {
+	if sortOrder == "" {
+		sortOrder = "pub_date desc"
+	}
+	result := DB.Preload(clause.Associations).Where("podcast_id in ?", podcastIds).Order(sortOrder).Find(&podcastItems)
 	return result.Error
 }
 

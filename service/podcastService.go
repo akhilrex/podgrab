@@ -59,10 +59,10 @@ func GetPodcastItemById(id string) *db.PodcastItem {
 
 	return &podcastItem
 }
-func GetAllPodcastItemsByPodcastIds(podcastIds []string) *[]db.PodcastItem {
+func GetAllPodcastItemsByPodcastIds(podcastIds []string, sortOrder string) *[]db.PodcastItem {
 	var podcastItems []db.PodcastItem
 
-	db.GetAllPodcastItemsByPodcastIds(podcastIds, &podcastItems)
+	db.GetAllPodcastItemsByPodcastIds(podcastIds, sortOrder, &podcastItems)
 	return &podcastItems
 }
 
