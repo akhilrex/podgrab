@@ -53,7 +53,12 @@
       }
       body.playerExists .button-enqueue{
         display: inline-block;
+      
+        [v-cloak] {
+        display: none;
       }
+}
+
     </style>
   </head>
   <body>
@@ -62,10 +67,13 @@
 
       <br />{{$setting := .setting}} 
       
-      <div id="app">
+      <div id="app" v-cloak>
 
-  
-    <form @submit.prevent="submitFilters()">
+  <button @click="toggleFilters()" class="u-full-width">
+    <span  v-show="!showFilters">Show Filters</span>
+    <span  v-show="showFilters">Hide Filters</span>
+  </button>
+    <form @submit.prevent="submitFilters()" v-show="showFilters">
       <div class="row">
          <input class="columns five" type="search" @input="searchQueryUpated()" v-model="filter.q" placeholder="Search">
     <div class="columns three">    <vue-multiselect v-model="selectedSorting" :options="sortOptions" :searchable="false"
@@ -75,32 +83,35 @@
     <div class="columns one">      <vue-multiselect :show-pointer="false"  v-model="filter.count" :options="pagingOptions" :searchable="false"  :allow-empty="false" :close-on-select="true" :show-labels="false" placeholder="Pick a value"></vue-multiselect>
 </div>
   
-      <div class="columns three">
-        <input type="submit" value="Filter" class="button">
-        <button class="button" @click="resetFilters()">Reset</button>
-      </div>
+<div class="columns three">    <vue-multiselect v-model="selectedPlayedStatus" :options="playedStatusOptions" :searchable="false"
+  :multiple="false" :close-on-select="true" :clear-on-select="true" :allow-empty="false" :show-labels="false"
+  placeholder="Sort By" label="Label" track-by="Value" :preselect-first="true">
+ </vue-multiselect></div>
       
    
   </div>
     <div class="row">
-      <vue-multiselect class="columns three" v-model="selectedPodcasts" :options="podcasts" 
+      <vue-multiselect class="columns three" v-model="selectedPodcasts" :options="podcasts"  :show-labels="false"
       :multiple="true" :close-on-select="false" :clear-on-select="false" 
       :preserve-search="true" placeholder="Podcasts" label="Title" track-by="ID" :preselect-first="false">
         <template slot="selection" slot-scope="{ values, search, isOpen }">
           <span class="multiselect__single" v-if="values.length && !isOpen">${ values.length } options selected</span>
         </template>
       </vue-multiselect>
-      <vue-multiselect class="columns three" v-model="selectedTags" :options="tags" :multiple="true" :close-on-select="false" :clear-on-select="false" :preserve-search="true" placeholder="Tags" label="Label" track-by="ID" :preselect-first="false">
+      <vue-multiselect class="columns three" v-model="selectedTags"  :show-labels="false" :options="tags" :multiple="true" :close-on-select="false" :clear-on-select="false" :preserve-search="true" placeholder="Tags" label="Label" track-by="ID" :preselect-first="false">
         <template slot="selection" slot-scope="{ values, search, isOpen }"><span class="multiselect__single" v-if="values.length && !isOpen">${ values.length } options selected</span></template>
       </vue-multiselect>
       <div class="columns three">    <vue-multiselect v-model="selectedDownloadStatus" :options="downloadStatusOptions" :searchable="false"
         :multiple="false" :close-on-select="true" :clear-on-select="true" :allow-empty="false" :show-labels="false"
         placeholder="Sort By" label="Label" track-by="Value" :preselect-first="true">
        </vue-multiselect></div>
-       <div class="columns three">    <vue-multiselect v-model="selectedPlayedStatus" :options="playedStatusOptions" :searchable="false"
-        :multiple="false" :close-on-select="true" :clear-on-select="true" :allow-empty="false" :show-labels="false"
-        placeholder="Sort By" label="Label" track-by="Value" :preselect-first="true">
-       </vue-multiselect></div>
+       <div class="columns three">
+        <a title="Play items in this page" v-if="podcastItems.length" class="button" @click="playPage()"><i class="fas fa-play"></i></a>
+        <a title="Enqueue items in this page" v-if="podcastItems.length" class="button  button-enqueue" @click="enqueuePage()"><i class="fas fa-plus"></i></a>
+        <a title="Reset Filters" class="button" @click="resetFilters()"><i class="fas fa-undo"></i></a>
+       
+      </div>
+      
     </div>
     </form>
  <hr>
@@ -275,10 +286,17 @@ var app = new Vue({
         computed:{
           page(){
             return this.filter.page;
+          },
+          count(){
+            return this.filter.count;
           }
         },
         watch:{
+        
           page(newPage,oldPage){
+            if(newPage==oldPage){
+              return;
+            }
            if(newPage==1){
              this.filter.previousPage=0;
            }else{
@@ -292,6 +310,17 @@ var app = new Vue({
            this.getData()
            
           },
+          count(current,old){
+            this.getData()
+          },
+          showFilters(current,old){
+           
+            if(localStorage){
+              localStorage.showFilters=current
+            }
+
+          },
+          
           selectedPodcasts(current,old){
             var arr=[];
             for (let index = 0; index < current.length; index++) {
@@ -299,7 +328,7 @@ var app = new Vue({
               arr.push(element.ID);
             }
             this.filter['podcastIds']=arr;
-            this.getData()
+            this.submitFilters()
           },
           selectedTags(current,old){
             var arr=[];
@@ -308,24 +337,27 @@ var app = new Vue({
               arr.push(element.ID);
             }
             this.filter['tagIds']=arr;
-            this.getData()
+            this.submitFilters()
           },
           selectedSorting(current,old){
             this.filter.sorting=current.Value;
-            this.getData()
+            this.submitFilters()
           },
           selectedDownloadStatus(current,old){
             this.filter.isDownloaded=current.Value;
-            this.getData()
+            this.submitFilters()
           },
           selectedPlayedStatus(current,old){
             this.filter.isPlayed=current.Value;
-            this.getData()
+            this.submitFilters()
           },
         },
         mounted(){
           if(localStorage && localStorage.episodesFilter){
               this.filter=JSON.parse(localStorage.episodesFilter);
+            }
+            if(localStorage && localStorage.showFilters){
+              this.showFilters=JSON.parse(localStorage.showFilters);
             }
 
             if(this.filter.podcastIds!=null){
@@ -425,15 +457,17 @@ var app = new Vue({
             downloadToDisk(item.ID)
           },
           openPlayer(item){
-            openPlayer(item.ID)
+            openPlayer([item.ID])
           },
-          enqueuePlayer(item){
-            enqueuePlayer(item.ID)
+          enqueueEpisode(item){
+            enqueueEpisode([item.ID])
           },
           searchQueryUpated(){
             var self=this;
+           
             clearTimeout(this.debounce)
             this.debounce = setTimeout(() => {
+              self.filter.page=1
                 self.getData()
               }, 600)
           },
@@ -446,6 +480,23 @@ var app = new Vue({
             this.filter.page=1;
             this.getData();
         
+          },
+          toggleFilters(){
+            this.showFilters=!this.showFilters
+          },
+          playPage(){
+            var itemIds=[];
+            for(var i=0;i<this.podcastItems.length;i++){
+              itemIds.push(this.podcastItems[i].ID)
+            }
+            openPlayer(itemIds)
+          },
+          enqueuePage(){
+            var itemIds=[];
+            for(var i=0;i<this.podcastItems.length;i++){
+              itemIds.push(this.podcastItems[i].ID)
+            }
+            enqueueEpisode(itemIds)
           },
           updateUrl(){
             var url= new URL(window.top.location.href);
@@ -479,6 +530,7 @@ var app = new Vue({
                 self.filter=response.data.filter;
                 self.saveFilter(self.filter);
                 self.updateUrl();
+                setPageTitle("Episodes ("+self.filter.totalCount+")")
               })
               .catch(function (error) {
                 if (error.response && error.response.data && error.response.data.message) {
@@ -505,6 +557,7 @@ var app = new Vue({
           selectedTags:[],
           selectedDownloadStatus:"",
           selectedPlayedStatus:"",
+          showFilters:localStorage && JSON.parse(localStorage.showFilters),
          
             {{ $len := len .podcastItems}}
             podcastItems: {{if gt $len 0}} {{ .podcastItems }} {{else}} [] {{end}},
@@ -664,11 +717,11 @@ var app = new Vue({
                 document.body.classList.add("playerExists")
               }
             });
-            function enqueueEpisode(id){
+            function enqueueEpisode(ids){
             if(!socket){
               return
             }
-           socket.send(getWebsocketMessage("Enqueue",`{"itemId":"${id}"}`))
+           socket.send(getWebsocketMessage("Enqueue",`{"itemIds":${JSON.stringify(ids)}}`))
           }
           function enquePodcast(id){
             if(!socket){

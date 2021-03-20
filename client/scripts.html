@@ -79,10 +79,12 @@
   }
   checkUseMore();
 
-  function openPlayer(itemId, podcastId,tagIds) {
+  function openPlayer(itemIds, podcastId,tagIds) {
     var url = "/player?";
-    if (itemId) {
-      url += "&itemId=" + itemId;
+    if(itemIds && itemIds.length>0){
+      for (const itemId of itemIds) {
+        url += "&itemIds=" + itemId;
+      }
     }
     if (podcastId) {
       url += "&podcastId=" + podcastId;

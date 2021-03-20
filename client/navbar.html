@@ -141,7 +141,7 @@ div#overlay{
 <div></div>
 <div></div>
   </a>
-  <h1>{{ .title }}</h1>
+  <h1 id="pageTitle">{{ .title }}</h1>
   {{if .podcastId }}
   <button
   class="button"
@@ -199,6 +199,11 @@ onclick="enquePodcast({{ .podcastId }})"
   <div id="overlay" onclick="toggleMenu()"></div>
 
   <script>
+
+    function setPageTitle(content){
+      document.getElementById('pageTitle').innerText=content;
+    }
+
     function toggleMenu(){
     var sideDrawer= document.getElementById('sideDrawer')
     var overlay= document.getElementById('overlay')

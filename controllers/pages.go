@@ -106,11 +106,11 @@ func PodcastPage(c *gin.Context) {
 
 }
 
-func getItemsToPlay(itemId, podcastId string, tagIds []string) []db.PodcastItem {
+func getItemsToPlay(itemIds []string, podcastId string, tagIds []string) []db.PodcastItem {
 	var items []db.PodcastItem
-	if itemId != "" {
-		toAdd := service.GetPodcastItemById(itemId)
-		items = append(items, *toAdd)
+	if len(itemIds) > 0 {
+		toAdd, _ := service.GetAllPodcastItemsByIds(itemIds)
+		items = *toAdd
 
 	} else if podcastId != "" {
 		pod := service.GetPodcastById(podcastId)
@@ -132,16 +132,16 @@ func getItemsToPlay(itemId, podcastId string, tagIds []string) []db.PodcastItem 
 
 func PlayerPage(c *gin.Context) {
 
-	itemId, hasItemId := c.GetQuery("itemId")
+	itemIds, hasItemIds := c.GetQueryArray("itemIds")
 	podcastId, hasPodcastId := c.GetQuery("podcastId")
 	tagIds, hasTagIds := c.GetQueryArray("tagIds")
 	title := "Podgrab"
 	var items []db.PodcastItem
 	var totalCount int64
-	if hasItemId {
-		toAdd := service.GetPodcastItemById(itemId)
-		items = append(items, *toAdd)
-		totalCount = 1
+	if hasItemIds {
+		toAdd, _ := service.GetAllPodcastItemsByIds(itemIds)
+		items = *toAdd
+		totalCount = int64(len(items))
 	} else if hasPodcastId {
 		pod := service.GetPodcastById(podcastId)
 		items = pod.PodcastItems

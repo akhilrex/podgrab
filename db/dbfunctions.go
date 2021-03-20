@@ -170,6 +170,22 @@ func GetAllPodcastItemsByPodcastIds(podcastIds []string, podcastItems *[]Podcast
 	result := DB.Preload(clause.Associations).Where("podcast_id in ?", podcastIds).Order("pub_date desc").Find(&podcastItems)
 	return result.Error
 }
+func GetAllPodcastItemsByIds(podcastItemIds []string) (*[]PodcastItem, error) {
+	var podcastItems []PodcastItem
+
+	var sb strings.Builder
+
+	sb.WriteString("\n CASE ID \n")
+
+	for i, v := range podcastItemIds {
+		sb.WriteString(fmt.Sprintf("WHEN '%v' THEN %v \n", v, i+1))
+	}
+
+	sb.WriteString(fmt.Sprintln("END"))
+
+	result := DB.Debug().Preload(clause.Associations).Where("id in ?", podcastItemIds).Order(sb.String()).Find(&podcastItems)
+	return &podcastItems, result.Error
+}
 
 func SetAllEpisodesToDownload(podcastId string) error {
 	result := DB.Model(PodcastItem{}).Where(&PodcastItem{PodcastID: podcastId, DownloadStatus: Deleted}).Update("download_status", NotDownloaded)
