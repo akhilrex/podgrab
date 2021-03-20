@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/akhilrex/podgrab/db"
+	"github.com/akhilrex/podgrab/model"
 	"github.com/akhilrex/podgrab/service"
 	"github.com/gin-gonic/gin"
 )
@@ -55,7 +56,7 @@ func PodcastPage(c *gin.Context) {
 		var podcast db.Podcast
 
 		if err := db.GetPodcastById(searchByIdQuery.Id, &podcast); err == nil {
-			var pagination Pagination
+			var pagination model.Pagination
 			if c.ShouldBindQuery(&pagination) == nil {
 				var page, count int
 				if page = pagination.Page; page == 0 {
@@ -94,7 +95,7 @@ func PodcastPage(c *gin.Context) {
 					"podcastId":      searchByIdQuery.Id,
 				})
 			} else {
-				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+				c.JSON(http.StatusBadRequest, err)
 			}
 		} else {
 			c.JSON(http.StatusBadRequest, err)
@@ -224,73 +225,41 @@ func BackupsPage(c *gin.Context) {
 	}
 
 }
+
+func getSortOptions() interface{} {
+	return []struct {
+		Label, Value string
+	}{
+		{"Release (asc)", "release_asc"},
+		{"Release (desc)", "release_desc"},
+		{"Duration (asc)", "duration_asc"},
+		{"Duration (desc)", "duration_desc"},
+	}
+}
 func AllEpisodesPage(c *gin.Context) {
-	var pagination Pagination
-	var page, count int
-	c.ShouldBindQuery(&pagination)
-	if page = pagination.Page; page == 0 {
-		page = 1
-	}
-	if count = pagination.Count; count == 0 {
-		count = 10
-	}
-
-	var filter EpisodesFilter
+	var filter model.EpisodesFilter
 	c.ShouldBindQuery(&filter)
-
-	var podcastItems []db.PodcastItem
-	var totalCount int64
-	//fmt.Printf("%+v\n", filter)
-	fromDate := time.Time{}
-	if filter.FromDate != "" {
-		parsedDate, err := time.Parse("2006-01-02", strings.Trim(filter.FromDate, "\""))
-		if err != nil {
-			fromDate = time.Time{}
-		} else {
-			fromDate = parsedDate
-		}
+	filter.VerifyPaginationValues()
+	setting := c.MustGet("setting").(*db.Setting)
+	podcasts := service.GetAllPodcasts("")
+	tags, _ := db.GetAllTags("")
+	toReturn := gin.H{
+		"title":        "All Episodes",
+		"podcastItems": []db.PodcastItem{},
+		"setting":      setting,
+		"page":         filter.Page,
+		"count":        filter.Count,
+		"filter":       filter,
+		"podcasts":     podcasts,
+		"tags":         tags,
+		"sortOptions":  getSortOptions(),
 	}
-
-	if err := db.GetPaginatedPodcastItems(page, count,
-		nil, filter.PlayedOnly, fromDate,
-		&podcastItems, &totalCount); err == nil {
-
-		setting := c.MustGet("setting").(*db.Setting)
-		totalPages := int(math.Ceil(float64(totalCount) / float64(count)))
-		nextPage, previousPage := 0, 0
-		if page < totalPages {
-			nextPage = page + 1
-		}
-		if page > 1 {
-			previousPage = page - 1
-		}
-		downloadedOnly := false
-		if filter.DownloadedOnly != nil {
-			downloadedOnly = *filter.DownloadedOnly
-			fmt.Println(downloadedOnly)
-		}
-		toReturn := gin.H{
-			"title":          "All Episodes",
-			"podcastItems":   podcastItems,
-			"setting":        setting,
-			"page":           page,
-			"count":          count,
-			"totalCount":     totalCount,
-			"totalPages":     totalPages,
-			"nextPage":       nextPage,
-			"previousPage":   previousPage,
-			"downloadedOnly": downloadedOnly,
-		}
-		fmt.Printf("%+v\n", totalCount)
-		c.HTML(http.StatusOK, "episodes.html", toReturn)
-	} else {
-		c.JSON(http.StatusBadRequest, err)
-	}
+	c.HTML(http.StatusOK, "episodes_new.html", toReturn)
 
 }
 
 func AllTagsPage(c *gin.Context) {
-	var pagination Pagination
+	var pagination model.Pagination
 	var page, count int
 	c.ShouldBindQuery(&pagination)
 	if page = pagination.Page; page == 0 {
