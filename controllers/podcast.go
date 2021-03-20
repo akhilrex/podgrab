@@ -45,17 +45,6 @@ type AddRemoveTagQuery struct {
 	TagId string `binding:"required" uri:"tagId" json:"tagId" form:"tagId"`
 }
 
-type Pagination struct {
-	Page  int `uri:"page" query:"page" json:"page" form:"page"`
-	Count int `uri:"count" query:"count" json:"count" form:"count"`
-}
-
-type EpisodesFilter struct {
-	DownloadedOnly *bool  `uri:"downloadedOnly" query:"downloadedOnly" json:"downloadedOnly" form:"downloadedOnly"`
-	PlayedOnly     *bool  `uri:"playedOnly" query:"playedOnly" json:"playedOnly" form:"playedOnly"`
-	FromDate       string `uri:"fromDate" query:"fromDate" json:"fromDate" form:"fromDate"`
-}
-
 type PatchPodcastItem struct {
 	IsPlayed bool   `json:"isPlayed" form:"isPlayed" query:"isPlayed"`
 	Title    string `form:"title" json:"title" query:"title"`
@@ -182,9 +171,23 @@ func DownloadAllEpisodesByPodcastId(c *gin.Context) {
 }
 
 func GetAllPodcastItems(c *gin.Context) {
-	var podcasts []db.PodcastItem
-	db.GetAllPodcastItems(&podcasts)
-	c.JSON(200, podcasts)
+	var filter model.EpisodesFilter
+	err := c.ShouldBindQuery(&filter)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	filter.VerifyPaginationValues()
+	if podcastItems, totalCount, err := db.GetPaginatedPodcastItemsNew(filter); err == nil {
+		filter.SetCounts(totalCount)
+		toReturn := gin.H{
+			"podcastItems": podcastItems,
+			"filter":       &filter,
+		}
+		c.JSON(http.StatusOK, toReturn)
+	} else {
+		c.JSON(http.StatusBadRequest, err)
+	}
+
 }
 
 func GetPodcastItemById(c *gin.Context) {

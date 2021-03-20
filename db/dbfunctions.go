@@ -4,8 +4,11 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
 
+	"github.com/akhilrex/podgrab/model"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -35,6 +38,63 @@ func GetAllPodcastItemsWithoutSize() (*[]PodcastItem, error) {
 	result := DB.Where("file_size<=?", 0).Order("pub_date desc").Find(&podcasts)
 	return &podcasts, result.Error
 }
+
+func getSortOrder(sorting model.EpisodeSort) string {
+	switch sorting {
+	case model.RELEASE_ASC:
+		return "pub_date asc"
+	case model.RELEASE_DESC:
+		return "pub_date desc"
+	case model.DURATION_ASC:
+		return "duration asc"
+	case model.DURATION_DESC:
+		return "duration desc"
+	default:
+		return "pub_date desc"
+	}
+}
+
+func GetPaginatedPodcastItemsNew(queryModel model.EpisodesFilter) (*[]PodcastItem, int64, error) {
+	var podcasts []PodcastItem
+	var total int64
+	query := DB.Debug().Preload("Podcast")
+	if queryModel.IsDownloaded != nil {
+		isDownloaded, err := strconv.ParseBool(*queryModel.IsDownloaded)
+		if err == nil && isDownloaded {
+			query = query.Where("download_status=?", Downloaded)
+		} else {
+			query = query.Where("download_status!=?", Downloaded)
+		}
+	}
+	if queryModel.IsPlayed != nil {
+		isPlayed, err := strconv.ParseBool(*queryModel.IsPlayed)
+
+		if err == nil && isPlayed {
+			query = query.Where("is_played=?", 1)
+		} else {
+			query = query.Where("is_played=?", 0)
+		}
+	}
+
+	if queryModel.Q != "" {
+		query = query.Where("UPPER(title) like ?", "%"+strings.TrimSpace(strings.ToUpper(queryModel.Q))+"%")
+	}
+
+	if len(queryModel.TagIds) > 0 {
+		query = query.Where("podcast_id in (select podcast_id from podcast_tags where tag_id in ?)", queryModel.TagIds)
+	}
+
+	if len(queryModel.PodcastIds) > 0 {
+		query = query.Where("podcast_id in ?", queryModel.PodcastIds)
+	}
+
+	totalsQuery := query.Order(getSortOrder(queryModel.Sorting)).Find(&podcasts)
+	totalsQuery.Count(&total)
+
+	result := query.Limit(queryModel.Count).Offset((queryModel.Page - 1) * queryModel.Count).Order("pub_date desc").Find(&podcasts)
+	return &podcasts, total, result.Error
+}
+
 func GetPaginatedPodcastItems(page int, count int, downloadedOnly *bool, playedOnly *bool, fromDate time.Time, podcasts *[]PodcastItem, total *int64) error {
 	query := DB.Preload("Podcast")
 	if downloadedOnly != nil {
@@ -109,6 +169,22 @@ func GetAllPodcastItemsByPodcastIds(podcastIds []string, podcastItems *[]Podcast
 
 	result := DB.Preload(clause.Associations).Where("podcast_id in ?", podcastIds).Order("pub_date desc").Find(&podcastItems)
 	return result.Error
+}
+func GetAllPodcastItemsByIds(podcastItemIds []string) (*[]PodcastItem, error) {
+	var podcastItems []PodcastItem
+
+	var sb strings.Builder
+
+	sb.WriteString("\n CASE ID \n")
+
+	for i, v := range podcastItemIds {
+		sb.WriteString(fmt.Sprintf("WHEN '%v' THEN %v \n", v, i+1))
+	}
+
+	sb.WriteString(fmt.Sprintln("END"))
+
+	result := DB.Debug().Preload(clause.Associations).Where("id in ?", podcastItemIds).Order(sb.String()).Find(&podcastItems)
+	return &podcastItems, result.Error
 }
 
 func SetAllEpisodesToDownload(podcastId string) error {

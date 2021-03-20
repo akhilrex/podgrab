@@ -59,6 +59,10 @@ func GetPodcastItemById(id string) *db.PodcastItem {
 
 	return &podcastItem
 }
+
+func GetAllPodcastItemsByIds(podcastItemIds []string) (*[]db.PodcastItem, error) {
+	return db.GetAllPodcastItemsByIds(podcastItemIds)
+}
 func GetAllPodcastItemsByPodcastIds(podcastIds []string) *[]db.PodcastItem {
 	var podcastItems []db.PodcastItem
 

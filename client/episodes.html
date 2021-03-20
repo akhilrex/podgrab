@@ -188,41 +188,41 @@
 
       <div class="row">
         <div class="columns twelve" style="text-align: center">
-          {{if .previousPage }}
+          {{if .filter.PreviousPage }}
           <a
             href="?page=1&downloadedOnly={{.downloadedOnly}}"
             class="button"
-            >Newest</a
+            >First</a
           >
           {{end}}
-          {{if .previousPage }}
+          {{if .filter.PreviousPage }}
           <a
-            href="?page={{.previousPage}}&downloadedOnly={{.downloadedOnly}}"
+            href="?page={{.filter.PreviousPage}}&downloadedOnly={{.downloadedOnly}}"
             class="button"
-            >Newer</a 
+            >Last</a 
           >
           {{end}} 
           
           <select name="page" id="pageDdl">
             {{ $page:=.page }}
-            {{range $y := intRange 1 .totalPages}}
+            {{range $y := intRange 1 .filter.TotalPages}}
               <option {{if eq $page $y }} selected="selected" {{end}}}>{{$y}}</option>
             {{end}}
           </select>
           
-          {{if .nextPage }}
+          {{if .filter.NextPage }}
           <a
-            href="?page={{.nextPage}}&downloadedOnly={{.downloadedOnly}}"
+            href="?page={{.filter.NextPage}}&downloadedOnly={{.downloadedOnly}}"
             class="button"
-            >Older</a
+            >Next</a
           >
           {{end}}
-          {{if gt .totalPages .page }}
+          {{if gt .filter.TotalPages .page }}
         
           <a
-            href="?page={{.totalPages}}&downloadedOnly={{.downloadedOnly}}"
+            href="?page={{.filter.TotalPages}}&downloadedOnly={{.downloadedOnly}}"
             class="button"
-            >Oldest</a
+            >Last</a
           >
           {{end}}
         </div>

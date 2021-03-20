@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{.title}} - PodGrab</title>
+    {{template "commoncss" .}}
+    <link rel="stylesheet" href="/webassets/vue-multiselect.min.css">
+
+    <style>
+      img {
+        display: none;
+      }
+
+      
+      h2,
+      h3,
+      h4,
+      h5 {
+        margin-bottom: 1rem;
+      }
+      h4 {
+        font-size: 2rem;
+      }
+
+      h5 {
+        font-size: 1.5rem;
+      }
+      p {
+        margin-bottom: 0.5rem;
+      }
+      hr {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .podcastItem .button {
+        padding: 0 15px;
+      }
+
+      .IsPlayed-true {
+        color: #555555;
+      }
+
+      /* Larger than tablet */
+      @media (min-width: 750px) {
+        img {
+          display: block;
+        }
+      }
+      .button-enqueue{
+        display: none;
+      }
+      body.playerExists .button-enqueue{
+        display: inline-block;
+      
+        [v-cloak] {
+        display: none;
+      }
+}
+
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      {{template "navbar" .}}
+
+      <br />{{$setting := .setting}} 
+      
+      <div id="app" v-cloak>
+
+  <button @click="toggleFilters()" class="u-full-width">
+    <span  v-show="!showFilters">Show Filters</span>
+    <span  v-show="showFilters">Hide Filters</span>
+  </button>
+    <form @submit.prevent="submitFilters()" v-show="showFilters">
+      <div class="row">
+         <input class="columns five" type="search" @input="searchQueryUpated()" v-model="filter.q" placeholder="Search">
+    <div class="columns three">    <vue-multiselect v-model="selectedSorting" :options="sortOptions" :searchable="false"
+       :multiple="false" :close-on-select="true" :clear-on-select="true" :allow-empty="false" :show-labels="false"
+       placeholder="Sort By" label="Label" track-by="Value" :preselect-first="true">
+      </vue-multiselect></div>
+    <div class="columns one">      <vue-multiselect :show-pointer="false"  v-model="filter.count" :options="pagingOptions" :searchable="false"  :allow-empty="false" :close-on-select="true" :show-labels="false" placeholder="Pick a value"></vue-multiselect>
+</div>
+  
+<div class="columns three">    <vue-multiselect v-model="selectedPlayedStatus" :options="playedStatusOptions" :searchable="false"
+  :multiple="false" :close-on-select="true" :clear-on-select="true" :allow-empty="false" :show-labels="false"
+  placeholder="Sort By" label="Label" track-by="Value" :preselect-first="true">
+ </vue-multiselect></div>
+      
+   
+  </div>
+    <div class="row">
+      <vue-multiselect class="columns three" v-model="selectedPodcasts" :options="podcasts"  :show-labels="false"
+      :multiple="true" :close-on-select="false" :clear-on-select="false" 
+      :preserve-search="true" placeholder="Podcasts" label="Title" track-by="ID" :preselect-first="false">
+        <template slot="selection" slot-scope="{ values, search, isOpen }">
+          <span class="multiselect__single" v-if="values.length && !isOpen">${ values.length } options selected</span>
+        </template>
+      </vue-multiselect>
+      <vue-multiselect class="columns three" v-model="selectedTags"  :show-labels="false" :options="tags" :multiple="true" :close-on-select="false" :clear-on-select="false" :preserve-search="true" placeholder="Tags" label="Label" track-by="ID" :preselect-first="false">
+        <template slot="selection" slot-scope="{ values, search, isOpen }"><span class="multiselect__single" v-if="values.length && !isOpen">${ values.length } options selected</span></template>
+      </vue-multiselect>
+      <div class="columns three">    <vue-multiselect v-model="selectedDownloadStatus" :options="downloadStatusOptions" :searchable="false"
+        :multiple="false" :close-on-select="true" :clear-on-select="true" :allow-empty="false" :show-labels="false"
+        placeholder="Sort By" label="Label" track-by="Value" :preselect-first="true">
+       </vue-multiselect></div>
+       <div class="columns three">
+        <a title="Play items in this page" v-if="podcastItems.length" class="button" @click="playPage()"><i class="fas fa-play"></i></a>
+        <a title="Enqueue items in this page" v-if="podcastItems.length" class="button  button-enqueue" @click="enqueuePage()"><i class="fas fa-plus"></i></a>
+        <a title="Reset Filters" class="button" @click="resetFilters()"><i class="fas fa-undo"></i></a>
+       
+      </div>
+      
+    </div>
+    </form>
+ <hr>
+
+
+  <template v-for="item in podcastItems"  >
+      <div class="podcasts row  podcastItem" >
+        <div class="columns two">
+          <img
+            onerror="onImageError(this)"
+            class="u-full-width"
+            :src=" getEpisodeImage(item)"
+            v-bind:alt="item.Title"
+            lazy="lazy"
+          />
+        </div>
+        <div class="columns ten">
+          <div class="row">
+            <div class="columns eight">
+              <h4>
+                <i
+                   v-if="item.IsPlayed"
+                   title="Played"
+                   style="color: green"
+                   class="fas fa-check-circle"
+                 ></i>
+                 ${item.Title} <template v-if="item.Podcast && item.Podcast.Title"> // ${item.Podcast.Title}</template>
+               </h4>
+            </div>
+            <div class="columns three">
+              <small :title="item.PubDate">${getRelativeDate(item.PubDate)}</small
+              >
+            </div>
+            <div class="columns one">
+              <small> ${getFormattedDuration(item.Duration)}</small>
+            </div>
+          </div>
+          <p class="useMore">${item.Summary }</p>
+
+          <a
+          v-if="item.IsPlayed"
+          class="button button"
+          title="Mark as not listened"
+          @click="changePlayedStatus(item)"
+          ><i class="fas fa-envelope"></i
+        ></a>
+       
+        <a
+         v-if="!item.IsPlayed"
+          class="button button"
+          title="Mark as listened"
+          @click="changePlayedStatus(item)"
+          ><i class="fas fa-envelope-open"></i
+        ></a>
+        <a
+        v-if="!isBookmarked(item)"
+          class="button button"
+          title="Bookmark Episode"
+          @click="changeBookmarkStatus(item)"
+          ><i class="far fa-bookmark"></i
+        ></a>
+      
+        <a
+        v-if="isBookmarked(item)"
+          class="button button"
+          title="Remove Bookmark"
+          @click="changeBookmarkStatus(item)"
+          ><i class="fas fa-bookmark"></i
+        ></a>
+
+        <a
+          v-if="item.DownloadPath"
+          class="button"
+          :href="removeStartingSlash(item.DownloadPath)"
+          download
+          title="Download episode file"
+          ><i class="fas fa-download"></i
+        ></a>
+        <a
+          v-if="item.DownloadPath"
+          class="button button"
+          @click="deleteFile(item)"
+          title="Delete Podcast Episode File"
+          ><i class="fas fa-trash"></i
+        ></a>
+        <a
+        v-if="settings.AutoDownload && !item.DownloadPath"
+        class="button button"
+        @click="downloadToDisk(item)"
+        title="Download to server"
+        download
+        ><i class="fas fa-cloud-download-alt"></i
+      ></a>
+      <a
+      v-if="!settings.AutoDownload && !item.DownloadPath && item.DownloadStatus===3"
+        class="button button"
+        @click="downloadToDisk(item)"
+        title="Download to server"
+        download
+        ><i class="fas fa-cloud-download-alt"></i
+      ></a>
+      <a
+          class="button button"
+          @click="openPlayer(item)"
+          title="Play Episode"
+          ><i class="fas fa-play"></i
+        ></a>
+        <a
+        class="button button-enqueue"
+        @click="enqueueEpisode(item)"
+        title="Add Episode to existing player playlist"
+        ><i class="fas fa-plus"></i
+      ></a>
+        </div>  <div class="columns one"></div>
+      </div>
+     <hr />
+    </template>
+    <p v-if="podcastItems.length===0">Nothing to see here! Maybe try changing the filter criteria.</p>
+
+     
+   
+      <div class="row" v-if="podcastItems.length">
+        <div class="columns twelve" style="text-align: center">
+         
+          <a v-if="filter.previousPage"
+           @click=" goToPage(1)"
+            class="button"
+            >First</a
+          >
+          
+          <a v-if="filter.previousPage"
+           @click="goToPreviousPage()"
+            class="button"
+            >Previous</a 
+          >
+         
+          
+          <select name="page" id="pageDdl" v-model="filter.page" >
+              <option :key="index" v-for="index in filter.totalPages" >${index}</option>
+          </select>
+          
+          <a
+          v-if="filter.nextPage"
+            class="button"
+            @click="goToNextPage()"
+            >Next</a
+          >
+    
+        
+          <a
+          v-if="filter.totalPages>filter.page"
+            class="button"
+            @click=" goToPage(filter.totalPages)"
+            >Last</a
+          >
+        </div>
+      </div>
+   
+  </div>
+
+    {{template "scripts"}}
+    <script src="/webassets/luxon.min.js"></script>
+    <script src="/webassets/vue-multiselect.min.js"></script>
+
+
+<script>
+Vue.component('vue-multiselect', window.VueMultiselect.default)
+
+var app = new Vue({
+        delimiters: ["${", "}"],
+        el: "#app",
+        computed:{
+          page(){
+            return this.filter.page;
+          },
+          count(){
+            return this.filter.count;
+          }
+        },
+        watch:{
+        
+          page(newPage,oldPage){
+            if(newPage==oldPage){
+              return;
+            }
+           if(newPage==1){
+             this.filter.previousPage=0;
+           }else{
+             this.filter.previousPage=newPage-1;
+           }
+           if(newPage==this.filter.totalPages){
+             this.filter.nextPage=0;
+           }else{
+            this.filter.nextPage=newPage+1;
+           }
+           this.getData()
+           
+          },
+          count(current,old){
+            this.getData()
+          },
+          showFilters(current,old){
+           
+            if(localStorage){
+              localStorage.showFilters=current
+            }
+
+          },
+          
+          selectedPodcasts(current,old){
+            var arr=[];
+            for (let index = 0; index < current.length; index++) {
+              const element = current[index];
+              arr.push(element.ID);
+            }
+            this.filter['podcastIds']=arr;
+            this.submitFilters()
+          },
+          selectedTags(current,old){
+            var arr=[];
+            for (let index = 0; index < current.length; index++) {
+              const element = current[index];
+              arr.push(element.ID);
+            }
+            this.filter['tagIds']=arr;
+            this.submitFilters()
+          },
+          selectedSorting(current,old){
+            this.filter.sorting=current.Value;
+            this.submitFilters()
+          },
+          selectedDownloadStatus(current,old){
+            this.filter.isDownloaded=current.Value;
+            this.submitFilters()
+          },
+          selectedPlayedStatus(current,old){
+            this.filter.isPlayed=current.Value;
+            this.submitFilters()
+          },
+        },
+        mounted(){
+          if(localStorage && localStorage.episodesFilter){
+              this.filter=JSON.parse(localStorage.episodesFilter);
+            }
+            if(localStorage && localStorage.showFilters){
+              this.showFilters=JSON.parse(localStorage.showFilters);
+            }
+
+            if(this.filter.podcastIds!=null){
+              var selectedPodcasts=[];
+              for(var i=0;i<this.podcasts.length;i++){
+                for(var j=0;j<this.filter.podcastIds.length;j++){
+                if(this.filter.podcastIds[j]===this.podcasts[i].ID){
+                  selectedPodcasts.push( this.podcasts[i])
+                }
+              }
+              }
+              this.selectedPodcasts=selectedPodcasts
+          }
+
+          if(this.filter.tagIds!=null){
+
+            var selectedTags=[];
+            for(var i=0;i<this.tags.length;i++){
+              for(var j=0;j<this.filter.tagIds.length;j++){
+              if(this.filter.tagIds[j]===this.tags[i].ID){
+                selectedTags.push( this.tags[i])
+              }
+            }
+            }
+            this.selectedTags=selectedTags
+          }
+            for(var i=0;i<this.sortOptions.length;i++){
+              if(this.sortOptions[i].Value===this.filter.sorting){
+                this.selectedSorting=this.sortOptions[i]
+              }
+            }
+
+            for(var i=0;i<this.downloadStatusOptions.length;i++){
+              if(this.downloadStatusOptions[i].Value===this.filter.isDownloaded.toString()){
+                this.selectedDownloadStatus=this.downloadStatusOptions[i]
+              }
+            }
+
+            for(var i=0;i<this.playedStatusOptions.length;i++){
+              if(this.playedStatusOptions[i].Value===this.filter.isPlayed.toString()){
+                this.selectedPlayedStatus=this.playedStatusOptions[i]
+              }
+            }
+
+          this.getData()
+
+
+        },
+        methods:{
+          getRelativeDate(dt){
+            return luxon.DateTime.fromISO(dt).toRelative()
+          },
+          getFormattedDuration(duration){
+            var obj=luxon.Duration.fromObject({seconds:duration}).shiftTo("hours","minutes","seconds").toObject();
+            str="";
+            if(obj.hours>0){
+                str+=obj.hours+":"
+            }
+            str+=obj.minutes+":"+obj.seconds;
+            return str;
+          },
+          getEpisodeImage(item){
+            return "/podcastitems/"+item.ID+"/image"
+          },
+          changePlayedStatus(item){
+            changePlayedStatus(item.ID,!item.IsPlayed,()=>item.IsPlayed=!item.IsPlayed)
+          },
+          goToPreviousPage(pageNumber){
+            this.filter.page=this.filter.previousPage;
+          },
+          goToNextPage(pageNumber){
+            this.filter.page=this.filter.nextPage;
+          },
+          goToPage(pageNumber){
+              this.filter.page=pageNumber;
+          },
+          changeBookmarkStatus(item){
+              isBookmarked= this.isBookmarked(item);
+            
+              let self=this;
+              changeBookmarkStatus(item.ID,!isBookmarked,function(){
+                  if(isBookmarked){
+                    item.BookmarkDate=self.nildate
+                  }else{
+                    item.BookmarkDate="new Date().toDateString()"
+                  }
+              })
+          },
+          
+          isBookmarked(item){
+            return item.BookmarkDate!==this.nildate
+          },
+          deleteFile(item){
+            deleteFile(item.ID)
+          },
+          downloadToDisk(item){
+            downloadToDisk(item.ID)
+          },
+          openPlayer(item){
+            openPlayer([item.ID])
+          },
+          enqueueEpisode(item){
+            enqueueEpisode([item.ID])
+          },
+          searchQueryUpated(){
+            var self=this;
+           
+            clearTimeout(this.debounce)
+            this.debounce = setTimeout(() => {
+              self.filter.page=1
+                self.getData()
+              }, 600)
+          },
+          saveFilter(data){
+            if(localStorage){
+              localStorage.episodesFilter=JSON.stringify(data);
+            }
+          },
+          submitFilters(){
+            this.filter.page=1;
+            this.getData();
+        
+          },
+          toggleFilters(){
+            this.showFilters=!this.showFilters
+          },
+          playPage(){
+            var itemIds=[];
+            for(var i=0;i<this.podcastItems.length;i++){
+              itemIds.push(this.podcastItems[i].ID)
+            }
+            openPlayer(itemIds)
+          },
+          enqueuePage(){
+            var itemIds=[];
+            for(var i=0;i<this.podcastItems.length;i++){
+              itemIds.push(this.podcastItems[i].ID)
+            }
+            enqueueEpisode(itemIds)
+          },
+          updateUrl(){
+            var url= new URL(window.top.location.href);
+            var copy= Vue.util.extend({},this.filter);
+            delete copy.totalPages
+            delete copy.totalCount
+            delete copy.nextPage
+            delete copy.previousPage
+            url.search=new URLSearchParams(copy);
+            history.pushState(null,null,url.href)
+          },
+          resetFilters(){
+            this.filter.q="";
+            this.selectedPodcasts=[];
+            this.selectedTags=[];
+            this.selectedDownloadStatus=this.downloadStatusOptions[0];
+            this.selectedPlayedStatus=this.playedStatusOptions[0];
+          },
+          removeStartingSlash(url){
+            if(url[0]==='/'){
+              return url
+            }
+            return "/"+url
+          },
+          getData(){
+            var self=this;
+            axios
+              .get("/podcastitems",{params:this.filter})
+              .then(function (response) {
+                self.podcastItems= response.data.podcastItems;
+                self.filter=response.data.filter;
+                self.saveFilter(self.filter);
+                self.updateUrl();
+                setPageTitle("Episodes ("+self.filter.totalCount+")")
+              })
+              .catch(function (error) {
+                if (error.response && error.response.data && error.response.data.message) {
+                  Vue.toasted.show(error.response.data.message, {
+                    theme: "bubble",
+                    type: "error",
+                    position: "top-right",
+                    duration: 5000,
+                  });
+                }
+              })
+              .then(function () {});
+              }
+        },
+        data: {
+          socket:null,
+          debouce:null,
+          nildate:"0001-01-01T00:00:00Z",
+          playerExists:false,
+          isMobile:false,
+          sortOrder:"dateAdded-asc",
+          selectedSorting:"release_desc",
+          selectedPodcasts:[],
+          selectedTags:[],
+          selectedDownloadStatus:"",
+          selectedPlayedStatus:"",
+          showFilters:localStorage && JSON.parse(localStorage.showFilters),
+         
+            {{ $len := len .podcastItems}}
+            podcastItems: {{if gt $len 0}} {{ .podcastItems }} {{else}} [] {{end}},
+            settings:{{.setting}},
+            filter:{{.filter}},
+            podcasts:{{.podcasts}},
+            tags:{{.tags}},
+            sortOptions:{{.sortOptions}},
+            pagingOptions:[10,20,50,100],
+            downloadStatusOptions:[{"Label":"All","Value":"nil"},{"Label":"Downloaded Only","Value":"true"},{"Label":"Not Downloaded","Value":"false"}],
+            playedStatusOptions:[{"Label":"All","Value":"nil"},{"Label":"Played Only","Value":"true"},{"Label":"Unplayed only","Value":"false"}],
+        }})
+</script>
+
+    <script>
+      function debounce(func, wait, immediate) {
+          var timeout;
+          return function() {
+            var context = this, args = arguments;
+            var later = function() {
+              timeout = null;
+              if (!immediate) func.apply(context, args);
+            };
+            var callNow = immediate && !timeout;
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+            if (callNow) func.apply(context, args);
+          };
+        };
+              function downloadToDisk(id) {
+        axios
+          .get("/podcastitems/" + id + "/download")
+          .then(function (response) {
+            Vue.toasted.show("Podcast download enqueued.", {
+              theme: "bubble",
+              type: "info",
+              position: "top-right",
+              duration: 5000,
+            });
+            var row = document.getElementById("podcast-" + id);
+            row.remove();
+          })
+          .catch(function (error) {
+            if (error.response && error.response.data && error.response.data.message) {
+              Vue.toasted.show(error.response.data.message, {
+                theme: "bubble",
+                type: "error",
+                position: "top-right",
+                duration: 5000,
+              });
+            }
+          })
+          .then(function () {});
+        return false;
+      }
+      function deleteFile(id) {
+        axios
+          .get("/podcastitems/" + id + "/delete")
+          .then(function (response) {
+            Vue.toasted.show("Podcast file deleted.", {
+              theme: "bubble",
+              type: "success",
+              position: "top-right",
+              duration: 5000,
+            });
+            var row = document.getElementById("podcast-" + id);
+            row.remove();
+          })
+          .catch(function (error) {
+            if (error.response && error.response.data && error.response.data.message) {
+              Vue.toasted.show(error.response.data.message, {
+                theme: "bubble",
+                type: "error",
+                position: "top-right",
+                duration: 5000,
+              });
+            }
+          })
+          .then(function () {});
+        return false;
+      }
+      function changePlayedStatus(id, status,success) {
+        var endpoint = status ? "markPlayed" : "markUnplayed";
+        axios
+          .get("/podcastitems/" + id + "/" + endpoint, {
+            isPlayed: status,
+          })
+          .then(function (response) {
+            Vue.toasted.show("Podcast played status updated.", {
+              theme: "bubble",
+              type: "info",
+              position: "top-right",
+              duration: 5000,
+            });
+            if(success){
+              success();
+            }
+          })
+          .catch(function (error) {
+            if (error.response && error.response.data && error.response.data.message) {
+
+              Vue.toasted.show(error.response.data.message, {
+                theme: "bubble",
+                type: "error",
+                position: "top-right",
+                duration: 5000,
+              });
+            }
+          })
+          .then(function () {});
+        return false;
+      }
+      function changeBookmarkStatus(id, status,success) {
+        var endpoint = status ? "bookmark" : "unbookmark";
+        axios
+          .get("/podcastitems/" + id + "/" + endpoint, {
+            isPlayed: status,
+          })
+          .then(function (response) {
+            msg= status?"Bookmark Added": "Bookmark removed";
+            Vue.toasted.show(msg, {
+              theme: "bubble",
+              type: "info",
+              position: "top-right",
+              duration: 5000,
+            });
+          if(success){
+            success()
+          }
+          })
+          .catch(function (error) {
+            if (error.response && error.response.data && error.response.data.message) {
+              Vue.toasted.show(error.response.data.message, {
+                theme: "bubble",
+                type: "error",
+                position: "top-right",
+                duration: 5000,
+              });
+            }
+          })
+          .then(function () {});
+        return false;
+      }
+     
+    </script>
+    <script>
+
+       const socket= getWebsocketConnection(function(event){
+              const message= getWebsocketMessage("Register","Home")
+              socket.send(message);
+            },function(x){
+              const msg= JSON.parse(x.data)
+              if(msg.messageType=="NoPlayer"){
+                document.body.classList.remove("playerExists")
+              }
+              if(msg.messageType=="PlayerExists"){
+                document.body.classList.add("playerExists")
+              }
+            });
+            function enqueueEpisode(ids){
+            if(!socket){
+              return
+            }
+           socket.send(getWebsocketMessage("Enqueue",`{"itemIds":${JSON.stringify(ids)}}`))
+          }
+          function enquePodcast(id){
+            if(!socket){
+              return
+            }
+            socket.send(getWebsocketMessage("Enqueue",`{"podcastId":"${id}"}`))
+          }
+          function playPodcast(id){
+            openPlayer("",id)
+          }
+    </script>
+  </body>
+</html>

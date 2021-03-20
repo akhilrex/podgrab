@@ -9,7 +9,7 @@ import (
 )
 
 type EnqueuePayload struct {
-	ItemId    string   `json:"itemId"`
+	ItemIds   []string `json:"itemIds"`
 	PodcastId string   `json:"podcastId"`
 	TagIds    []string `json:"tagIds"`
 }
@@ -91,7 +91,7 @@ func HandleWebsocketMessages() {
 			fmt.Println(msg.Payload)
 			err := json.Unmarshal([]byte(msg.Payload), &payload)
 			if err == nil {
-				items := getItemsToPlay(payload.ItemId, payload.PodcastId, payload.TagIds)
+				items := getItemsToPlay(payload.ItemIds, payload.PodcastId, payload.TagIds)
 				var player *websocket.Conn
 				for connection, id := range activePlayers {
 
