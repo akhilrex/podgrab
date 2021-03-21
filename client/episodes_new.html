@@ -557,7 +557,7 @@ var app = new Vue({
           selectedTags:[],
           selectedDownloadStatus:"",
           selectedPlayedStatus:"",
-          showFilters:localStorage && JSON.parse(localStorage.showFilters),
+          showFilters:localStorage && localStorage.showFilters && JSON.parse(localStorage.showFilters),
          
             {{ $len := len .podcastItems}}
             podcastItems: {{if gt $len 0}} {{ .podcastItems }} {{else}} [] {{end}},
