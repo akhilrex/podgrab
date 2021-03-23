@@ -126,7 +126,11 @@ services:
 ```sh
    docker-compose up -d
 ```
+### Build from Source / Ubuntu Installation
 
+Although personally I feel that using the docker container is the best way of using and enjoying something like Podgrab, a lot of people in the community are still not comfortable with using Docker and wanted to host it natively on their Linux servers. Follow the link below to get a guide on how to build Podgrab from source.
+
+[Build from source / Ubuntu Guide](docs/ubuntu-install.md)
 ### Environment Variables
 
 | Name            | Description                                                             | Default |
