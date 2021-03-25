@@ -41,6 +41,7 @@ go build -o ./dist/podgrab ./main.go
 ``` bash
 sudo mkdir -p /usr/local/bin/podgrab
 mv -v dist/* /usr/local/bin/podgrab
+mv -v dist/.* /usr/local/bin/podgrab
 ```
 
 At this point theoretically the installation is complete. You can make the relevant changes in the ```.env``` file present at ```/usr/local/bin/podgrab``` path and run the following command 
