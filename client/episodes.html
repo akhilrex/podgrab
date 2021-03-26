@@ -163,13 +163,13 @@
           {{end}} {{end}} {{end }}
           <a
           class="button button"
-          onclick="openPlayer('{{.ID}}')"
+          onclick="openPlayer(['{{.ID}}'])"
           title="Play Episode"
           ><i class="fas fa-play"></i
         ></a>
         <a
         class="button button-enqueue"
-        onclick="enqueueEpisode('{{.ID}}')"
+        onclick="enqueueEpisode(['{{.ID}}'])"
         title="Add Episode to existing player playlist"
         ><i class="fas fa-plus"></i
       ></a>
@@ -374,7 +374,7 @@
             if(!socket){
               return
             }
-           socket.send(getWebsocketMessage("Enqueue",`{"itemId":"${id}"}`))
+           socket.send(getWebsocketMessage("Enqueue",`{"itemIds":${JSON.stringify(id)}}`))
           }
           function enquePodcast(id){
             if(!socket){
