@@ -10,7 +10,7 @@
         display: none;
       }
 
-      
+
       h2,
       h3,
       h4,
@@ -110,7 +110,7 @@
             ><i class="fas fa-envelope-open"></i
           ></a>
           {{ end }}
-          
+
           {{if isDateNull .BookmarkDate }}
           <a
             class="button button"
@@ -125,9 +125,9 @@
             onclick="changeBookmarkStatus('{{.ID}}',false)"
             ><i class="fas fa-bookmark"></i
           ></a>
-          
+
           {{ end }}
-          
+
           {{if .DownloadPath}}
           <a
             class="button"
@@ -142,7 +142,7 @@
             title="Delete Podcast Episode File"
             ><i class="fas fa-trash"></i
           ></a>
-         
+
 
           {{else}} {{if not $setting.AutoDownload}}
           <a
@@ -199,17 +199,17 @@
           <a
             href="?page={{.previousPage}}"
             class="button"
-            >Last</a 
+            >Previous</a
           >
-          {{end}} 
-          
+          {{end}}
+
           <select name="page" id="pageDdl">
             {{ $page:=.page }}
             {{range $y := intRange 1 .totalPages}}
               <option {{if eq $page $y }} selected="selected" {{end}}}>{{$y}}</option>
             {{end}}
           </select>
-          
+
           {{if .nextPage }}
           <a
             href="?page={{.nextPage}}"
@@ -218,7 +218,7 @@
           >
           {{end}}
           {{if gt .totalPages .page }}
-        
+
           <a
             href="?page={{.totalPages}}"
             class="button"
@@ -349,10 +349,10 @@
           return;
         }
         var queryParams = new URLSearchParams(window.location.search);
- 
-          // Set new or modify existing parameter value. 
+
+          // Set new or modify existing parameter value.
           queryParams.set("page", this.value);
-          
+
           window.top.location= window.top.location.origin+window.top.location.pathname+"?"+queryParams.toString();
       });
     </script>
