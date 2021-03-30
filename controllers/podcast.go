@@ -5,11 +5,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
 	"strings"
 
 	"github.com/akhilrex/podgrab/model"
 	"github.com/akhilrex/podgrab/service"
-	"github.com/gin-contrib/location"
 
 	"github.com/akhilrex/podgrab/db"
 	"github.com/gin-gonic/gin"
@@ -235,9 +235,11 @@ func GetPodcastItemFileById(c *gin.Context) {
 		err := db.GetPodcastItemById(searchByIdQuery.Id, &podcast)
 		if err == nil {
 			if _, err = os.Stat(podcast.DownloadPath); !os.IsNotExist(err) {
-				url := location.Get(c)
-				filePath := fmt.Sprintf("%s://%s/%s", url.Scheme, url.Host, podcast.DownloadPath)
-				c.Redirect(301, filePath)
+				c.Header("Content-Description", "File Transfer")
+				c.Header("Content-Transfer-Encoding", "binary")
+				c.Header("Content-Disposition", "attachment; filename="+path.Base(podcast.DownloadPath))
+				c.Header("Content-Type", "application/octet-stream")
+				c.File(podcast.DownloadPath)
 			} else {
 				c.Redirect(302, fmt.Sprintf("/%s", podcast.FileURL))
 			}
