@@ -185,7 +185,7 @@
         <a
           v-if="item.DownloadPath"
           class="button"
-          :href="removeStartingSlash(item.DownloadPath)"
+          :href="downloadFromServer(item)"
           download
           title="Download episode file"
           ><i class="fas fa-download"></i
@@ -421,6 +421,9 @@ var app = new Vue({
           },
           getEpisodeImage(item){
             return "/podcastitems/"+item.ID+"/image"
+          },
+          downloadFromServer(item){
+            return "/podcastitems/"+item.ID+"/file"
           },
           changePlayedStatus(item){
             changePlayedStatus(item.ID,!item.IsPlayed,()=>item.IsPlayed=!item.IsPlayed)

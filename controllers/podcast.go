@@ -241,7 +241,7 @@ func GetPodcastItemFileById(c *gin.Context) {
 				c.Header("Content-Type", "application/octet-stream")
 				c.File(podcast.DownloadPath)
 			} else {
-				c.Redirect(302, fmt.Sprintf("/%s", podcast.FileURL))
+				c.Redirect(302, podcast.FileURL)
 			}
 		}
 	} else {
