@@ -874,7 +874,7 @@ div#large-visualization{
                   var toReturn= {
                     id:x.ID,
                     name:x.Title,
-                    url:x.DownloadPath,
+                    url:"/podcastitems/"+x.ID+"/file",
                     cover_art_url:image,
                     artist:x.Podcast.Title,
                     album: new Date(x.PubDate.substr(0,10)).toDateString()
