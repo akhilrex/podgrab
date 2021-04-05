@@ -26,9 +26,7 @@ func main() {
 		db.Migrate()
 	}
 	r := gin.Default()
-	dataPath := os.Getenv("DATA")
-	r.Static("/webassets", "./webassets")
-	r.Static("/assets", dataPath)
+
 	r.Use(setupSettings())
 	r.Use(gin.Recovery())
 	r.Use(location.Default())
@@ -143,6 +141,9 @@ func main() {
 		router = &r.RouterGroup
 	}
 
+	dataPath := os.Getenv("DATA")
+	router.Static("/webassets", "./webassets")
+	router.Static("/assets", dataPath)
 	router.POST("/podcasts", controllers.AddPodcast)
 	router.GET("/podcasts", controllers.GetAllPodcasts)
 	router.GET("/podcasts/:id", controllers.GetPodcastById)
