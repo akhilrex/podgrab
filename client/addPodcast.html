@@ -244,7 +244,7 @@
             var self = this;
             self.searching = true;
             axios
-              .get("/search?q=" + this.query+"&searchSource="+this.searchSource)
+              .get(encodeURI("/search?q=" + this.query+"&searchSource="+this.searchSource))
               .then(function (response) {
                 self.results = response.data;
               })
