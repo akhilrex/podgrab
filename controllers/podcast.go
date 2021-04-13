@@ -217,7 +217,7 @@ func GetPodcastItemImageById(c *gin.Context) {
 			if _, err = os.Stat(podcast.LocalImage); os.IsNotExist(err) {
 				c.Redirect(301, podcast.Image)
 			} else {
-				c.Redirect(302, "/"+podcast.LocalImage)
+				c.File(podcast.LocalImage)
 			}
 		}
 	} else {
