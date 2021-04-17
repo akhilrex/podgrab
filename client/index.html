@@ -289,6 +289,7 @@
     {{template "scripts"}}
     <script src="/webassets/popper.min.js"></script>
     <script src="/webassets/tippy-bundle.umd.min.js"></script>
+    <script src="/webassets/stopword.js"></script>
 
     <template id="editTags">
       <div class="tags">
@@ -491,8 +492,11 @@
                 case "episodesCount-asc":compareFunction=(a,b)=>a.AllEpisodesCount-b.AllEpisodesCount;break;
                 case "episodesCount-desc":compareFunction=(a,b)=>b.AllEpisodesCount-a.AllEpisodesCount;break;
                 case "name-asc":compareFunction=(a,b)=>{
-                               var nameA = a.Title.toUpperCase(); // ignore upper and lowercase
-                              var nameB = b.Title.toUpperCase(); // ignore upper and lowercase
+                               var nameAArr = sw.removeStopwords(a.Title.split(' ')) ;
+                              var nameBArr = sw.removeStopwords(b.Title.split(' '));
+
+                              nameA= nameAArr.length?nameAArr[0].toUpperCase():"";
+                              nameB= nameBArr.length?nameBArr[0].toUpperCase():"";
                               if (nameA < nameB) {
                                 return -1;
                               }
@@ -504,8 +508,11 @@
                               return 0;
                 };break;
                 case "name-desc":compareFunction=(a,b)=>{
-                               var nameA = b.Title.toUpperCase(); // ignore upper and lowercase
-                              var nameB = a.Title.toUpperCase(); // ignore upper and lowercase
+                             var nameAArr = sw.removeStopwords(b.Title.split(' ')) ;
+                              var nameBArr = sw.removeStopwords(a.Title.split(' '));
+
+                              nameA= nameAArr.length?nameAArr[0].toUpperCase():"";
+                              nameB= nameBArr.length?nameBArr[0].toUpperCase():"";
                               if (nameA < nameB) {
                                 return -1;
                               }
