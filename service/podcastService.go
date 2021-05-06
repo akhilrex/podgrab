@@ -198,7 +198,7 @@ func getItunesImageUrl(body []byte) string {
 func AddPodcast(url string) (db.Podcast, error) {
 	var podcast db.Podcast
 	err := db.GetPodcastByURL(url, &podcast)
-	fmt.Println(url)
+
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		data, body, err := FetchURL(url)
 		if err != nil {
@@ -220,8 +220,10 @@ func AddPodcast(url string) (db.Podcast, error) {
 		}
 
 		err = db.CreatePodcast(&podcast)
+		go DownloadPodcastCoverImage(podcast.Image, podcast.Title)
 		return podcast, err
 	}
+
 	return podcast, &model.PodcastAlreadyExistsError{Url: url}
 
 }

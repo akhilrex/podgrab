@@ -166,7 +166,8 @@
             <img
               onerror="onImageError(this)"
               class="u-full-width"
-              v-bind:src="podcast.Image"
+              :src="getPodcastImage(podcast)"
+             
               v-bind:alt="podcast.Title"
             />
           </a>
@@ -455,6 +456,9 @@
 
         },
         methods:{
+          getPodcastImage(item){
+            return "/podcasts/"+item.ID+"/image"
+          },
           removePodcast(id) {      
            const index= this.podcasts.findIndex(x=>x.ID===id);
            this.podcasts.splice(index,1);       

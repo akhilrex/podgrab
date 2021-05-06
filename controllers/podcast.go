@@ -225,6 +225,27 @@ func GetPodcastItemImageById(c *gin.Context) {
 	}
 }
 
+func GetPodcastImageById(c *gin.Context) {
+	var searchByIdQuery SearchByIdQuery
+
+	if c.ShouldBindUri(&searchByIdQuery) == nil {
+
+		var podcast db.Podcast
+
+		err := db.GetPodcastById(searchByIdQuery.Id, &podcast)
+		if err == nil {
+			localPath := service.GetPodcastLocalImagePath(podcast.Image, podcast.Title)
+			if _, err = os.Stat(localPath); os.IsNotExist(err) {
+				c.Redirect(301, podcast.Image)
+			} else {
+				c.File(localPath)
+			}
+		}
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+	}
+}
+
 func GetPodcastItemFileById(c *gin.Context) {
 	var searchByIdQuery SearchByIdQuery
 
