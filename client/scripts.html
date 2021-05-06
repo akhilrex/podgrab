@@ -117,8 +117,9 @@
   }
 
   function getWebsocketConnection(onOpen,onMessage){
+    const wsProto = window.location.protocol.startsWith('https') ? 'wss://' : 'ws://';
           // Create WebSocket connection.
-    const socket = new WebSocket('ws://'+window.location.host+'/ws');
+    const socket = new WebSocket(wsProto+window.location.host+'/ws');
 
     socket.addEventListener('open', onOpen);
 
