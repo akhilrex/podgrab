@@ -215,7 +215,7 @@ func GetPodcastItemImageById(c *gin.Context) {
 		err := db.GetPodcastItemById(searchByIdQuery.Id, &podcast)
 		if err == nil {
 			if _, err = os.Stat(podcast.LocalImage); os.IsNotExist(err) {
-				c.Redirect(301, podcast.Image)
+				c.Redirect(302, podcast.Image)
 			} else {
 				c.File(podcast.LocalImage)
 			}
@@ -236,7 +236,7 @@ func GetPodcastImageById(c *gin.Context) {
 		if err == nil {
 			localPath := service.GetPodcastLocalImagePath(podcast.Image, podcast.Title)
 			if _, err = os.Stat(localPath); os.IsNotExist(err) {
-				c.Redirect(301, podcast.Image)
+				c.Redirect(302, podcast.Image)
 			} else {
 				c.File(localPath)
 			}

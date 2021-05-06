@@ -13,7 +13,8 @@
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a> -->
 
-  <h1 align="center">Podgrab</h1>
+  <h1 align="center" style="margin-bottom:0px">Podgrab</h1>
+  <p align="center">Current Version - 2021.05.06</p>
 
   <p align="center">
     A self-hosted podcast manager to download episodes as soon as they become live
