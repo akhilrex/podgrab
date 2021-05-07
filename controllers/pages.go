@@ -28,6 +28,7 @@ type SettingModel struct {
 	AppendEpisodeNumberToFileName bool `form:"appendEpisodeNumberToFileName" json:"appendEpisodeNumberToFileName" query:"appendEpisodeNumberToFileName"`
 	DarkMode                      bool `form:"darkMode" json:"darkMode" query:"darkMode"`
 	DownloadEpisodeImages         bool `form:"downloadEpisodeImages" json:"downloadEpisodeImages" query:"downloadEpisodeImages"`
+	GenerateNFOFile               bool `form:"generateNFOFile" json:"generateNFOFile" query:"generateNFOFile"`
 }
 
 var searchOptions = map[string]string{

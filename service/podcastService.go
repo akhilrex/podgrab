@@ -198,7 +198,7 @@ func getItunesImageUrl(body []byte) string {
 func AddPodcast(url string) (db.Podcast, error) {
 	var podcast db.Podcast
 	err := db.GetPodcastByURL(url, &podcast)
-
+	setting := db.GetOrCreateSetting()
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		data, body, err := FetchURL(url)
 		if err != nil {
@@ -221,6 +221,9 @@ func AddPodcast(url string) (db.Podcast, error) {
 
 		err = db.CreatePodcast(&podcast)
 		go DownloadPodcastCoverImage(podcast.Image, podcast.Title)
+		if setting.GenerateNFOFile {
+			go CreateNfoFile(&podcast)
+		}
 		return podcast, err
 	}
 
@@ -617,6 +620,9 @@ func DeletePodcastEpisodes(id string) error {
 	}
 	for _, item := range podcastItems {
 		DeleteFile(item.DownloadPath)
+		if item.LocalImage != "" {
+			DeleteFile(item.LocalImage)
+		}
 		SetPodcastItemAsNotDownloaded(item.ID, db.Deleted)
 
 	}
@@ -719,7 +725,7 @@ func GetSearchFromPodcastIndex(pod *podcastindex.Podcast) *model.CommonSearchRes
 	return p
 }
 
-func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload bool, appendDateToFileName bool, appendEpisodeNumberToFileName bool, darkMode bool, downloadEpisodeImages bool) error {
+func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload bool, appendDateToFileName bool, appendEpisodeNumberToFileName bool, darkMode bool, downloadEpisodeImages bool, generateNFOFile bool) error {
 	setting := db.GetOrCreateSetting()
 
 	setting.AutoDownload = autoDownload
@@ -729,6 +735,7 @@ func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload b
 	setting.AppendEpisodeNumberToFileName = appendEpisodeNumberToFileName
 	setting.DarkMode = darkMode
 	setting.DownloadEpisodeImages = downloadEpisodeImages
+	setting.GenerateNFOFile = generateNFOFile
 
 	return db.UpdateSettings(setting)
 }

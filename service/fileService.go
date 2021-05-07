@@ -3,9 +3,11 @@ package service
 import (
 	"archive/tar"
 	"compress/gzip"
+	"encoding/xml"
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -15,6 +17,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/akhilrex/podgrab/db"
 	"github.com/akhilrex/podgrab/internal/sanitize"
 	stringy "github.com/gobeam/stringy"
 )
@@ -66,6 +69,32 @@ func GetPodcastLocalImagePath(link string, podcastName string) string {
 
 	finalPath := path.Join(folder, fileName)
 	return finalPath
+}
+
+func CreateNfoFile(podcast *db.Podcast) error {
+	fileName := "album.nfo"
+	folder := createDataFolderIfNotExists(podcast.Title)
+
+	finalPath := path.Join(folder, fileName)
+
+	type NFO struct {
+		XMLName xml.Name `xml:"album"`
+		Title   string   `xml:"title"`
+		Type    string   `xml:"type"`
+		Thumb   string   `xml:"thumb"`
+	}
+
+	toSave := NFO{
+		Title: podcast.Title,
+		Type:  "Broadcast",
+		Thumb: podcast.Image,
+	}
+	out, err := xml.MarshalIndent(toSave, " ", "  ")
+	if err != nil {
+		return err
+	}
+	toPersist := xml.Header + string(out)
+	return ioutil.WriteFile(finalPath, []byte(toPersist), 0644)
 }
 
 func DownloadPodcastCoverImage(link string, podcastName string) (string, error) {

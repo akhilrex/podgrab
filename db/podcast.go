@@ -82,6 +82,7 @@ type Setting struct {
 	AppendEpisodeNumberToFileName bool `gorm:"default:false"`
 	DarkMode                      bool `gorm:"default:false"`
 	DownloadEpisodeImages         bool `gorm:"default:false"`
+	GenerateNFOFile               bool `gorm:"default:false"`
 }
 type Migration struct {
 	Base

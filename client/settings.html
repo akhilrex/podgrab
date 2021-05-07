@@ -86,6 +86,10 @@
             <input type="checkbox" name="downloadEpisodeImages" v-model="downloadEpisodeImages">
             <span class="label-body">Download Episode Images with files</span>
         </label>
+        <label for="generateNFOFile">
+            <input type="checkbox" name="generateNFOFile" v-model="generateNFOFile">
+            <span class="label-body">Generate NFO files for Podcasts</span>
+        </label>
         
       
         <input type="submit" value="Save" class="button">
@@ -117,7 +121,7 @@
         <table>
             <tr>
                 <td>Current Version</td>
-                <td>2021.05.06</td>
+                <td>2021.05.07</td>
             </tr>
             <tr>
                 <td>Website</td>
@@ -160,8 +164,8 @@ var app = new Vue({
             appendDateToFileName:self.appendDateToFileName,
             appendEpisodeNumberToFileName:self.appendEpisodeNumberToFileName,
             darkMode:self.darkMode,
-            downloadEpisodeImages:self.downloadEpisodeImages
-
+            downloadEpisodeImages:self.downloadEpisodeImages,
+            generateNFOFile:self.generateNFOFile
         })
         .then(function(response){
             Vue.toasted.show('Settings saved successfully.' ,{
@@ -203,6 +207,7 @@ var app = new Vue({
     darkMode:{{ .setting.DarkMode }},
     originalThemeSetting:{{ .setting.DarkMode }},
     downloadEpisodeImages:{{.setting.DownloadEpisodeImages }},
+    generateNFOFile:{{.setting.GenerateNFOFile }},
   },
 
 })

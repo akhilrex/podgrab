@@ -465,7 +465,7 @@ func UpdateSetting(c *gin.Context) {
 
 		err = service.UpdateSettings(model.DownloadOnAdd, model.InitialDownloadCount,
 			model.AutoDownload, model.AppendDateToFileName, model.AppendEpisodeNumberToFileName,
-			model.DarkMode, model.DownloadEpisodeImages)
+			model.DarkMode, model.DownloadEpisodeImages, model.GenerateNFOFile)
 		if err == nil {
 			c.JSON(200, gin.H{"message": "Success"})
 
