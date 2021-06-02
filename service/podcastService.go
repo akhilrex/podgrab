@@ -202,7 +202,7 @@ func AddPodcast(url string) (db.Podcast, error) {
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		data, body, err := FetchURL(url)
 		if err != nil {
-			fmt.Println("Error")
+			fmt.Println(err.Error())
 			Logger.Errorw("Error adding podcast", err)
 			return db.Podcast{}, err
 		}

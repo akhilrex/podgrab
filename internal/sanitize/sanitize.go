@@ -187,6 +187,8 @@ var illegalName = regexp.MustCompile(`[^[:alnum:]-.]`)
 func Name(s string) string {
 	// Start with lowercase string
 	fileName := s
+	fileName = baseNameSeparators.ReplaceAllString(fileName, "-")
+
 	fileName = path.Clean(path.Base(fileName))
 
 	// Remove illegal characters for names, replacing some common separators with -

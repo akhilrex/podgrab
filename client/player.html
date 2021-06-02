@@ -739,6 +739,10 @@ div#large-visualization{
                   <span data-amplitude-song-info="artist"></span>
                   <span data-amplitude-song-info="album"></span>
                 </div>
+                <br>
+                <div class="song-summary">
+                  <span data-amplitude-song-info="summary"></span>
+                </div>
               </div>
             </div>
           </div>
@@ -877,6 +881,7 @@ div#large-visualization{
                     url:"/podcastitems/"+x.ID+"/file",
                     cover_art_url:image,
                     artist:x.Podcast.Title,
+                    summary:x.Summary,
                     album: new Date(x.PubDate.substr(0,10)).toDateString()
                   }
                   if(!toReturn.url){
