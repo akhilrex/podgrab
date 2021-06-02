@@ -14,7 +14,7 @@
   </a> -->
 
   <h1 align="center" style="margin-bottom:0px">Podgrab</h1>
-  <p align="center">Current Version - 2021.05.07</p>
+  <p align="center">Current Version - 2021.06.02</p>
 
   <p align="center">
     A self-hosted podcast manager to download episodes as soon as they become live
@@ -54,6 +54,8 @@ Podgrab is a is a self-hosted podcast manager which automatically downloads late
 It works best if you already know which podcasts you want to monitor. However there is a podcast search system powered by iTunes built into Podgrab
 
 *Developers Note: This project is under active development which means I release new updates very frequently. It is recommended that you use something like [watchtower](https://github.com/containrrr/watchtower) which will automatically update your containers whenever I release a new version or periodically rebuild the container with the latest image manually.*
+
+__Also check out my other self-hosted, open-source solution - [Hammond](https://github.com/akhilrex/hammond) - Vehicle and Expense management system.__
 
 ### Motivation
 
