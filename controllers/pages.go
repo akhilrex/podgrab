@@ -21,14 +21,13 @@ type SearchGPodderData struct {
 	SearchSource string `binding:"required" form:"searchSource" json:"searchSource" query:"searchSource"`
 }
 type SettingModel struct {
-	DownloadOnAdd                 bool `form:"downloadOnAdd" json:"downloadOnAdd" query:"downloadOnAdd"`
-	InitialDownloadCount          int  `form:"initialDownloadCount" json:"initialDownloadCount" query:"initialDownloadCount"`
-	AutoDownload                  bool `form:"autoDownload" json:"autoDownload" query:"autoDownload"`
-	AppendDateToFileName          bool `form:"appendDateToFileName" json:"appendDateToFileName" query:"appendDateToFileName"`
-	AppendEpisodeNumberToFileName bool `form:"appendEpisodeNumberToFileName" json:"appendEpisodeNumberToFileName" query:"appendEpisodeNumberToFileName"`
-	DarkMode                      bool `form:"darkMode" json:"darkMode" query:"darkMode"`
-	DownloadEpisodeImages         bool `form:"downloadEpisodeImages" json:"downloadEpisodeImages" query:"downloadEpisodeImages"`
-	GenerateNFOFile               bool `form:"generateNFOFile" json:"generateNFOFile" query:"generateNFOFile"`
+	DownloadOnAdd                 bool   `form:"downloadOnAdd" json:"downloadOnAdd" query:"downloadOnAdd"`
+	InitialDownloadCount          int    `form:"initialDownloadCount" json:"initialDownloadCount" query:"initialDownloadCount"`
+	AutoDownload                  bool   `form:"autoDownload" json:"autoDownload" query:"autoDownload"`
+	FileNameFormat                string `form:"fileNameFormat" json:"fileNameFormat" query:"fileNameFormat"`
+	DarkMode                      bool   `form:"darkMode" json:"darkMode" query:"darkMode"`
+	DownloadEpisodeImages         bool   `form:"downloadEpisodeImages" json:"downloadEpisodeImages" query:"downloadEpisodeImages"`
+	GenerateNFOFile               bool   `form:"generateNFOFile" json:"generateNFOFile" query:"generateNFOFile"`
 }
 
 var searchOptions = map[string]string{
