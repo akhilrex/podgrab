@@ -41,8 +41,6 @@ func Download(link string, episodeTitle string, podcastName string, episodePathN
 	dir, _ := path.Split(finalPath)
 	createPreSanitizedPath(dir)
 
-	fmt.Println("finalPath: " + finalPath)
-
 	if _, err := os.Stat(finalPath); !os.IsNotExist(err) {
 		changeOwnership(finalPath)
 		return finalPath, nil
@@ -365,7 +363,7 @@ func getFileName(link string, title string, defaultExtension string) string {
 	}
 	//str := stringy.New(title)
 	str := stringy.New(cleanFileName(title))
-	return str.SnakeCase().Get() + ext
+	return str.KebabCase().Get() + ext
 }
 
 func cleanFileName(original string) string {

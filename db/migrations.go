@@ -75,8 +75,6 @@ func ExecuteAndSaveMigration(name string, condition []string, query []string) er
 			Name: name,
 		})
 		return result.Error
-	} else {
-		fmt.Println("skipping")
 	}
 	return nil
 }
