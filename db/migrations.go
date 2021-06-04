@@ -69,6 +69,8 @@ func ExecuteAndSaveMigration(name string, condition []string, query []string) er
 					return result.Error
 				}
 			}
+		} else {
+			fmt.Println("migration not required")
 		}
 		DB.Save(&Migration{
 			Date: time.Now(),
