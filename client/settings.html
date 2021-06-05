@@ -28,6 +28,17 @@
 
 }
     </style>
+    <script type="text/javascript">
+function insertText(elemID, text){
+    var elem = document.getElementById(elemID)
+    elem.value += text;
+    elem.focus();
+    elem.setSelectionRange(
+        elem.value.length,
+        elem.value.length
+    );
+}
+    </script>
 </head>
 <body>
     <div class="container">
@@ -72,7 +83,7 @@
      
         <label for="fileNameFormat">
             <span class="label-body">Episode file name format:</span>
-            <input type="text" name="fileNameFormat" v-model="fileNameFormat" width="100%">
+            <input type="text" name="fileNameFormat" id="fileNameFormatInput" v-model="fileNameFormat" width="100%">
             <table id="pathFormatTable">
                 <thead>
                     <tr class="header">
@@ -81,14 +92,16 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td class="key">%YYYY%</td><td class="description">Episode published year (ie: 1999)</td></tr>
-                    <tr><td class="key">%mm%</td><td class="description">Episode published month (ie: 12)</td></tr>
-                    <tr><td class="key">%dd%</td><td class="description">Episode published date (ie: 31)</td></tr>
-                    <tr><td class="key">%EpisodeTitle%</td><td class="description">Episode title</td></tr>
-                    <tr><td class="key">%EpisodeNumber%</td><td class="description">Episode number</td></tr>
-                    <tr><td class="key">%EpisodeDate%</td><td class="description">Episode date (ie: 1999-12-31)</td></tr>
-                    <tr><td class="key">%ShowTitle%</td><td class="description">Show title</td></tr>
-                    <tr><td class="key">%%</td><td class="description">Literal '%'</td></tr>
+                    <tr><td class="description" colspan=2>Click the key to add it to the format field.</td></tr>
+                    <tr><td class="key"><a onclick="insertText('fileNameFormatInput', '%YYYY%');">%YYYY%</a></td><td class="description">Episode published year (ie: 1999)</td></tr>
+                    <tr><td class="key"><a onclick="insertText('fileNameFormatInput', '%mm%');">%mm%</a></td><td class="description">Episode published month (ie: 12)</td></tr>
+                    <tr><td class="key"><a onclick="insertText('fileNameFormatInput', '%dd%');">%dd%</a></td><td class="description">Episode published date (ie: 31)</td></tr>
+                    <tr><td class="key"><a onclick="insertText('fileNameFormatInput', '%EpisodeTitle%');">%EpisodeTitle%</a></td><td class="description">Episode title</td></tr>
+                    <tr><td class="key"><a onclick="insertText('fileNameFormatInput', '%EpisodeNumber%');">%EpisodeNumber%</a></td><td class="description">Episode number</td></tr>
+                    <tr><td class="key"><a onclick="insertText('fileNameFormatInput', '%EpisodeDate%');">%EpisodeDate%</a></td><td class="description">Episode date (ie: 1999-12-31)</td></tr>
+                    <tr><td class="key"><a onclick="insertText('fileNameFormatInput', '%ShowTitle%');">%ShowTitle%</a></td><td class="description">Show title</td></tr>
+                    <tr><td class="key"><a onclick="insertText('fileNameFormatInput', '%%');">%%</a></td><td class="description">Literal '%'</td></tr>
+                    <tr><td class="key"><a onclick="insertText('fileNameFormatInput', '/');">/</a></td><td class="description">Path separator</td></tr>
                 </tbody>
             </table>
         </label>
