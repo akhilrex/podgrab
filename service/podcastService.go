@@ -263,19 +263,26 @@ func AddPodcastItems(podcast *db.Podcast, newPodcast bool) error {
 		_, keyExists := keyMap[obj.Guid.Text]
 		if !keyExists {
 			duration, _ := strconv.Atoi(obj.Duration)
-			pubDate, _ := time.Parse(time.RFC1123Z, obj.PubDate)
+			toParse := strings.TrimSpace(obj.PubDate)
+
+			pubDate, _ := time.Parse(time.RFC1123Z, toParse)
 			if (pubDate == time.Time{}) {
-				pubDate, _ = time.Parse(time.RFC1123, obj.PubDate)
+				pubDate, _ = time.Parse(time.RFC1123, toParse)
 			}
 			if (pubDate == time.Time{}) {
 				//	RFC1123     = "Mon, 02 Jan 2006 15:04:05 MST"
 				modifiedRFC1123 := "Mon, 2 Jan 2006 15:04:05 MST"
-				pubDate, _ = time.Parse(modifiedRFC1123, obj.PubDate)
+				pubDate, _ = time.Parse(modifiedRFC1123, toParse)
 			}
 			if (pubDate == time.Time{}) {
 				//	RFC1123Z    = "Mon, 02 Jan 2006 15:04:05 -0700" // RFC1123 with numeric zone
 				modifiedRFC1123Z := "Mon, 2 Jan 2006 15:04:05 -0700"
-				pubDate, _ = time.Parse(modifiedRFC1123Z, obj.PubDate)
+				pubDate, _ = time.Parse(modifiedRFC1123Z, toParse)
+			}
+			if (pubDate == time.Time{}) {
+				//	RFC1123Z    = "Mon, 02 Jan 2006 15:04:05 -0700" // RFC1123 with numeric zone
+				modifiedRFC1123Z := "Mon, 02 Jan 2006 15:04:05 -0700"
+				pubDate, _ = time.Parse(modifiedRFC1123Z, toParse)
 			}
 
 			if (pubDate == time.Time{}) {
