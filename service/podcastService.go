@@ -473,32 +473,39 @@ func SetAllEpisodesToDownload(podcastId string) error {
 var format_re = regexp.MustCompile("%%|%([^%]+)%")
 
 var format_map = map[string]interface{}{
-	"%ShowTitle%": func(item *db.PodcastItem) string {
+	"%ShowTitle%": func(item *db.PodcastItem, args ...string) string {
 		return item.Podcast.Title
 	},
-	"%EpisodeTitle%": func(item *db.PodcastItem) string {
+	"%EpisodeTitle%": func(item *db.PodcastItem, args ...string) string {
 		return item.Title
 	},
-	"%EpisodeNumber%": func(item *db.PodcastItem) string {
+	"%EpisodeNumber%": func(item *db.PodcastItem, args ...string) string {
 		seq, err := db.GetEpisodeNumber(item.ID, item.PodcastID)
-		if err == nil {
-			return strconv.Itoa(seq)
+		if err != nil {
+			seq = 0
 		}
-		return "0"
+		width, err := 0, *new(error)
+		if len(args) > 0 {
+			width, err = strconv.Atoi(args[0])
+		}
+		if err != nil {
+			width = 0
+		}
+		return fmt.Sprintf("%0*d", width, seq)
 	},
-	"%EpisodeDate%": func(item *db.PodcastItem) string {
+	"%EpisodeDate%": func(item *db.PodcastItem, args ...string) string {
 		return item.PubDate.Format("2006-01-02")
 	},
-	"%YYYY%": func(item *db.PodcastItem) string {
+	"%YYYY%": func(item *db.PodcastItem, args ...string) string {
 		return item.PubDate.Format("2006")
 	},
-	"%mm%": func(item *db.PodcastItem) string {
+	"%mm%": func(item *db.PodcastItem, args ...string) string {
 		return item.PubDate.Format("01")
 	},
-	"%dd%": func(item *db.PodcastItem) string {
+	"%dd%": func(item *db.PodcastItem, args ...string) string {
 		return item.PubDate.Format("02")
 	},
-	"%%": func(item *db.PodcastItem) string {
+	"%%": func(item *db.PodcastItem, args ...string) string {
 		return "%"
 	},
 }
@@ -512,9 +519,10 @@ func FormatFileName(item *db.PodcastItem, formatString string) string {
 			formattedFileName += formatString[previousTokenEndingIndex:t[0]]
 		}
 		token := formatString[t[0]:t[1]]
-		tokenFunction := format_map[token]
+		tokenArgs := strings.Split(token[1:len(token)-1], ":")
+		tokenFunction := format_map["%"+tokenArgs[0]+"%"]
 		if nil != tokenFunction {
-			token = tokenFunction.(func(item *db.PodcastItem)string)(item)
+			token = tokenFunction.(func(*db.PodcastItem, ...string)string)(item, tokenArgs[1:]...)
 			token = sanitize.Name(token)
 		}
 		formattedFileName += token
