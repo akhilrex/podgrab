@@ -295,10 +295,14 @@ func AddPodcastItems(podcast *db.Podcast, newPodcast bool) error {
 
 			var downloadStatus db.DownloadStatus
 			if setting.AutoDownload {
-				if i < limit {
+				if !newPodcast {
 					downloadStatus = db.NotDownloaded
 				} else {
-					downloadStatus = db.Deleted
+					if i < limit {
+						downloadStatus = db.NotDownloaded
+					} else {
+						downloadStatus = db.Deleted
+					}
 				}
 			} else {
 				downloadStatus = db.Deleted

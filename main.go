@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"log"
 	"os"
+	"path"
 	"strconv"
 	"time"
 
@@ -142,8 +143,11 @@ func main() {
 	}
 
 	dataPath := os.Getenv("DATA")
+	backupPath := path.Join(os.Getenv("CONFIG"), "backups")
+
 	router.Static("/webassets", "./webassets")
 	router.Static("/assets", dataPath)
+	router.Static(backupPath, backupPath)
 	router.POST("/podcasts", controllers.AddPodcast)
 	router.GET("/podcasts", controllers.GetAllPodcasts)
 	router.GET("/podcasts/:id", controllers.GetPodcastById)
