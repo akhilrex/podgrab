@@ -417,6 +417,7 @@ func createRss(items []db.PodcastItem, title, description string, c *gin.Context
 			Enclosure: model.RssItemEnclosure{
 				URL:    fmt.Sprintf("%s://%s/podcastitems/%s/file", url.Scheme, url.Host, item.ID),
 				Length: fmt.Sprint(item.FileSize),
+				Type:   "audio/mpeg",
 			},
 			PubDate: item.PubDate.Format("Mon, 02 Jan 2006 15:04:05 -0700"),
 			Guid: model.RssItemGuid{
