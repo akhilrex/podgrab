@@ -26,11 +26,27 @@ func Download(link string, episodeTitle string, podcastName string, prefix strin
 	if link == "" {
 		return "", errors.New("Download path empty")
 	}
-	client := httpClient()
-	resp, err := client.Get(link)
+
+	req, err := http.NewRequest("GET", link, nil)
 	if err != nil {
 		Logger.Errorw("Error getting response: "+link, err)
 		return "", err
+	}
+	req.Header.Add("Accept", "*/*")
+	req.Header.Add("User-Agent", "Go-http-client")
+
+	client := httpClient()
+	resp, err := client.Do(req)
+
+	//resp, err := client.Get(link)
+	if err != nil {
+		Logger.Errorw("Error getting response: "+link, err)
+		return "", err
+	}
+
+	if resp.StatusCode != 200 {
+		Logger.Errorw("Cannot download \"" + episodeTitle + "\" from the Podcast " + podcastName + ", http status: " + resp.Status)
+		return "", errors.New("Error while downloading file(" + link + "): " + resp.Status)
 	}
 
 	fileName := getFileName(link, episodeTitle, ".mp3")
@@ -101,11 +117,26 @@ func DownloadPodcastCoverImage(link string, podcastName string) (string, error) 
 	if link == "" {
 		return "", errors.New("Download path empty")
 	}
-	client := httpClient()
-	resp, err := client.Get(link)
+
+	req, err := http.NewRequest("GET", link, nil)
 	if err != nil {
 		Logger.Errorw("Error getting response: "+link, err)
 		return "", err
+	}
+	req.Header.Add("Accept", "*/*")
+	req.Header.Add("User-Agent", "Go-http-client")
+
+	client := httpClient()
+	resp, err := client.Do(req)
+
+	if err != nil {
+		Logger.Errorw("Error getting response: "+link, err)
+		return "", err
+	}
+
+	if resp.StatusCode != 200 {
+		Logger.Errorw("Cannot download \"" + podcastName + "\" Cover Image, http status: " + resp.Status)
+		return "", errors.New("Error while downloading file(" + link + "): " + resp.Status)
 	}
 
 	fileName := getFileName(link, "folder", ".jpg")
