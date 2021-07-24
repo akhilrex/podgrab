@@ -52,6 +52,9 @@ function insertText(elemID, text){
     <div class="columns two">
         <a href="/opml" class="button">Export OPML</a>
     </div>
+    <div class="columns two">
+        <a title="Import this rss feed in your favorite podcast player" target="_blank" href="/rss" class="button">Rss Feed</a>
+    </div>
 </div>
 <hr>
 <div class="row" id="app">
@@ -118,6 +121,10 @@ function insertText(elemID, text){
             <input type="checkbox" name="generateNFOFile" v-model="generateNFOFile">
             <span class="label-body">Generate NFO files for Podcasts</span>
         </label>
+        <label for="dontDownloadDeletedFromDisk">
+            <input type="checkbox" name="dontDownloadDeletedFromDisk" v-model="dontDownloadDeletedFromDisk">
+            <span class="label-body">Don't re-download files deleted from disk.</span>
+        </label>
         
       
         <input type="submit" value="Save" class="button">
@@ -149,7 +156,7 @@ function insertText(elemID, text){
         <table>
             <tr>
                 <td>Current Version</td>
-                <td>2021.06.02</td>
+                <td>   2021.07.14</td>
             </tr>
             <tr>
                 <td>Website</td>
@@ -192,7 +199,8 @@ var app = new Vue({
             fileNameFormat:self.fileNameFormat,
             darkMode:self.darkMode,
             downloadEpisodeImages:self.downloadEpisodeImages,
-            generateNFOFile:self.generateNFOFile
+            generateNFOFile:self.generateNFOFile,
+            dontDownloadDeletedFromDisk:self.dontDownloadDeletedFromDisk
         })
         .then(function(response){
             Vue.toasted.show('Settings saved successfully.' ,{
@@ -233,7 +241,8 @@ var app = new Vue({
     darkMode:{{ .setting.DarkMode }},
     originalThemeSetting:{{ .setting.DarkMode }},
     downloadEpisodeImages:{{.setting.DownloadEpisodeImages }},
-    generateNFOFile:{{.setting.GenerateNFOFile }},
+    generateNFOFile:{{ .setting.GenerateNFOFile }},
+    dontDownloadDeletedFromDisk:{{ .setting.DontDownloadDeletedFromDisk }},
   },
 
 })

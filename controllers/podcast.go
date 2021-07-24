@@ -10,6 +10,7 @@ import (
 
 	"github.com/akhilrex/podgrab/model"
 	"github.com/akhilrex/podgrab/service"
+	"github.com/gin-contrib/location"
 
 	"github.com/akhilrex/podgrab/db"
 	"github.com/gin-gonic/gin"
@@ -399,6 +400,87 @@ func GetTagById(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 	}
 }
+
+func createRss(items []db.PodcastItem, title, description string, c *gin.Context) model.RssPodcastData {
+	var rssItems []model.RssItem
+	url := location.Get(c)
+	for _, item := range items {
+		rssItem := model.RssItem{
+			Title:       item.Title,
+			Description: item.Summary,
+			Summary:     item.Summary,
+			Image: model.RssItemImage{
+				Text: item.Title,
+				Href: fmt.Sprintf("%s://%s/podcastitems/%s/image", url.Scheme, url.Host, item.ID),
+			},
+			EpisodeType: item.EpisodeType,
+			Enclosure: model.RssItemEnclosure{
+				URL:    fmt.Sprintf("%s://%s/podcastitems/%s/file", url.Scheme, url.Host, item.ID),
+				Length: fmt.Sprint(item.FileSize),
+				Type:   "audio/mpeg",
+			},
+			PubDate: item.PubDate.Format("Mon, 02 Jan 2006 15:04:05 -0700"),
+			Guid: model.RssItemGuid{
+				IsPermaLink: "false",
+				Text:        item.ID,
+			},
+			Link:     fmt.Sprintf("%s://%s/allTags", url.Scheme, url.Host),
+			Text:     item.Title,
+			Duration: fmt.Sprint(item.Duration),
+		}
+		rssItems = append(rssItems, rssItem)
+	}
+	return model.RssPodcastData{
+		Itunes:  "http://www.itunes.com/dtds/podcast-1.0.dtd",
+		Media:   "http://search.yahoo.com/mrss/",
+		Version: "2.0",
+		Atom:    "http://www.w3.org/2005/Atom",
+		Psc:     "https://podlove.org/simple-chapters/",
+		Content: "http://purl.org/rss/1.0/modules/content/",
+		Channel: model.RssChannel{
+			Item:        rssItems,
+			Title:       title,
+			Description: description,
+			Summary:     description,
+			Link:        fmt.Sprintf("%s://%s/allTags", url.Scheme, url.Host),
+		},
+	}
+}
+
+func GetRssForTagById(c *gin.Context) {
+	var searchByIdQuery SearchByIdQuery
+	if c.ShouldBindUri(&searchByIdQuery) == nil {
+		tag, err := db.GetTagById(searchByIdQuery.Id)
+		var podIds []string
+		for _, pod := range tag.Podcasts {
+			podIds = append(podIds, pod.ID)
+		}
+		items := *service.GetAllPodcastItemsByPodcastIds(podIds)
+
+		description := fmt.Sprintf("Playing episodes with tag : %s", tag.Label)
+		title := fmt.Sprintf(" %s | Podgrab", tag.Label)
+
+		if err == nil {
+			c.XML(200, createRss(items, title, description, c))
+		}
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+	}
+}
+func GetRss(c *gin.Context) {
+	var items []db.PodcastItem
+
+	if err := db.GetAllPodcastItems(&items); err != nil {
+		fmt.Println(err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+	}
+
+	title := "Podgrab"
+	description := "Pograb playlist"
+
+	c.XML(200, createRss(items, title, description, c))
+
+}
 func DeleteTagById(c *gin.Context) {
 	var searchByIdQuery SearchByIdQuery
 	if c.ShouldBindUri(&searchByIdQuery) == nil {
@@ -464,13 +546,14 @@ func UpdateSetting(c *gin.Context) {
 	if err == nil {
 
 		err = service.UpdateSettings(
-			model.DownloadOnAdd,
-			model.InitialDownloadCount,
-			model.AutoDownload,
+		    model.DownloadOnAdd, 
+		    model.InitialDownloadCount,
+			model.AutoDownload, 
 			model.FileNameFormat,
-			model.DarkMode,
-			model.DownloadEpisodeImages,
-			model.GenerateNFOFile)
+			model.DarkMode, 
+			model.DownloadEpisodeImages, 
+			model.GenerateNFOFile, 
+			model.DontDownloadDeletedFromDisk)
 		if err == nil {
 			c.JSON(200, gin.H{"message": "Success"})
 

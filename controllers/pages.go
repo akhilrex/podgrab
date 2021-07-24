@@ -28,6 +28,7 @@ type SettingModel struct {
 	DarkMode                      bool   `form:"darkMode" json:"darkMode" query:"darkMode"`
 	DownloadEpisodeImages         bool   `form:"downloadEpisodeImages" json:"downloadEpisodeImages" query:"downloadEpisodeImages"`
 	GenerateNFOFile               bool   `form:"generateNFOFile" json:"generateNFOFile" query:"generateNFOFile"`
+	DontDownloadDeletedFromDisk   bool   `form:"dontDownloadDeletedFromDisk" json:"dontDownloadDeletedFromDisk" query:"dontDownloadDeletedFromDisk"`
 }
 
 var searchOptions = map[string]string{
