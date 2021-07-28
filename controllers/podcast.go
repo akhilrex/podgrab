@@ -442,7 +442,9 @@ func createRss(items []db.PodcastItem, title, description string, c *gin.Context
 			Title:       title,
 			Description: description,
 			Summary:     description,
+			Author:      "Podgrab Aggregation",
 			Link:        fmt.Sprintf("%s://%s/allTags", url.Scheme, url.Host),
+			Image:       model.RssItemImage{Text: title, Href: fmt.Sprintf("%s://%s/webassets/blank.png", url.Scheme, url.Host)},
 		},
 	}
 }
