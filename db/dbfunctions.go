@@ -272,6 +272,12 @@ func ForceSetLastEpisodeDate(podcastId string) {
 	DB.Exec("update podcasts set last_episode = (select max(pi.pub_date) from podcast_items pi where pi.podcast_id = @id) where id = @id", sql.Named("id", podcastId))
 }
 
+func TogglePodcastPauseStatus(podcastId string, isPaused bool) error {
+
+	tx := DB.Debug().Exec("update podcasts set is_paused = @isPaused where id = @id", sql.Named("id", podcastId), sql.Named("isPaused", isPaused))
+	return tx.Error
+}
+
 func GetPodcastItemsByPodcastIdAndGUIDs(podcastId string, guids []string) (*[]PodcastItem, error) {
 	var podcastItems []PodcastItem
 	result := DB.Preload(clause.Associations).Where(&PodcastItem{PodcastID: podcastId}).Where("guid IN ?", guids).Find(&podcastItems)
@@ -295,6 +301,11 @@ func CreatePodcast(podcast *Podcast) error {
 
 func CreatePodcastItem(podcastItem *PodcastItem) error {
 	tx := DB.Omit("Podcast").Create(&podcastItem)
+	return tx.Error
+}
+
+func UpdatePodcast(podcast *Podcast) error {
+	tx := DB.Save(&podcast)
 	return tx.Error
 }
 func UpdatePodcastItem(podcastItem *PodcastItem) error {

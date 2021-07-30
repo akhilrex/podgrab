@@ -115,6 +115,10 @@
       .list .u-full-width{
         width: 80%;
       }
+
+      .paused{
+        opacity: 50%;
+      }
     </style>
   </head>
   <body>
@@ -172,11 +176,12 @@
             />
           </a>
           </div>
-          <div class="columns" v-bind:class="{ten:layout=='list', twelve:layout=='grid'}">
+          <div class="columns" v-bind:class="{ten:layout=='list', twelve:layout=='grid',paused:podcast.IsPaused}">
             <div class="titleContainer">
             <a style="text-decoration: none" :href="'/podcasts/'+podcast.ID+'/view'">
               <h3 v-if="layout=='list'">${podcast.Title}</h3>
-              <h5 v-if="layout=='grid'">${podcast.Title}</h5>
+              <h5 v-if="layout=='grid'">${podcast.Title} </h5>
+             
               </a>
             </div>
            <div class="contentContainer">
@@ -250,6 +255,22 @@
           >
             <i class="fas fa-plus"></i>
           </button>
+          <button
+          class="button"
+          title="New episodes for this podcast are not being downloaded automatially. Click to resume download."
+          v-if="podcast.IsPaused"
+          @click="togglePause(podcast,false)"
+        >
+          <i style="color: greenyellow;" class="fas fa-dot-circle"></i>
+        </button>
+        <button
+        class="button"
+        title="Click to pause automatic downloading for this podcast."
+        v-if="!podcast.IsPaused"
+        @click="togglePause(podcast,true)"
+      >
+        <i style="color: red;" class="fas fa-dot-circle"></i>
+      </button>
             </div>
             </div>
           </div>
@@ -468,6 +489,27 @@
               return
             }
             this.socket.send(getWebsocketMessage("Enqueue",`{"podcastId":"${id}"}`))
+          },
+          togglePause(item,isPaused){
+            var self=this;
+            var url= isPaused?`/podcasts/${item.ID}/pause`:`/podcasts/${item.ID}/unpause`;
+            axios
+              .get(url)
+              .then(function (response) {
+                 item.IsPaused=isPaused;
+
+              })
+              .catch(function (error) {
+                if (error.response && error.response.data && error.response.data.message) {
+                  Vue.toasted.show(error.response.data.message, {
+                    theme: "bubble",
+                    type: "error",
+                    position: "top-right",
+                    duration: 5000,
+                  });
+                }
+              })
+              
           },
           filterPodcasts(){
             if(this.filterTag===""){

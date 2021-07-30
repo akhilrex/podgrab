@@ -95,6 +95,35 @@ func GetPodcastById(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 	}
 }
+
+func PausePodcastById(c *gin.Context) {
+	var searchByIdQuery SearchByIdQuery
+	if c.ShouldBindUri(&searchByIdQuery) == nil {
+
+		err := service.TogglePodcastPause(searchByIdQuery.Id, true)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, err)
+			return
+		}
+		c.JSON(200, gin.H{})
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+	}
+}
+func UnpausePodcastById(c *gin.Context) {
+	var searchByIdQuery SearchByIdQuery
+	if c.ShouldBindUri(&searchByIdQuery) == nil {
+		err := service.TogglePodcastPause(searchByIdQuery.Id, false)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, err)
+			return
+		}
+		c.JSON(200, gin.H{})
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+	}
+}
+
 func DeletePodcastById(c *gin.Context) {
 	var searchByIdQuery SearchByIdQuery
 

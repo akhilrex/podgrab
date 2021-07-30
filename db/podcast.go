@@ -30,6 +30,8 @@ type Podcast struct {
 	DownloadedEpisodesSize  int64 `gorm:"-"`
 	DownloadingEpisodesSize int64 `gorm:"-"`
 	AllEpisodesSize         int64 `gorm:"-"`
+
+	IsPaused bool `gorm:"default:false"`
 }
 
 //PodcastItem is

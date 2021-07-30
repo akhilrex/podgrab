@@ -312,6 +312,10 @@ func AddPodcastItems(podcast *db.Podcast, newPodcast bool) error {
 				downloadStatus = db.Deleted
 			}
 
+			if podcast.IsPaused {
+				downloadStatus = db.Deleted
+			}
+
 			summary := strip.StripTags(obj.Summary)
 			if summary == "" {
 				summary = strip.StripTags(obj.Description)
@@ -778,4 +782,14 @@ func AddTag(label, description string) (db.Tag, error) {
 
 	return *tag, &model.TagAlreadyExistsError{Label: label}
 
+}
+
+func TogglePodcastPause(id string, isPaused bool) error {
+	var podcast db.Podcast
+	err := db.GetPodcastById(id, &podcast)
+	if err != nil {
+		return err
+	}
+
+	return db.TogglePodcastPauseStatus(id, isPaused)
 }
