@@ -253,6 +253,11 @@
               <option :key="index" v-for="index in filter.totalPages" >${index}</option>
           </select>
           
+          <select name="count" id="countDdl" v-model="filter.count" >
+              <option :key="index" v-for="index in countOptions" >${index}</option>
+
+        </select>
+        
           <a
           v-if="filter.nextPage"
             class="button"
@@ -291,8 +296,14 @@ var app = new Vue({
             return this.filter.count;
           }
         },
+      
         watch:{
-        
+        count(newValue,oldValue){
+          if(newValue===oldValue){
+            return;
+          }
+          this.getData();
+        },
           page(newPage,oldPage){
             if(newPage==oldPage){
               return;
@@ -309,9 +320,6 @@ var app = new Vue({
            }
            this.getData()
            
-          },
-          count(current,old){
-            this.getData()
           },
           showFilters(current,old){
            
@@ -355,6 +363,7 @@ var app = new Vue({
         mounted(){
           if(localStorage && localStorage.episodesFilter){
               this.filter=JSON.parse(localStorage.episodesFilter);
+
             }
             if(localStorage && localStorage.showFilters){
               this.showFilters=JSON.parse(localStorage.showFilters);
@@ -401,7 +410,7 @@ var app = new Vue({
                 this.selectedPlayedStatus=this.playedStatusOptions[i]
               }
             }
-
+            this.filter.page=1;
           this.getData()
 
 
@@ -560,6 +569,7 @@ var app = new Vue({
           selectedTags:[],
           selectedDownloadStatus:"",
           selectedPlayedStatus:"",
+          countOptions:[10,20,30,40,50,100],
           showFilters:localStorage && localStorage.showFilters && JSON.parse(localStorage.showFilters),
          
             {{ $len := len .podcastItems}}
