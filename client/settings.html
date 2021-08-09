@@ -93,6 +93,10 @@
             <input type="checkbox" name="generateNFOFile" v-model="generateNFOFile">
             <span class="label-body">Generate NFO files for Podcasts</span>
         </label>
+        <label for="dontDownloadDeletedFromDisk">
+            <input type="checkbox" name="dontDownloadDeletedFromDisk" v-model="dontDownloadDeletedFromDisk">
+            <span class="label-body">Don't re-download files deleted from disk.</span>
+        </label>
         
       
         <input type="submit" value="Save" class="button">
@@ -124,7 +128,7 @@
         <table>
             <tr>
                 <td>Current Version</td>
-                <td> 2021.06.20</td>
+                <td>  2021.08.02</td>
             </tr>
             <tr>
                 <td>Website</td>
@@ -140,7 +144,7 @@
             </tr>
             <tr>
                 <td>Support the developer</td>
-                <td><a href="https://www.buymeacoffee.com/akhilrex" target="_blank" rel="noopener noreferrer">Support here</a></td>
+                <td><a href="https://www.buymeacoffee.com/akhilrex" target="_blank" rel="noopener noreferrer">Buy him a beer!!</a></td>
             </tr>
         </table>
         
@@ -168,7 +172,8 @@ var app = new Vue({
             appendEpisodeNumberToFileName:self.appendEpisodeNumberToFileName,
             darkMode:self.darkMode,
             downloadEpisodeImages:self.downloadEpisodeImages,
-            generateNFOFile:self.generateNFOFile
+            generateNFOFile:self.generateNFOFile,
+            dontDownloadDeletedFromDisk:self.dontDownloadDeletedFromDisk
         })
         .then(function(response){
             Vue.toasted.show('Settings saved successfully.' ,{
@@ -210,7 +215,8 @@ var app = new Vue({
     darkMode:{{ .setting.DarkMode }},
     originalThemeSetting:{{ .setting.DarkMode }},
     downloadEpisodeImages:{{.setting.DownloadEpisodeImages }},
-    generateNFOFile:{{.setting.GenerateNFOFile }},
+    generateNFOFile:{{ .setting.GenerateNFOFile }},
+    dontDownloadDeletedFromDisk:{{ .setting.DontDownloadDeletedFromDisk }},
   },
 
 })

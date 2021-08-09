@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"log"
 	"os"
+	"path"
 	"strconv"
 	"time"
 
@@ -142,8 +143,11 @@ func main() {
 	}
 
 	dataPath := os.Getenv("DATA")
+	backupPath := path.Join(os.Getenv("CONFIG"), "backups")
+
 	router.Static("/webassets", "./webassets")
 	router.Static("/assets", dataPath)
+	router.Static(backupPath, backupPath)
 	router.POST("/podcasts", controllers.AddPodcast)
 	router.GET("/podcasts", controllers.GetAllPodcasts)
 	router.GET("/podcasts/:id", controllers.GetPodcastById)
@@ -153,6 +157,8 @@ func main() {
 	router.GET("/podcasts/:id/download", controllers.DownloadAllEpisodesByPodcastId)
 	router.DELETE("/podcasts/:id/items", controllers.DeletePodcastEpisodesById)
 	router.DELETE("/podcasts/:id/podcast", controllers.DeleteOnlyPodcastById)
+	router.GET("/podcasts/:id/pause", controllers.PausePodcastById)
+	router.GET("/podcasts/:id/unpause", controllers.UnpausePodcastById)
 
 	router.GET("/podcastitems", controllers.GetAllPodcastItems)
 	router.GET("/podcastitems/:id", controllers.GetPodcastItemById)

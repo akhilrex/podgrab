@@ -295,16 +295,24 @@ func AddPodcastItems(podcast *db.Podcast, newPodcast bool) error {
 
 			var downloadStatus db.DownloadStatus
 			if setting.AutoDownload {
-				if i < limit {
+				if !newPodcast {
 					downloadStatus = db.NotDownloaded
 				} else {
-					downloadStatus = db.Deleted
+					if i < limit {
+						downloadStatus = db.NotDownloaded
+					} else {
+						downloadStatus = db.Deleted
+					}
 				}
 			} else {
 				downloadStatus = db.Deleted
 			}
 
 			if newPodcast && !setting.DownloadOnAdd {
+				downloadStatus = db.Deleted
+			}
+
+			if podcast.IsPaused {
 				downloadStatus = db.Deleted
 			}
 
@@ -528,6 +536,7 @@ func DownloadMissingEpisodes() error {
 }
 func CheckMissingFiles() error {
 	data, err := db.GetAllPodcastItemsAlreadyDownloaded()
+	setting := db.GetOrCreateSetting()
 
 	//fmt.Println("Processing episodes: ", strconv.Itoa(len(*data)))
 	if err != nil {
@@ -536,7 +545,11 @@ func CheckMissingFiles() error {
 	for _, item := range *data {
 		fileExists := FileExists(item.DownloadPath)
 		if !fileExists {
-			SetPodcastItemAsNotDownloaded(item.ID, db.NotDownloaded)
+			if setting.DontDownloadDeletedFromDisk {
+				SetPodcastItemAsNotDownloaded(item.ID, db.Deleted)
+			} else {
+				SetPodcastItemAsNotDownloaded(item.ID, db.NotDownloaded)
+			}
 		}
 	}
 	return nil
@@ -732,7 +745,7 @@ func GetSearchFromPodcastIndex(pod *podcastindex.Podcast) *model.CommonSearchRes
 	return p
 }
 
-func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload bool, appendDateToFileName bool, appendEpisodeNumberToFileName bool, darkMode bool, downloadEpisodeImages bool, generateNFOFile bool) error {
+func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload bool, appendDateToFileName bool, appendEpisodeNumberToFileName bool, darkMode bool, downloadEpisodeImages bool, generateNFOFile bool, dontDownloadDeletedFromDisk bool) error {
 	setting := db.GetOrCreateSetting()
 
 	setting.AutoDownload = autoDownload
@@ -743,6 +756,7 @@ func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload b
 	setting.DarkMode = darkMode
 	setting.DownloadEpisodeImages = downloadEpisodeImages
 	setting.GenerateNFOFile = generateNFOFile
+	setting.DontDownloadDeletedFromDisk = dontDownloadDeletedFromDisk
 
 	return db.UpdateSettings(setting)
 }
@@ -768,4 +782,14 @@ func AddTag(label, description string) (db.Tag, error) {
 
 	return *tag, &model.TagAlreadyExistsError{Label: label}
 
+}
+
+func TogglePodcastPause(id string, isPaused bool) error {
+	var podcast db.Podcast
+	err := db.GetPodcastById(id, &podcast)
+	if err != nil {
+		return err
+	}
+
+	return db.TogglePodcastPauseStatus(id, isPaused)
 }

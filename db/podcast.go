@@ -30,6 +30,8 @@ type Podcast struct {
 	DownloadedEpisodesSize  int64 `gorm:"-"`
 	DownloadingEpisodesSize int64 `gorm:"-"`
 	AllEpisodesSize         int64 `gorm:"-"`
+
+	IsPaused bool `gorm:"default:false"`
 }
 
 //PodcastItem is
@@ -83,6 +85,7 @@ type Setting struct {
 	DarkMode                      bool `gorm:"default:false"`
 	DownloadEpisodeImages         bool `gorm:"default:false"`
 	GenerateNFOFile               bool `gorm:"default:false"`
+	DontDownloadDeletedFromDisk   bool `gorm:"default:false"`
 }
 type Migration struct {
 	Base

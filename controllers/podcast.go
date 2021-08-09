@@ -95,6 +95,35 @@ func GetPodcastById(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 	}
 }
+
+func PausePodcastById(c *gin.Context) {
+	var searchByIdQuery SearchByIdQuery
+	if c.ShouldBindUri(&searchByIdQuery) == nil {
+
+		err := service.TogglePodcastPause(searchByIdQuery.Id, true)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, err)
+			return
+		}
+		c.JSON(200, gin.H{})
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+	}
+}
+func UnpausePodcastById(c *gin.Context) {
+	var searchByIdQuery SearchByIdQuery
+	if c.ShouldBindUri(&searchByIdQuery) == nil {
+		err := service.TogglePodcastPause(searchByIdQuery.Id, false)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, err)
+			return
+		}
+		c.JSON(200, gin.H{})
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+	}
+}
+
 func DeletePodcastById(c *gin.Context) {
 	var searchByIdQuery SearchByIdQuery
 
@@ -417,6 +446,7 @@ func createRss(items []db.PodcastItem, title, description string, c *gin.Context
 			Enclosure: model.RssItemEnclosure{
 				URL:    fmt.Sprintf("%s://%s/podcastitems/%s/file", url.Scheme, url.Host, item.ID),
 				Length: fmt.Sprint(item.FileSize),
+				Type:   "audio/mpeg",
 			},
 			PubDate: item.PubDate.Format("Mon, 02 Jan 2006 15:04:05 -0700"),
 			Guid: model.RssItemGuid{
@@ -441,7 +471,9 @@ func createRss(items []db.PodcastItem, title, description string, c *gin.Context
 			Title:       title,
 			Description: description,
 			Summary:     description,
+			Author:      "Podgrab Aggregation",
 			Link:        fmt.Sprintf("%s://%s/allTags", url.Scheme, url.Host),
+			Image:       model.RssItemImage{Text: title, Href: fmt.Sprintf("%s://%s/webassets/blank.png", url.Scheme, url.Host)},
 		},
 	}
 }
@@ -546,7 +578,7 @@ func UpdateSetting(c *gin.Context) {
 
 		err = service.UpdateSettings(model.DownloadOnAdd, model.InitialDownloadCount,
 			model.AutoDownload, model.AppendDateToFileName, model.AppendEpisodeNumberToFileName,
-			model.DarkMode, model.DownloadEpisodeImages, model.GenerateNFOFile)
+			model.DarkMode, model.DownloadEpisodeImages, model.GenerateNFOFile, model.DontDownloadDeletedFromDisk)
 		if err == nil {
 			c.JSON(200, gin.H{"message": "Success"})
 
