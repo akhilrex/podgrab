@@ -430,9 +430,18 @@ func GetTagById(c *gin.Context) {
 	}
 }
 
+func getBaseUrl(c *gin.Context) string {
+	setting := c.MustGet("setting").(*db.Setting)
+	if setting.BaseUrl == "" {
+		url := location.Get(c)
+		return fmt.Sprintf("%s://%s", url.Scheme, url.Host)
+	}
+	return setting.BaseUrl
+}
+
 func createRss(items []db.PodcastItem, title, description string, c *gin.Context) model.RssPodcastData {
 	var rssItems []model.RssItem
-	url := location.Get(c)
+	url := getBaseUrl(c)
 	for _, item := range items {
 		rssItem := model.RssItem{
 			Title:       item.Title,
@@ -440,11 +449,11 @@ func createRss(items []db.PodcastItem, title, description string, c *gin.Context
 			Summary:     item.Summary,
 			Image: model.RssItemImage{
 				Text: item.Title,
-				Href: fmt.Sprintf("%s://%s/podcastitems/%s/image", url.Scheme, url.Host, item.ID),
+				Href: fmt.Sprintf("%s/podcastitems/%s/image", url, item.ID),
 			},
 			EpisodeType: item.EpisodeType,
 			Enclosure: model.RssItemEnclosure{
-				URL:    fmt.Sprintf("%s://%s/podcastitems/%s/file", url.Scheme, url.Host, item.ID),
+				URL:    fmt.Sprintf("%s/podcastitems/%s/file", url, item.ID),
 				Length: fmt.Sprint(item.FileSize),
 				Type:   "audio/mpeg",
 			},
@@ -453,7 +462,7 @@ func createRss(items []db.PodcastItem, title, description string, c *gin.Context
 				IsPermaLink: "false",
 				Text:        item.ID,
 			},
-			Link:     fmt.Sprintf("%s://%s/allTags", url.Scheme, url.Host),
+			Link:     fmt.Sprintf("%s/allTags", url),
 			Text:     item.Title,
 			Duration: fmt.Sprint(item.Duration),
 		}
@@ -472,8 +481,8 @@ func createRss(items []db.PodcastItem, title, description string, c *gin.Context
 			Description: description,
 			Summary:     description,
 			Author:      "Podgrab Aggregation",
-			Link:        fmt.Sprintf("%s://%s/allTags", url.Scheme, url.Host),
-			Image:       model.RssItemImage{Text: title, Href: fmt.Sprintf("%s://%s/webassets/blank.png", url.Scheme, url.Host)},
+			Link:        fmt.Sprintf("%s/allTags", url),
+			Image:       model.RssItemImage{Text: title, Href: fmt.Sprintf("%s/webassets/blank.png", url)},
 		},
 	}
 }
@@ -578,7 +587,7 @@ func UpdateSetting(c *gin.Context) {
 
 		err = service.UpdateSettings(model.DownloadOnAdd, model.InitialDownloadCount,
 			model.AutoDownload, model.AppendDateToFileName, model.AppendEpisodeNumberToFileName,
-			model.DarkMode, model.DownloadEpisodeImages, model.GenerateNFOFile, model.DontDownloadDeletedFromDisk)
+			model.DarkMode, model.DownloadEpisodeImages, model.GenerateNFOFile, model.DontDownloadDeletedFromDisk, model.BaseUrl)
 		if err == nil {
 			c.JSON(200, gin.H{"message": "Success"})
 

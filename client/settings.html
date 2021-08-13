@@ -97,6 +97,10 @@
             <input type="checkbox" name="dontDownloadDeletedFromDisk" v-model="dontDownloadDeletedFromDisk">
             <span class="label-body">Don't re-download files deleted from disk.</span>
         </label>
+        <label for="baseUrl">
+            <span class="label-body">Base URL (if accessing Podgrab using a URL. Without trailing /. Leave empty if not using or unsure.)</span>
+            <input type="url" class="u-full-width"  name="baseUrl" v-model="baseUrl">
+        </label>
         
       
         <input type="submit" value="Save" class="button">
@@ -128,7 +132,7 @@
         <table>
             <tr>
                 <td>Current Version</td>
-                <td>  2021.08.02</td>
+                <td>  2021.08.13</td>
             </tr>
             <tr>
                 <td>Website</td>
@@ -173,7 +177,8 @@ var app = new Vue({
             darkMode:self.darkMode,
             downloadEpisodeImages:self.downloadEpisodeImages,
             generateNFOFile:self.generateNFOFile,
-            dontDownloadDeletedFromDisk:self.dontDownloadDeletedFromDisk
+            dontDownloadDeletedFromDisk:self.dontDownloadDeletedFromDisk,
+            baseUrl:self.baseUrl,
         })
         .then(function(response){
             Vue.toasted.show('Settings saved successfully.' ,{
@@ -217,6 +222,7 @@ var app = new Vue({
     downloadEpisodeImages:{{.setting.DownloadEpisodeImages }},
     generateNFOFile:{{ .setting.GenerateNFOFile }},
     dontDownloadDeletedFromDisk:{{ .setting.DontDownloadDeletedFromDisk }},
+    baseUrl: {{ .setting.BaseUrl }},
   },
 
 })

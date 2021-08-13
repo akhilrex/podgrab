@@ -745,7 +745,9 @@ func GetSearchFromPodcastIndex(pod *podcastindex.Podcast) *model.CommonSearchRes
 	return p
 }
 
-func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload bool, appendDateToFileName bool, appendEpisodeNumberToFileName bool, darkMode bool, downloadEpisodeImages bool, generateNFOFile bool, dontDownloadDeletedFromDisk bool) error {
+func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload bool,
+	appendDateToFileName bool, appendEpisodeNumberToFileName bool, darkMode bool, downloadEpisodeImages bool,
+	generateNFOFile bool, dontDownloadDeletedFromDisk bool, baseUrl string) error {
 	setting := db.GetOrCreateSetting()
 
 	setting.AutoDownload = autoDownload
@@ -757,6 +759,7 @@ func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload b
 	setting.DownloadEpisodeImages = downloadEpisodeImages
 	setting.GenerateNFOFile = generateNFOFile
 	setting.DontDownloadDeletedFromDisk = dontDownloadDeletedFromDisk
+	setting.BaseUrl = baseUrl
 
 	return db.UpdateSettings(setting)
 }

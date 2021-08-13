@@ -86,6 +86,7 @@ type Setting struct {
 	DownloadEpisodeImages         bool `gorm:"default:false"`
 	GenerateNFOFile               bool `gorm:"default:false"`
 	DontDownloadDeletedFromDisk   bool `gorm:"default:false"`
+	BaseUrl                       string
 }
 type Migration struct {
 	Base
