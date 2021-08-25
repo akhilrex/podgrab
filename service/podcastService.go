@@ -185,6 +185,9 @@ func getItunesImageUrl(body []byte) string {
 	}
 
 	iimage := channel.SelectElement("itunes:image")
+	if iimage == nil {
+		return ""
+	}
 	for _, attr := range iimage.Attr {
 		if attr.Name.Local == "href" {
 			return attr.Value
