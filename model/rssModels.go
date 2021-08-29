@@ -18,14 +18,16 @@ type RssPodcastData struct {
 	Channel    RssChannel `xml:"channel"`
 }
 type RssChannel struct {
-	Text        string    `xml:",chardata"`
-	Language    string    `xml:"language"`
-	Link        string    `xml:"link"`
-	Title       string    `xml:"title"`
-	Description string    `xml:"description"`
-	Type        string    `xml:"type"`
-	Summary     string    `xml:"summary"`
-	Item        []RssItem `xml:"item"`
+	Text        string       `xml:",chardata"`
+	Language    string       `xml:"language"`
+	Link        string       `xml:"link"`
+	Title       string       `xml:"title"`
+	Description string       `xml:"description"`
+	Type        string       `xml:"type"`
+	Summary     string       `xml:"summary"`
+	Image       RssItemImage `xml:"image"`
+	Item        []RssItem    `xml:"item"`
+	Author      string       `xml:"author"`
 }
 type RssItem struct {
 	Text        string           `xml:",chardata"`

@@ -115,6 +115,10 @@
       .list .u-full-width{
         width: 80%;
       }
+
+      .paused{
+        opacity: 50%;
+      }
     </style>
   </head>
   <body>
@@ -172,11 +176,12 @@
             />
           </a>
           </div>
-          <div class="columns" v-bind:class="{ten:layout=='list', twelve:layout=='grid'}">
+          <div class="columns" v-bind:class="{ten:layout=='list', twelve:layout=='grid',paused:podcast.IsPaused}">
             <div class="titleContainer">
             <a style="text-decoration: none" :href="'/podcasts/'+podcast.ID+'/view'">
               <h3 v-if="layout=='list'">${podcast.Title}</h3>
-              <h5 v-if="layout=='grid'">${podcast.Title}</h5>
+              <h5 v-if="layout=='grid'">${podcast.Title} </h5>
+             
               </a>
             </div>
            <div class="contentContainer">
@@ -250,6 +255,30 @@
           >
             <i class="fas fa-plus"></i>
           </button>
+          <button
+          class="button"
+          title="New episodes for this podcast are not being downloaded automatially. Click to resume download."
+          v-if="podcast.IsPaused"
+          @click="togglePause(podcast,false)"
+        >
+          <i style="color: greenyellow;" class="fas fa-dot-circle"></i>
+        </button>
+        <button
+        class="button"
+        title="Click to pause automatic downloading for this podcast."
+        v-if="!podcast.IsPaused"
+        @click="togglePause(podcast,true)"
+      >
+        <i style="color: red;" class="fas fa-dot-circle"></i>
+      </button>
+      <button
+      class="button"
+      title="Click to see details."
+      
+      @click="showDetails(podcast)"
+    >
+      <i  class="fas fa-info"></i>
+    </button>
             </div>
             </div>
           </div>
@@ -284,14 +313,52 @@
         Please feel free to report any issues or request any features on our github page <a target="_blank" href="https://github.com/akhilrex/podgrab">here</a>
       </p>
     </div>
+   
   </template>
+  <Modal v-model="showDetail">
+    <table class="table" v-if="detailPodcast">
+      <tr>
+        <td>Title</td>
+        <td>${detailPodcast.Title}</td>
+      </tr>
+     
+      <tr>
+        <td>Author</td>
+        <td>${ detailPodcast.Author }</td>
+      </tr>
+      <tr>
+        <td>Url</td>
+        <td> <a target="_blank" :href="detailPodcast.URL">Link</a></td>
+      </tr>
+
+      <tr>
+        <td>Summary</td>
+        <td style="word-wrap: break-word;">${ detailPodcast.Summary }</td>
+      </tr>
+      <tr>
+        <td>Added On</td>
+        <td>${ getFormattedDate(detailPodcast.CreatedAt)}</td>
+      </tr>
+      <tr>
+        <td>Last Episode</td>
+        <td>${ getFormattedLastEpisodeDate(detailPodcast)}</td>
+      </tr>
+      <tr>
+        <td>Paused</td>
+        <td> ${ detailPodcast.IsPaused?'Yes':'No' }</td>
+      </tr>
+    </table>
+
+  </Modal>
  </div>
     </div>
     {{template "scripts"}}
     <script src="/webassets/popper.min.js"></script>
     <script src="/webassets/tippy-bundle.umd.min.js"></script>
     <script src="/webassets/stopword.js"></script>
-
+    <script src="/webassets/modal/vue-modal.umd.min.js"></script>
+    <link rel="stylesheet" href="/webassets/modal/vue-modal.css">
+ 
     <template id="editTags">
       <div class="tags">
         <div @click="editTags" style="cursor: pointer;">
@@ -317,6 +384,8 @@
        </div>
     </template>
     <script>
+      Vue.component('Modal', VueModal)
+
       Vue.component('tagger',{
         delimiters: ["${", "}"],
         data:function(){
@@ -456,6 +525,10 @@
 
         },
         methods:{
+          showDetails(podcast){
+            this.detailPodcast=podcast;
+            this.showDetail=true;
+          },
           getPodcastImage(item){
             return "/podcasts/"+item.ID+"/image"
           },
@@ -468,6 +541,27 @@
               return
             }
             this.socket.send(getWebsocketMessage("Enqueue",`{"podcastId":"${id}"}`))
+          },
+          togglePause(item,isPaused){
+            var self=this;
+            var url= isPaused?`/podcasts/${item.ID}/pause`:`/podcasts/${item.ID}/unpause`;
+            axios
+              .get(url)
+              .then(function (response) {
+                 item.IsPaused=isPaused;
+
+              })
+              .catch(function (error) {
+                if (error.response && error.response.data && error.response.data.message) {
+                  Vue.toasted.show(error.response.data.message, {
+                    theme: "bubble",
+                    type: "error",
+                    position: "top-right",
+                    duration: 5000,
+                  });
+                }
+              })
+              
           },
           filterPodcasts(){
             if(this.filterTag===""){
@@ -566,6 +660,12 @@
            var dt=new Date(Date.parse(podcast.LastEpisode.substr(0,10)));
            return dt.toDateString()
           },
+          getFormattedDate(date){
+           const options={month:"short", day:"numeric", year:"numeric"}
+           //todo: this is a really dirty hack which needs to be fixed when we work on the episode page
+           var dt=new Date(Date.parse(date.substr(0,10)));
+           return dt.toDateString()
+          },
           downloadAllEpisodes(id) { downloadAllEpisodes(id);},
           deletePodcast(id){ deletePodcast(id,()=>{
            
@@ -660,6 +760,8 @@
         },
         data: {
           socket:null,
+          detailPodcast:null,
+          showDetail:false,
           playerExists:false,
           isMobile:false,
           layoutOptions:["list","grid"],

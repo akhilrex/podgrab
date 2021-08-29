@@ -187,6 +187,9 @@ func getItunesImageUrl(body []byte) string {
 	}
 
 	iimage := channel.SelectElement("itunes:image")
+	if iimage == nil {
+		return ""
+	}
 	for _, attr := range iimage.Attr {
 		if attr.Name.Local == "href" {
 			return attr.Value
@@ -311,6 +314,10 @@ func AddPodcastItems(podcast *db.Podcast, newPodcast bool) error {
 			}
 
 			if newPodcast && !setting.DownloadOnAdd {
+				downloadStatus = db.Deleted
+			}
+
+			if podcast.IsPaused {
 				downloadStatus = db.Deleted
 			}
 
@@ -791,7 +798,7 @@ func GetSearchFromPodcastIndex(pod *podcastindex.Podcast) *model.CommonSearchRes
 	return p
 }
 
-func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload bool, fileNameFormat string, darkMode bool, downloadEpisodeImages bool, generateNFOFile bool, dontDownloadDeletedFromDisk bool) error {
+func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload bool, fileNameFormat string, darkMode bool, downloadEpisodeImages bool, generateNFOFile bool, dontDownloadDeletedFromDisk bool, baseUrl string) error {
 	setting := db.GetOrCreateSetting()
 
 	setting.AutoDownload = autoDownload
@@ -802,6 +809,7 @@ func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload b
 	setting.DownloadEpisodeImages = downloadEpisodeImages
 	setting.GenerateNFOFile = generateNFOFile
 	setting.DontDownloadDeletedFromDisk = dontDownloadDeletedFromDisk
+	setting.BaseUrl = baseUrl
 
 	return db.UpdateSettings(setting)
 }
@@ -827,4 +835,14 @@ func AddTag(label, description string) (db.Tag, error) {
 
 	return *tag, &model.TagAlreadyExistsError{Label: label}
 
+}
+
+func TogglePodcastPause(id string, isPaused bool) error {
+	var podcast db.Podcast
+	err := db.GetPodcastById(id, &podcast)
+	if err != nil {
+		return err
+	}
+
+	return db.TogglePodcastPauseStatus(id, isPaused)
 }

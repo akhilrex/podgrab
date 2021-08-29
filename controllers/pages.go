@@ -29,6 +29,7 @@ type SettingModel struct {
 	DownloadEpisodeImages         bool   `form:"downloadEpisodeImages" json:"downloadEpisodeImages" query:"downloadEpisodeImages"`
 	GenerateNFOFile               bool   `form:"generateNFOFile" json:"generateNFOFile" query:"generateNFOFile"`
 	DontDownloadDeletedFromDisk   bool   `form:"dontDownloadDeletedFromDisk" json:"dontDownloadDeletedFromDisk" query:"dontDownloadDeletedFromDisk"`
+	BaseUrl                       string `form:"baseUrl" json:"baseUrl" query:"baseUrl"`
 }
 
 var searchOptions = map[string]string{
