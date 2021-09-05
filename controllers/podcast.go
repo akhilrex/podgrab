@@ -289,7 +289,7 @@ func GetPodcastItemFileById(c *gin.Context) {
 				c.Header("Content-Description", "File Transfer")
 				c.Header("Content-Transfer-Encoding", "binary")
 				c.Header("Content-Disposition", "attachment; filename="+path.Base(podcast.DownloadPath))
-				c.Header("Content-Type", "application/octet-stream")
+				c.Header("Content-Type", GetFileContentType(podcast.DownloadPath))
 				c.File(podcast.DownloadPath)
 			} else {
 				c.Redirect(302, podcast.FileURL)
@@ -298,6 +298,19 @@ func GetPodcastItemFileById(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 	}
+}
+
+func GetFileContentType(filePath string) string {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return "application/octet-stream"
+	}
+	defer file.Close()
+	buffer := make([]byte, 512)
+	if _, err := file.Read(buffer); err != nil {
+		return "application/octet-stream"
+	}
+	return http.DetectContentType(buffer)
 }
 
 func MarkPodcastItemAsUnplayed(c *gin.Context) {
