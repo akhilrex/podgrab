@@ -77,16 +77,15 @@ const (
 
 type Setting struct {
 	Base
-	DownloadOnAdd                 bool `gorm:"default:true"`
-	InitialDownloadCount          int  `gorm:"default:5"`
-	AutoDownload                  bool `gorm:"default:true"`
-	AppendDateToFileName          bool `gorm:"default:false"`
-	AppendEpisodeNumberToFileName bool `gorm:"default:false"`
-	DarkMode                      bool `gorm:"default:false"`
+	DownloadOnAdd                 bool   `gorm:"default:true"`
+	InitialDownloadCount          int    `gorm:"default:5"`
+	AutoDownload                  bool   `gorm:"default:true"`
+	AppendDateToFileName          bool   `gorm:"default:false"`
+	AppendEpisodeNumberToFileName bool   `gorm:"default:false"`
 	ColorScheme                   string `gorm:"default:auto"`
-	DownloadEpisodeImages         bool `gorm:"default:false"`
-	GenerateNFOFile               bool `gorm:"default:false"`
-	DontDownloadDeletedFromDisk   bool `gorm:"default:false"`
+	DownloadEpisodeImages         bool   `gorm:"default:false"`
+	GenerateNFOFile               bool   `gorm:"default:false"`
+	DontDownloadDeletedFromDisk   bool   `gorm:"default:false"`
 	BaseUrl                       string
 }
 type Migration struct {

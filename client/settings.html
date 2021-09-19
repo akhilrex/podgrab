@@ -80,11 +80,6 @@
             <input type="checkbox" name="appendEpisodeNumberToFileName" v-model="appendEpisodeNumberToFileName">
             <span class="label-body">Append episode number to episode file name</span>
         </label>
-
-        <label for="darkMode">
-            <input type="checkbox" name="darkMode" v-model="darkMode">
-            <span class="label-body">Use Dark Mode</span>
-        </label>
         <label for="colorScheme">
             <span class="label-body">Preferred color scheme to use</span></br>
             <select name="colorScheme" v-model="colorScheme">
@@ -168,9 +163,6 @@
 var app = new Vue({
   delimiters: ['${', '}'],
   el: '#app',
-  mounted(){
-    this.originalThemeSetting= this.darkMode;
-  },
   methods:{
       saveSettings:function(e){
           e.preventDefault();
@@ -182,7 +174,6 @@ var app = new Vue({
             autoDownload:self.autoDownload,
             appendDateToFileName:self.appendDateToFileName,
             appendEpisodeNumberToFileName:self.appendEpisodeNumberToFileName,
-            darkMode:self.darkMode,
             colorScheme:self.colorScheme,
             downloadEpisodeImages:self.downloadEpisodeImages,
             generateNFOFile:self.generateNFOFile,
@@ -196,10 +187,6 @@ var app = new Vue({
                 position: "top-right",
                 duration : 5000
             })
-            console.log(self.originalThemeSetting);
-            if(self.originalThemeSetting!= self.darkMode){
-                window.location.reload()
-            }
         })
         .catch(function(error){
             if (error.response && error.response.data && error.response.data.message) {
@@ -226,9 +213,7 @@ var app = new Vue({
     autoDownload: {{ .setting.AutoDownload }},
     appendDateToFileName: {{ .setting.AppendDateToFileName }},
     appendEpisodeNumberToFileName:{{ .setting.AppendEpisodeNumberToFileName }},
-    darkMode:{{ .setting.DarkMode }},
     colorScheme:{{ .setting.ColorScheme }},
-    originalThemeSetting:{{ .setting.DarkMode }},
     downloadEpisodeImages:{{.setting.DownloadEpisodeImages }},
     generateNFOFile:{{ .setting.GenerateNFOFile }},
     dontDownloadDeletedFromDisk:{{ .setting.DontDownloadDeletedFromDisk }},
