@@ -83,6 +83,7 @@ type Setting struct {
 	AppendDateToFileName          bool `gorm:"default:false"`
 	AppendEpisodeNumberToFileName bool `gorm:"default:false"`
 	DarkMode                      bool `gorm:"default:false"`
+	ColorScheme                   string `gorm:"default:auto"`
 	DownloadEpisodeImages         bool `gorm:"default:false"`
 	GenerateNFOFile               bool `gorm:"default:false"`
 	DontDownloadDeletedFromDisk   bool `gorm:"default:false"`

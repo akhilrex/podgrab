@@ -85,6 +85,14 @@
             <input type="checkbox" name="darkMode" v-model="darkMode">
             <span class="label-body">Use Dark Mode</span>
         </label>
+        <label for="colorScheme">
+            <span class="label-body">Preferred color scheme to use</span></br>
+            <select name="colorScheme" v-model="colorScheme">
+                <option value="auto">Auto</option>
+                <option value="light">Light Mode</option>
+                <option value="dark">Dark Mode</option>
+            </select>
+        </label>
         <label for="downloadEpisodeImages">
             <input type="checkbox" name="downloadEpisodeImages" v-model="downloadEpisodeImages">
             <span class="label-body">Download Episode Images with files</span>
@@ -175,6 +183,7 @@ var app = new Vue({
             appendDateToFileName:self.appendDateToFileName,
             appendEpisodeNumberToFileName:self.appendEpisodeNumberToFileName,
             darkMode:self.darkMode,
+            colorScheme:self.colorScheme,
             downloadEpisodeImages:self.downloadEpisodeImages,
             generateNFOFile:self.generateNFOFile,
             dontDownloadDeletedFromDisk:self.dontDownloadDeletedFromDisk,
@@ -218,6 +227,7 @@ var app = new Vue({
     appendDateToFileName: {{ .setting.AppendDateToFileName }},
     appendEpisodeNumberToFileName:{{ .setting.AppendEpisodeNumberToFileName }},
     darkMode:{{ .setting.DarkMode }},
+    colorScheme:{{ .setting.ColorScheme }},
     originalThemeSetting:{{ .setting.DarkMode }},
     downloadEpisodeImages:{{.setting.DownloadEpisodeImages }},
     generateNFOFile:{{ .setting.GenerateNFOFile }},
