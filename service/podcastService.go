@@ -676,6 +676,12 @@ func DeletePodcast(id string, deleteFiles bool) error {
 		db.DeletePodcastItemById(item.ID)
 
 	}
+
+	err = deletePodcastFolder(podcast.Title)
+	if err != nil {
+		return err
+	}
+
 	err = db.DeletePodcastById(id)
 	if err != nil {
 		return err

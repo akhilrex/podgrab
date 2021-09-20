@@ -346,6 +346,10 @@ func createConfigFolderIfNotExists(folder string) string {
 	return createFolder(folder, dataPath)
 }
 
+func deletePodcastFolder(folder string) error {
+	return os.RemoveAll(createDataFolderIfNotExists(folder))
+}
+
 func getFileName(link string, title string, defaultExtension string) string {
 	fileUrl, err := url.Parse(link)
 	checkError(err)
