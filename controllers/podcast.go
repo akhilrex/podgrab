@@ -200,6 +200,17 @@ func DownloadAllEpisodesByPodcastId(c *gin.Context) {
 	}
 }
 
+func RefreshEpisodesByPodcastId(c *gin.Context) {
+	var searchByIdQuery SearchByIdQuery
+
+	if c.ShouldBindUri(&searchByIdQuery) == nil {
+		go service.RefreshPodcastByPodcastId(searchByIdQuery.Id)
+		c.JSON(200, gin.H{})
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+	}
+}
+
 func GetAllPodcastItems(c *gin.Context) {
 	var filter model.EpisodesFilter
 	err := c.ShouldBindQuery(&filter)
