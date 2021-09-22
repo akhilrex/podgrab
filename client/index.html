@@ -674,7 +674,7 @@
            return dt.toDateString()
           },
           downloadAllEpisodes(id) { downloadAllEpisodes(id);},
-          refreshPodcast(podcast) { refreshPodcast(podcast); },
+          refreshPodcast(podcast) { refreshPodcast(podcast.ID, podcast.Title); },
           deletePodcast(id){ deletePodcast(id,()=>{
            
               const index= this.podcasts.findIndex(x=>x.ID===id);

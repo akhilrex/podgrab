@@ -172,12 +172,12 @@
           .then(function () {});
         return false;
       }
-      function refreshPodcast(podcast) {
+      function refreshPodcast(id, title) {
         axios
-          .get("/podcasts/" + podcast.ID + "/refresh")
+          .get("/podcasts/" + id + "/refresh")
           .then(function (response) {
             Vue.toasted.show(
-              "\"" + podcast.Title + "\" has been enqueued to refresh.",
+              "\"" + title + "\" has been enqueued to refresh.",
               {
                 theme: "bubble",
                 type: "info",
