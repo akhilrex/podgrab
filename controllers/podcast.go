@@ -200,6 +200,11 @@ func DownloadAllEpisodesByPodcastId(c *gin.Context) {
 	}
 }
 
+func RefreshEpisodes(c *gin.Context) {
+	go service.RefreshEpisodes()
+	c.JSON(200, gin.H{})
+}
+
 func RefreshEpisodesByPodcastId(c *gin.Context) {
 	var searchByIdQuery SearchByIdQuery
 
