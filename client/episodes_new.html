@@ -352,7 +352,7 @@ var app = new Vue({
             this.submitFilters()
           },
           selectedDownloadStatus(current,old){
-            this.filter.isDownloaded=current.Value;
+            this.filter.downloadStatus=current.Value;
             this.submitFilters()
           },
           selectedPlayedStatus(current,old){
@@ -400,7 +400,7 @@ var app = new Vue({
             }
 
             for(var i=0;i<this.downloadStatusOptions.length;i++){
-              if(this.downloadStatusOptions[i].Value===this.filter.isDownloaded.toString()){
+              if(this.downloadStatusOptions[i].Value===this.filter.downloadStatus.toString()){
                 this.selectedDownloadStatus=this.downloadStatusOptions[i]
               }
             }
@@ -580,8 +580,18 @@ var app = new Vue({
             tags:{{.tags}},
             sortOptions:{{.sortOptions}},
             pagingOptions:[10,20,50,100],
-            downloadStatusOptions:[{"Label":"All","Value":"nil"},{"Label":"Downloaded Only","Value":"true"},{"Label":"Not Downloaded","Value":"false"}],
-            playedStatusOptions:[{"Label":"All","Value":"nil"},{"Label":"Played Only","Value":"true"},{"Label":"Unplayed only","Value":"false"}],
+            downloadStatusOptions:[
+                {"Label":"All","Value":"nil"},
+                {"Label":"Downloaded","Value":"2"},
+                {"Label":"Not Downloaded","Value":"0"},
+                {"Label":"Deleted","Value":"3"},
+                {"Label":"Downloading","Value":"1"}
+            ],
+            playedStatusOptions:[
+                {"Label":"All","Value":"nil"},
+                {"Label":"Played Only","Value":"true"},
+                {"Label":"Unplayed only","Value":"false"}
+            ],
         }})
 </script>
 
