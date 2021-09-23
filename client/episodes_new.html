@@ -73,7 +73,7 @@
     <span  v-show="!showFilters">Show Filters</span>
     <span  v-show="showFilters">Hide Filters</span>
   </button>
-    <form @submit.prevent="submitFilters()" v-show="showFilters">
+    <form id="filters" @submit.prevent="submitFilters()" v-show="showFilters">
       <div class="row">
          <input class="columns five" type="search" @input="searchQueryUpated()" v-model="filter.q" placeholder="Search">
     <div class="columns three">    <vue-multiselect v-model="selectedSorting" :options="sortOptions" :searchable="false"
@@ -109,6 +109,8 @@
         :multiple="false" :close-on-select="true" :clear-on-select="true" :allow-empty="false" :show-labels="false"
         placeholder="Episode Type" label="Label" track-by="Value" :preselect-first="true">
        </vue-multiselect></div>
+    </div>
+    <div class="row">
        <div class="columns three">
         <a title="Play items in this page" v-if="podcastItems.length" class="button" @click="playPage()"><i class="fas fa-play"></i></a>
         <a title="Enqueue items in this page" v-if="podcastItems.length" class="button  button-enqueue" @click="enqueuePage()"><i class="fas fa-plus"></i></a>
