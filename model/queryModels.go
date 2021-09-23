@@ -23,6 +23,7 @@ const (
 type EpisodesFilter struct {
 	Pagination
 	DownloadStatus *string     `uri:"downloadStatus" query:"downloadStatus" json:"downloadStatus" form:"downloadStatus"`
+	EpisodeType    *string     `uri:"episodeType" query:"episodeType" json:"episodeType" form:"episodeType"`
 	IsPlayed       *string     `uri:"isPlayed" query:"isPlayed" json:"isPlayed" form:"isPlayed"`
 	Sorting        EpisodeSort `uri:"sorting" query:"sorting" json:"sorting" form:"sorting"`
 	Q              string      `uri:"q" query:"q" json:"q" form:"q"`

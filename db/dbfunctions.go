@@ -61,6 +61,13 @@ func GetPaginatedPodcastItemsNew(queryModel model.EpisodesFilter) (*[]PodcastIte
 	if queryModel.DownloadStatus != nil && *queryModel.DownloadStatus != "nil" {
 		query = query.Where("download_status=?", queryModel.DownloadStatus)
 	}
+	if queryModel.EpisodeType != nil && *queryModel.EpisodeType != "nil" {
+		if *queryModel.EpisodeType == "full" {
+			query = query.Where(DB.Where("episode_type=\"full\"").Or("episode_type=\"\""))
+		} else {
+			query = query.Where("episode_type=?", queryModel.EpisodeType)
+		}
+	}
 	if queryModel.IsPlayed != nil {
 		isPlayed, err := strconv.ParseBool(*queryModel.IsPlayed)
 		if err == nil {
