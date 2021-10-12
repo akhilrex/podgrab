@@ -487,6 +487,28 @@ func createRss(items []db.PodcastItem, title, description string, c *gin.Context
 	}
 }
 
+func GetRssForPodcastById(c *gin.Context) {
+	var searchByIdQuery SearchByIdQuery
+	if c.ShouldBindUri(&searchByIdQuery) == nil {
+		var podcast db.Podcast
+		err:=db.GetPodcastById(searchByIdQuery.Id,&podcast)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		}
+		var podIds []string
+		podIds = append(podIds, searchByIdQuery.Id)
+		items := *service.GetAllPodcastItemsByPodcastIds(podIds)
+
+		description := podcast.Summary
+		title := podcast.Title
+
+		if err == nil {
+			c.XML(200, createRss(items, title, description, c))
+		}
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+	}
+}
 func GetRssForTagById(c *gin.Context) {
 	var searchByIdQuery SearchByIdQuery
 	if c.ShouldBindUri(&searchByIdQuery) == nil {
