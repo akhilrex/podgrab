@@ -439,7 +439,7 @@ func getBaseUrl(c *gin.Context) string {
 	return setting.BaseUrl
 }
 
-func createRss(items []db.PodcastItem, title, description string, c *gin.Context) model.RssPodcastData {
+func createRss(items []db.PodcastItem, title, description, image string, c *gin.Context) model.RssPodcastData {
 	var rssItems []model.RssItem
 	url := getBaseUrl(c)
 	for _, item := range items {
@@ -468,6 +468,12 @@ func createRss(items []db.PodcastItem, title, description string, c *gin.Context
 		}
 		rssItems = append(rssItems, rssItem)
 	}
+
+	imagePath := fmt.Sprintf("%s/webassets/blank.png", url)
+	if image != "" {
+		imagePath = image
+	}
+
 	return model.RssPodcastData{
 		Itunes:  "http://www.itunes.com/dtds/podcast-1.0.dtd",
 		Media:   "http://search.yahoo.com/mrss/",
@@ -482,7 +488,7 @@ func createRss(items []db.PodcastItem, title, description string, c *gin.Context
 			Summary:     description,
 			Author:      "Podgrab Aggregation",
 			Link:        fmt.Sprintf("%s/allTags", url),
-			Image:       model.RssItemImage{Text: title, Href: fmt.Sprintf("%s/webassets/blank.png", url)},
+			Image:       model.RssItemImage{Text: title, Href: imagePath},
 		},
 	}
 }
@@ -491,7 +497,7 @@ func GetRssForPodcastById(c *gin.Context) {
 	var searchByIdQuery SearchByIdQuery
 	if c.ShouldBindUri(&searchByIdQuery) == nil {
 		var podcast db.Podcast
-		err:=db.GetPodcastById(searchByIdQuery.Id,&podcast)
+		err := db.GetPodcastById(searchByIdQuery.Id, &podcast)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		}
@@ -503,7 +509,7 @@ func GetRssForPodcastById(c *gin.Context) {
 		title := podcast.Title
 
 		if err == nil {
-			c.XML(200, createRss(items, title, description, c))
+			c.XML(200, createRss(items, title, description, podcast.Image, c))
 		}
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
@@ -523,7 +529,7 @@ func GetRssForTagById(c *gin.Context) {
 		title := fmt.Sprintf(" %s | Podgrab", tag.Label)
 
 		if err == nil {
-			c.XML(200, createRss(items, title, description, c))
+			c.XML(200, createRss(items, title, description, "", c))
 		}
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
@@ -540,7 +546,7 @@ func GetRss(c *gin.Context) {
 	title := "Podgrab"
 	description := "Pograb playlist"
 
-	c.XML(200, createRss(items, title, description, c))
+	c.XML(200, createRss(items, title, description, "", c))
 
 }
 func DeleteTagById(c *gin.Context) {
