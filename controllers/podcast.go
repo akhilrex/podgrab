@@ -488,7 +488,7 @@ func createRss(items []db.PodcastItem, title, description, image string, c *gin.
 			Summary:     description,
 			Author:      "Podgrab Aggregation",
 			Link:        fmt.Sprintf("%s/allTags", url),
-			Image:       model.RssItemImage{Text: title, Href: imagePath},
+			Image:       model.RssItemImage{Text: title, URL: imagePath},
 		},
 	}
 }
