@@ -14,7 +14,7 @@
   </a> -->
 
   <h1 align="center" style="margin-bottom:0px">Podgrab</h1>
-  <p align="center">Current Version -2021.10.01</p>
+  <p align="center">Current Version -2021.11.11</p>
 
   <p align="center">
     A self-hosted podcast manager to download episodes as soon as they become live
