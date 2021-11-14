@@ -368,8 +368,17 @@ func DownloadPodcastItem(c *gin.Context) {
 	var searchByIdQuery SearchByIdQuery
 
 	if c.ShouldBindUri(&searchByIdQuery) == nil {
-		go service.DownloadSingleEpisode(searchByIdQuery.Id)
-		c.JSON(200, gin.H{})
+		chan_err := make(chan error)
+
+		go func() {
+			chan_err <- service.DownloadSingleEpisode(searchByIdQuery.Id)
+		}()
+
+		if err := <-chan_err; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not download episode from host - " + err.Error()})
+		} else {
+			c.JSON(200, gin.H{})
+		}
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 	}

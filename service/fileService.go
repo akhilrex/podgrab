@@ -33,6 +33,16 @@ func Download(link string, episodeTitle string, podcastName string, prefix strin
 		return "", err
 	}
 
+	code := resp.StatusCode
+	if (400 <= code) && (code <= 499) {
+		Logger.Errorw("Host Rejected Download: "+link, "response", resp.Status)
+		return "", errors.New("" + resp.Status)
+	}
+	if (500 <= code) && (code <= 599) {
+		Logger.Errorw("Host Error: "+link, "response", resp.Status)
+		return "", errors.New(resp.Status)
+	}
+
 	fileName := getFileName(link, episodeTitle, ".mp3")
 	if prefix != "" {
 		fileName = fmt.Sprintf("%s-%s", prefix, fileName)
