@@ -29,7 +29,7 @@ func Download(link string, episodeTitle string, podcastName string, prefix strin
 	client := httpClient()
 	resp, err := client.Get(link)
 	if err != nil {
-		Logger.Errorw("Error getting response: "+link, err)
+		Logger.Errorw("Error getting response: "+link, "error", err)
 		return "", err
 	}
 
