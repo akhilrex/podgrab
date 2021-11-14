@@ -252,6 +252,13 @@
                 position: "top-right",
                 duration: 5000,
               });
+            } else if (error.response && error.response.status) {
+              Vue.toasted.show("Download failed - something went wrong", {
+                theme: "bubble",
+                type: "error",
+                position: "top-right",
+                duration: 5000,
+              });
             }
           })
           .then(function () {});
