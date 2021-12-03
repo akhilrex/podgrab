@@ -332,7 +332,10 @@ func Search(c *gin.Context) {
 }
 
 func GetOmpl(c *gin.Context) {
-	data, err := service.ExportOmpl()
+
+	usePodgrabLink := c.DefaultQuery("usePodgrabLink", "false") == "true"
+
+	data, err := service.ExportOmpl(usePodgrabLink, getBaseUrl(c))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid request"})
 		return
