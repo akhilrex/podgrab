@@ -141,14 +141,22 @@ func AddOpml(content string) error {
 
 }
 
-func ExportOmpl() ([]byte, error) {
+func ExportOmpl(usePodgrabLink bool, baseUrl string) ([]byte, error) {
+
 	podcasts := GetAllPodcasts("")
+
 	var outlines []model.OpmlOutline
 	for _, podcast := range *podcasts {
+
+		xmlUrl := podcast.URL
+		if usePodgrabLink {
+			xmlUrl = fmt.Sprintf("%s/podcasts/%s/rss", baseUrl, podcast.ID)
+		}
+
 		toAdd := model.OpmlOutline{
 			AttrText: podcast.Summary,
 			Type:     "rss",
-			XmlUrl:   podcast.URL,
+			XmlUrl:   xmlUrl,
 			Title:    podcast.Title,
 		}
 		outlines = append(outlines, toAdd)
