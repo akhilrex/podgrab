@@ -104,6 +104,10 @@
             <span class="label-body">Base URL (if accessing Podgrab using a URL. Without trailing /. Leave empty if not using or unsure.)</span>
             <input type="url" class="u-full-width"  name="baseUrl" v-model="baseUrl">
         </label>
+        <label for="maxDownloadConcurrency">
+            <input type="number" name="maxDownloadConcurrency" v-model="maxDownloadConcurrency">
+            <span class="label-body">Limit the number of podcasts that can be downloaded simultaneously.</span>
+        </label>
         
       
         <input type="submit" value="Save" class="button">
@@ -181,6 +185,7 @@ var app = new Vue({
             downloadEpisodeImages:self.downloadEpisodeImages,
             generateNFOFile:self.generateNFOFile,
             dontDownloadDeletedFromDisk:self.dontDownloadDeletedFromDisk,
+            maxDownloadConcurrency:self.maxDownloadConcurrency,
             baseUrl:self.baseUrl,
         })
         .then(function(response){
@@ -225,6 +230,7 @@ var app = new Vue({
     downloadEpisodeImages:{{.setting.DownloadEpisodeImages }},
     generateNFOFile:{{ .setting.GenerateNFOFile }},
     dontDownloadDeletedFromDisk:{{ .setting.DontDownloadDeletedFromDisk }},
+    maxDownloadConcurrency:{{ .setting.maxDownloadConcurrency }},
     baseUrl: {{ .setting.BaseUrl }},
   },
 
