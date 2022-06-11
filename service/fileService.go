@@ -28,8 +28,7 @@ func Download(link string, episodeTitle string, podcastName string, prefix strin
 	}
 	client := httpClient()
 
-	req, err := http.NewRequest("GET", link, nil)
-	req.Header.Add("User-Agent", "")
+	req, err := getRequest(link)
 	if err != nil {
 		Logger.Errorw("Error creating request: "+link, err)
 	}
