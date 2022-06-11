@@ -32,6 +32,7 @@ type SettingModel struct {
 	DontDownloadDeletedFromDisk   bool   `form:"dontDownloadDeletedFromDisk" json:"dontDownloadDeletedFromDisk" query:"dontDownloadDeletedFromDisk"`
 	BaseUrl                       string `form:"baseUrl" json:"baseUrl" query:"baseUrl"`
 	MaxDownloadConcurrency        int    `form:"maxDownloadConcurrency" json:"maxDownloadConcurrency" query:"maxDownloadConcurrency"`
+	UserAgent                     string `form:"userAgent" json:"userAgent" query:"userAgent"`
 }
 
 var searchOptions = map[string]string{

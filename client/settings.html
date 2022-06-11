@@ -105,10 +105,13 @@
             <input type="url" class="u-full-width"  name="baseUrl" v-model="baseUrl">
         </label>
         <label for="maxDownloadConcurrency" style="display: inline-block;" >
-            <span class="label-body">Limit the number of podcasts that can be downloaded simultaneously.</span>
+            <span class="label-body">Limit the number of podcasts that can be downloaded simultaneously</span>
             <input type="number" name="maxDownloadConcurrency" v-model.number="maxDownloadConcurrency" min="1">
         </label>
-        
+        <label for="userAgent" style="display: inline-block;" >
+            <span class="label-body">Specify the User-Agent header specified when downloading podcasts</span>
+            <input type="text" name="userAgent" v-model="userAgent">
+        </label>
       
         <input type="submit" value="Save" class="button">
     </form>
@@ -187,6 +190,7 @@ var app = new Vue({
             dontDownloadDeletedFromDisk:self.dontDownloadDeletedFromDisk,
             baseUrl:self.baseUrl,
             maxDownloadConcurrency:self.maxDownloadConcurrency,
+            userAgent:self.userAgent,
         })
         .then(function(response){
             Vue.toasted.show('Settings saved successfully.' ,{
@@ -232,6 +236,7 @@ var app = new Vue({
     dontDownloadDeletedFromDisk:{{ .setting.DontDownloadDeletedFromDisk }},
     baseUrl: {{ .setting.BaseUrl }},
     maxDownloadConcurrency:{{ .setting.MaxDownloadConcurrency }},
+    userAgent:{{ .setting.UserAgent}},
   },
 
 })
