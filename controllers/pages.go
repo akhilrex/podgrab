@@ -31,7 +31,7 @@ type SettingModel struct {
 	GenerateNFOFile               bool   `form:"generateNFOFile" json:"generateNFOFile" query:"generateNFOFile"`
 	DontDownloadDeletedFromDisk   bool   `form:"dontDownloadDeletedFromDisk" json:"dontDownloadDeletedFromDisk" query:"dontDownloadDeletedFromDisk"`
 	BaseUrl                       string `form:"baseUrl" json:"baseUrl" query:"baseUrl"`
-	MaxDownloadConcurrency        bool   `form:"maxDownloadConcurrency" json:"maxDownloadConcurrency" query:"maxDownloadConcurrency"`
+	MaxDownloadConcurrency        int    `form:"maxDownloadConcurrency" json:"maxDownloadConcurrency" query:"maxDownloadConcurrency"`
 }
 
 var searchOptions = map[string]string{
