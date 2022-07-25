@@ -10,28 +10,45 @@
 <link rel="stylesheet" href="/webassets/fa/fontawesome.min.css" />
 <link rel="stylesheet" href="/webassets/fa/solid.min.css" />
 <link rel="stylesheet" href="/webassets/fa/regular.min.css" />
-  {{if .setting.DarkMode}}
+
 <style>
-
-
-  html{
+  html[data-theme="dark"] {
     --text-color: #eeeeee;
-    --background: #121212; 
-    --overlay:#000; 
+    --background: #121212;
+    --overlay: #000;
   }
-  </style>
-  {{else}}
-  <style>
 
+  html[data-theme="light"] {
+    --text-color: #222;
+    --background: #fff;
+    --overlay: #ccc;
+  }
+</style>
 
-    html{
-      --text-color: #222;
-      --background: #fff; 
-      --overlay:#ccc; 
+{{if eq .setting.ColorScheme "light"}}
+  <script>
+    document.getElementsByTagName("html")[0].setAttribute("data-theme", "light");
+  </script>
+
+{{else if eq .setting.ColorScheme "dark"}}
+  <script>
+    document.getElementsByTagName("html")[0].setAttribute("data-theme", "dark");
+  </script>
+
+{{else}}
+  // Checking the browser for the preferred color scheme.
+  <script>
+    const userPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    if(userPrefersDark){
+      document.getElementsByTagName("html")[0].setAttribute("data-theme", "dark");
+    } else {
+      document.getElementsByTagName("html")[0].setAttribute("data-theme", "light");
     }
-    </style>
-  {{end}}
-  <style>
+  </script>
+{{end}}
+
+<style>
   *{
     background: var(--background);
     color: var(--text-color);

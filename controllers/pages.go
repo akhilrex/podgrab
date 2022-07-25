@@ -26,7 +26,7 @@ type SettingModel struct {
 	AutoDownload                  bool   `form:"autoDownload" json:"autoDownload" query:"autoDownload"`
 	AppendDateToFileName          bool   `form:"appendDateToFileName" json:"appendDateToFileName" query:"appendDateToFileName"`
 	AppendEpisodeNumberToFileName bool   `form:"appendEpisodeNumberToFileName" json:"appendEpisodeNumberToFileName" query:"appendEpisodeNumberToFileName"`
-	DarkMode                      bool   `form:"darkMode" json:"darkMode" query:"darkMode"`
+	ColorScheme                   string `from:"colorScheme" json:"colorScheme" query:"colorScheme"`
 	DownloadEpisodeImages         bool   `form:"downloadEpisodeImages" json:"downloadEpisodeImages" query:"downloadEpisodeImages"`
 	GenerateNFOFile               bool   `form:"generateNFOFile" json:"generateNFOFile" query:"generateNFOFile"`
 	DontDownloadDeletedFromDisk   bool   `form:"dontDownloadDeletedFromDisk" json:"dontDownloadDeletedFromDisk" query:"dontDownloadDeletedFromDisk"`
