@@ -104,7 +104,14 @@
             <span class="label-body">Base URL (if accessing Podgrab using a URL. Without trailing /. Leave empty if not using or unsure.)</span>
             <input type="url" class="u-full-width"  name="baseUrl" v-model="baseUrl">
         </label>
-        
+        <label for="maxDownloadConcurrency" style="display: inline-block;" >
+            <span class="label-body">Limit the number of podcasts that can be downloaded simultaneously</span>
+            <input type="number" name="maxDownloadConcurrency" v-model.number="maxDownloadConcurrency" min="1">
+        </label>
+        <label for="userAgent" style="display: inline-block;" >
+            <span class="label-body">The <code>User-Agent</code> header used when downloading podcasts</span>
+            <input type="text" class="u-full-width" name="userAgent" v-model="userAgent">
+        </label>
       
         <input type="submit" value="Save" class="button">
     </form>
@@ -182,6 +189,8 @@ var app = new Vue({
             generateNFOFile:self.generateNFOFile,
             dontDownloadDeletedFromDisk:self.dontDownloadDeletedFromDisk,
             baseUrl:self.baseUrl,
+            maxDownloadConcurrency:self.maxDownloadConcurrency,
+            userAgent:self.userAgent,
         })
         .then(function(response){
             Vue.toasted.show('Settings saved successfully.' ,{
@@ -226,6 +235,8 @@ var app = new Vue({
     generateNFOFile:{{ .setting.GenerateNFOFile }},
     dontDownloadDeletedFromDisk:{{ .setting.DontDownloadDeletedFromDisk }},
     baseUrl: {{ .setting.BaseUrl }},
+    maxDownloadConcurrency:{{ .setting.MaxDownloadConcurrency }},
+    userAgent:{{ .setting.UserAgent}},
   },
 
 })
