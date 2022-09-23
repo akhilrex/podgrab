@@ -622,18 +622,36 @@ func RefreshEpisodes() error {
 		return err
 	}
 	for _, item := range data {
-		isNewPodcast := item.LastEpisode == nil
-		if isNewPodcast {
-			fmt.Println(item.Title)
-			db.ForceSetLastEpisodeDate(item.ID)
-		}
-		AddPodcastItems(&item, isNewPodcast)
+		RefreshPodcast(&item)
 	}
 	//	setting := db.GetOrCreateSetting()
 
 	go DownloadMissingEpisodes()
 
 	return nil
+}
+
+func RefreshPodcastByPodcastId(podcastId string) error {
+	var podcast db.Podcast
+	err := db.GetPodcastById(podcastId, &podcast)
+	if err != nil {
+		return err
+	}
+
+	RefreshPodcast(&podcast)
+
+	go DownloadMissingEpisodes()
+
+	return nil
+}
+
+func RefreshPodcast(podcast *db.Podcast) {
+	isNewPodcast := podcast.LastEpisode == nil
+	if isNewPodcast {
+		fmt.Println(podcast.Title)
+		db.ForceSetLastEpisodeDate(podcast.ID)
+	}
+	AddPodcastItems(podcast, isNewPodcast)
 }
 
 func DeletePodcastEpisodes(id string) error {
