@@ -31,8 +31,6 @@ git clone --depth 1 https://github.com/akhilrex/podgrab
 ``` bash
 cd podgrab
 mkdir -p ./dist
-cp -r client ./dist
-cp -r webassets ./dist
 cp .env ./dist
 go build -o ./dist/podgrab ./main.go
 ```
