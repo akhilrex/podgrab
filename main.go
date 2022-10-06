@@ -1,9 +1,12 @@
 package main
 
 import (
+	"embed"
 	"fmt"
 	"html/template"
+	"io/fs"
 	"log"
+	"net/http"
 	"os"
 	"path"
 	"strconv"
@@ -16,6 +19,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jasonlvhit/gocron"
 	_ "github.com/joho/godotenv/autoload"
+)
+
+var (
+	//go:embed client
+	clientEmbed embed.FS
+	//go:embed webassets
+	webAssetsEmbed embed.FS
 )
 
 func main() {
@@ -127,7 +137,7 @@ func main() {
 			return fmt.Sprintf("%02d:%02d", mins, secs)
 		},
 	}
-	tmpl := template.Must(template.New("main").Funcs(funcMap).ParseGlob("client/*"))
+	tmpl := template.Must(template.New("main").Funcs(funcMap).ParseFS(clientEmbed, "client/*"))
 
 	//r.LoadHTMLGlob("client/*")
 	r.SetHTMLTemplate(tmpl)
@@ -145,7 +155,12 @@ func main() {
 	dataPath := os.Getenv("DATA")
 	backupPath := path.Join(os.Getenv("CONFIG"), "backups")
 
-	router.Static("/webassets", "./webassets")
+	webAssets, err := fs.Sub(webAssetsEmbed, "webassets")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	router.StaticFS("/webassets", http.FS(webAssets))
 	router.Static("/assets", dataPath)
 	router.Static(backupPath, backupPath)
 	router.POST("/podcasts", controllers.AddPodcast)

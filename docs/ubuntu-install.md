@@ -6,7 +6,7 @@ This guide has been written with Ubuntu in mind. If you are using any other flav
 
 ## Install Go
 
-Podgrab is built using Go which would be needed to compile and build the source code. Podgrab is written with Go 1.15 so any version equal to or above this should be good to Go. 
+Podgrab is built using Go which would be needed to compile and build the source code. Podgrab is written with Go 1.16 so any version equal to or above this should be good to Go. 
 
 If you already have Go installed on your machine, you can skip to the next step.
 
@@ -31,8 +31,6 @@ git clone --depth 1 https://github.com/akhilrex/podgrab
 ``` bash
 cd podgrab
 mkdir -p ./dist
-cp -r client ./dist
-cp -r webassets ./dist
 cp .env ./dist
 go build -o ./dist/podgrab ./main.go
 ```

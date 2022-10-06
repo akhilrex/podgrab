@@ -34,8 +34,6 @@ RUN chmod 777 /config; \
 
 WORKDIR /api
 COPY --from=builder /api/app .
-COPY client ./client
-COPY webassets ./webassets
 
 EXPOSE 8080
 
