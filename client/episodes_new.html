@@ -73,7 +73,7 @@
     <span  v-show="!showFilters">Show Filters</span>
     <span  v-show="showFilters">Hide Filters</span>
   </button>
-    <form @submit.prevent="submitFilters()" v-show="showFilters">
+    <form id="filters" @submit.prevent="submitFilters()" v-show="showFilters">
       <div class="row">
          <input class="columns five" type="search" @input="searchQueryUpated()" v-model="filter.q" placeholder="Search">
     <div class="columns three">    <vue-multiselect v-model="selectedSorting" :options="sortOptions" :searchable="false"
@@ -103,8 +103,14 @@
       </vue-multiselect>
       <div class="columns three">    <vue-multiselect v-model="selectedDownloadStatus" :options="downloadStatusOptions" :searchable="false"
         :multiple="false" :close-on-select="true" :clear-on-select="true" :allow-empty="false" :show-labels="false"
-        placeholder="Sort By" label="Label" track-by="Value" :preselect-first="true">
+        placeholder="Download Status" label="Label" track-by="Value" :preselect-first="true">
        </vue-multiselect></div>
+      <div class="columns three">    <vue-multiselect v-model="selectedEpisodeType" :options="episodeTypeOptions" :searchable="false"
+        :multiple="false" :close-on-select="true" :clear-on-select="true" :allow-empty="false" :show-labels="false"
+        placeholder="Episode Type" label="Label" track-by="Value" :preselect-first="true">
+       </vue-multiselect></div>
+    </div>
+    <div class="row">
        <div class="columns three">
         <a title="Play items in this page" v-if="podcastItems.length" class="button" @click="playPage()"><i class="fas fa-play"></i></a>
         <a title="Enqueue items in this page" v-if="podcastItems.length" class="button  button-enqueue" @click="enqueuePage()"><i class="fas fa-plus"></i></a>
@@ -352,7 +358,11 @@ var app = new Vue({
             this.submitFilters()
           },
           selectedDownloadStatus(current,old){
-            this.filter.isDownloaded=current.Value;
+            this.filter.downloadStatus=current.Value;
+            this.submitFilters()
+          },
+          selectedEpisodeType(current,old){
+            this.filter.episodeType=current.Value;
             this.submitFilters()
           },
           selectedPlayedStatus(current,old){
@@ -400,8 +410,14 @@ var app = new Vue({
             }
 
             for(var i=0;i<this.downloadStatusOptions.length;i++){
-              if(this.downloadStatusOptions[i].Value===this.filter.isDownloaded.toString()){
+              if(this.downloadStatusOptions[i].Value===this.filter.downloadStatus.toString()){
                 this.selectedDownloadStatus=this.downloadStatusOptions[i]
+              }
+            }
+
+            for(var i=0;i<this.episodeTypeOptions.length;i++){
+              if(this.episodeTypeOptions[i].Value===this.filter.episodeType.toString()){
+                this.selectedEpisodeType=this.episodeTypeOptionsOptions[i]
               }
             }
 
@@ -525,6 +541,7 @@ var app = new Vue({
             this.selectedPodcasts=[];
             this.selectedTags=[];
             this.selectedDownloadStatus=this.downloadStatusOptions[0];
+            this.selectedEpisodeType=this.episodeTypeOptions[0];
             this.selectedPlayedStatus=this.playedStatusOptions[0];
           },
           removeStartingSlash(url){
@@ -568,6 +585,7 @@ var app = new Vue({
           selectedPodcasts:[],
           selectedTags:[],
           selectedDownloadStatus:"",
+          selectedEpisodeType:"",
           selectedPlayedStatus:"",
           countOptions:[10,20,30,40,50,100],
           showFilters:localStorage && localStorage.showFilters && JSON.parse(localStorage.showFilters),
@@ -580,8 +598,24 @@ var app = new Vue({
             tags:{{.tags}},
             sortOptions:{{.sortOptions}},
             pagingOptions:[10,20,50,100],
-            downloadStatusOptions:[{"Label":"All","Value":"nil"},{"Label":"Downloaded Only","Value":"true"},{"Label":"Not Downloaded","Value":"false"}],
-            playedStatusOptions:[{"Label":"All","Value":"nil"},{"Label":"Played Only","Value":"true"},{"Label":"Unplayed only","Value":"false"}],
+            downloadStatusOptions:[
+                {"Label":"All","Value":"nil"},
+                {"Label":"Downloaded","Value":"2"},
+                {"Label":"Not Downloaded","Value":"0"},
+                {"Label":"Deleted","Value":"3"},
+                {"Label":"Downloading","Value":"1"}
+            ],
+            episodeTypeOptions:[
+                {"Label":"All","Value":"nil"},
+                {"Label":"Regular Episode","Value":"full"},
+                {"Label":"Bonus Episode","Value":"bonus"},
+                {"Label":"Trailer","Value":"trailer"}
+            ],
+            playedStatusOptions:[
+                {"Label":"All","Value":"nil"},
+                {"Label":"Played Only","Value":"true"},
+                {"Label":"Unplayed only","Value":"false"}
+            ],
         }})
 </script>
 
