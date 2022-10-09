@@ -19,8 +19,10 @@ var wsupgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-var activePlayers = make(map[*websocket.Conn]string)
-var allConnections = make(map[*websocket.Conn]string)
+var (
+	activePlayers  = make(map[*websocket.Conn]string)
+	allConnections = make(map[*websocket.Conn]string)
+)
 
 var broadcast = make(chan Message) // broadcast channel
 
@@ -34,7 +36,7 @@ type Message struct {
 func Wshandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := wsupgrader.Upgrade(w, r, nil)
 	if err != nil {
-		fmt.Println("Failed to set websocket upgrade: %+v", err)
+		fmt.Println(fmt.Sprintf("Failed to set websocket upgrade: %+v", err))
 		return
 	}
 	defer conn.Close()
@@ -43,7 +45,7 @@ func Wshandler(w http.ResponseWriter, r *http.Request) {
 		err := conn.ReadJSON(&mess)
 		if err != nil {
 			//	fmt.Println("Socket Error")
-			//fmt.Println(err.Error())
+			// fmt.Println(err.Error())
 			isPlayer := activePlayers[conn] != ""
 			if isPlayer {
 				delete(activePlayers, conn)
@@ -66,12 +68,12 @@ func HandleWebsocketMessages() {
 	for {
 		// Grab the next message from the broadcast channel
 		msg := <-broadcast
-		//fmt.Println(msg)
+		// fmt.Println(msg)
 
 		switch msg.MessageType {
 		case "RegisterPlayer":
 			activePlayers[msg.Connection] = msg.Identifier
-			for connection, _ := range allConnections {
+			for connection := range allConnections {
 				connection.WriteJSON(Message{
 					Identifier:  msg.Identifier,
 					MessageType: "PlayerExists",
@@ -79,7 +81,7 @@ func HandleWebsocketMessages() {
 			}
 			fmt.Println("Player Registered")
 		case "PlayerRemoved":
-			for connection, _ := range allConnections {
+			for connection := range allConnections {
 				connection.WriteJSON(Message{
 					Identifier:  msg.Identifier,
 					MessageType: "NoPlayer",
@@ -94,7 +96,6 @@ func HandleWebsocketMessages() {
 				items := getItemsToPlay(payload.ItemIds, payload.PodcastId, payload.TagIds)
 				var player *websocket.Conn
 				for connection, id := range activePlayers {
-
 					if msg.Identifier == id {
 						player = connection
 						break
@@ -116,7 +117,6 @@ func HandleWebsocketMessages() {
 		case "Register":
 			var player *websocket.Conn
 			for connection, id := range activePlayers {
-
 				if msg.Identifier == id {
 					player = connection
 					break

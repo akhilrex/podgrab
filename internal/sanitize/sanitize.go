@@ -24,7 +24,6 @@ var (
 // HTMLAllowing sanitizes html, allowing some tags.
 // Arrays of allowed tags and allowed attributes may optionally be passed as the second and third arguments.
 func HTMLAllowing(s string, args ...[]string) (string, error) {
-
 	allowedTags := defaultTags
 	if len(args) > 0 {
 		allowedTags = args[0]
@@ -94,13 +93,11 @@ func HTMLAllowing(s string, args ...[]string) (string, error) {
 		}
 
 	}
-
 }
 
 // HTML strips html tags, replace common entities, and escapes <>&;'" in the result.
 // Note the returned text may contain entities as it is escaped by HTMLEscapeString, and most entities are not translated.
 func HTML(s string) (output string) {
-
 	// Shortcut strings with no tags in them
 	if !strings.ContainsAny(s, "<>") {
 		output = s
@@ -194,6 +191,8 @@ func Name(s string) string {
 	// Remove illegal characters for names, replacing some common separators with -
 	fileName = cleanString(fileName, illegalName)
 
+	fileName = strings.ToValidUTF8(fileName, "-")
+
 	// NB this may be of length 0, caller must check
 	return fileName
 }
@@ -204,7 +203,6 @@ var baseNameSeparators = regexp.MustCompile(`[./]`)
 // BaseName makes a string safe to use in a file name, producing a sanitized basename replacing . or / with -.
 // No attempt is made to normalise a path or normalise case.
 func BaseName(s string) string {
-
 	// Replace certain joining characters with a dash
 	baseName := baseNameSeparators.ReplaceAllString(s, "-")
 
@@ -360,7 +358,6 @@ var (
 // cleanString replaces separators with - and removes characters listed in the regexp provided from string.
 // Accents, spaces, and all characters not in A-Za-z0-9 are replaced.
 func cleanString(s string, r *regexp.Regexp) string {
-
 	// Remove any trailing space to avoid ending on -
 	s = strings.Trim(s, " ")
 
@@ -371,7 +368,7 @@ func cleanString(s string, r *regexp.Regexp) string {
 	s = separators.ReplaceAllString(s, "-")
 
 	// Remove all other unrecognised characters - NB we do allow any printable characters
-	//s = r.ReplaceAllString(s, "")
+	// s = r.ReplaceAllString(s, "")
 
 	// Remove any multiple dashes caused by replacements above
 	s = dashes.ReplaceAllString(s, "-")
