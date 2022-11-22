@@ -13,6 +13,8 @@
         img{
             display: none;
         }
+        #pathFormatTable td.key { font-weight: bold; }
+        #pathFormatTable td.description { font-weight: normal; }
         @media (max-width: 750px) {
         .label-body{
       display: inline!important;
@@ -26,6 +28,17 @@
 
 }
     </style>
+    <script type="text/javascript">
+function insertText(elemID, text){
+    var elem = document.getElementById(elemID)
+    elem.value += text;
+    elem.focus();
+    elem.setSelectionRange(
+        elem.value.length,
+        elem.value.length
+    );
+}
+    </script>
 </head>
 <body>
     <div class="container">
@@ -74,14 +87,29 @@
             <span class="label-body">Automatically download new episodes to the disk</span>
         </label>
      
-        <label for="appendDateToFileName">
-            <input type="checkbox" name="appendDateToFileName" v-model="appendDateToFileName">
-            <span class="label-body">Append episode date to episode file name</span>
-        </label>
-       
-        <label for="appendEpisodeNumberToFileName">
-            <input type="checkbox" name="appendEpisodeNumberToFileName" v-model="appendEpisodeNumberToFileName">
-            <span class="label-body">Append episode number to episode file name</span>
+        <label for="fileNameFormat">
+            <span class="label-body">Episode file name format:</span>
+            <input type="text" name="fileNameFormat" id="fileNameFormatInput" v-model="fileNameFormat" width="100%">
+            <table id="pathFormatTable">
+                <thead>
+                    <tr class="header">
+                        <th class="key">Format Key</th>
+                        <th class="description">Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="description" colspan=2>Click the key to add it to the format field.</td></tr>
+                    <tr><td class="key"><a onclick="insertText('fileNameFormatInput', '%YYYY%');">%YYYY%</a></td><td class="description">Episode published year (ie: 1999)</td></tr>
+                    <tr><td class="key"><a onclick="insertText('fileNameFormatInput', '%mm%');">%mm%</a></td><td class="description">Episode published month (ie: 12)</td></tr>
+                    <tr><td class="key"><a onclick="insertText('fileNameFormatInput', '%dd%');">%dd%</a></td><td class="description">Episode published date (ie: 31)</td></tr>
+                    <tr><td class="key"><a onclick="insertText('fileNameFormatInput', '%EpisodeTitle%');">%EpisodeTitle%</a></td><td class="description">Episode title</td></tr>
+                    <tr><td class="key"><a onclick="insertText('fileNameFormatInput', '%EpisodeNumber%');">%EpisodeNumber%</a></td><td class="description">Episode number<br />(specify the minimum number of digits (ie. 3) as %EpisodeNumber:3%)</td></tr>
+                    <tr><td class="key"><a onclick="insertText('fileNameFormatInput', '%EpisodeDate%');">%EpisodeDate%</a></td><td class="description">Episode date (ie: 1999-12-31)</td></tr>
+                    <tr><td class="key"><a onclick="insertText('fileNameFormatInput', '%ShowTitle%');">%ShowTitle%</a></td><td class="description">Show title</td></tr>
+                    <tr><td class="key"><a onclick="insertText('fileNameFormatInput', '%%');">%%</a></td><td class="description">Literal '%'</td></tr>
+                    <tr><td class="key"><a onclick="insertText('fileNameFormatInput', '/');">/</a></td><td class="description">Path separator</td></tr>
+                </tbody>
+            </table>
         </label>
 
         <label for="darkMode">
@@ -182,8 +210,7 @@ var app = new Vue({
             downloadOnAdd: self.downloadOnAdd,
             initialDownloadCount:self.initialDownloadCount,
             autoDownload:self.autoDownload,
-            appendDateToFileName:self.appendDateToFileName,
-            appendEpisodeNumberToFileName:self.appendEpisodeNumberToFileName,
+            fileNameFormat:self.fileNameFormat,
             darkMode:self.darkMode,
             downloadEpisodeImages:self.downloadEpisodeImages,
             generateNFOFile:self.generateNFOFile,
@@ -227,8 +254,7 @@ var app = new Vue({
     downloadOnAdd: {{ .setting.DownloadOnAdd }},
     initialDownloadCount: {{ .setting.InitialDownloadCount }},
     autoDownload: {{ .setting.AutoDownload }},
-    appendDateToFileName: {{ .setting.AppendDateToFileName }},
-    appendEpisodeNumberToFileName:{{ .setting.AppendEpisodeNumberToFileName }},
+    fileNameFormat: {{ .setting.FileNameFormat }},
     darkMode:{{ .setting.DarkMode }},
     originalThemeSetting:{{ .setting.DarkMode }},
     downloadEpisodeImages:{{.setting.DownloadEpisodeImages }},
