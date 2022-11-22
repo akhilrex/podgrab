@@ -289,7 +289,7 @@ func GetPodcastItemFileById(c *gin.Context) {
 				c.Header("Content-Description", "File Transfer")
 				c.Header("Content-Transfer-Encoding", "binary")
 				c.Header("Content-Disposition", "attachment; filename="+path.Base(podcast.DownloadPath))
-				c.Header("Content-Type", "application/octet-stream")
+				c.Header("Content-Type", GetFileContentType(podcast.DownloadPath))
 				c.File(podcast.DownloadPath)
 			} else {
 				c.Redirect(302, podcast.FileURL)
@@ -298,6 +298,19 @@ func GetPodcastItemFileById(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 	}
+}
+
+func GetFileContentType(filePath string) string {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return "application/octet-stream"
+	}
+	defer file.Close()
+	buffer := make([]byte, 512)
+	if _, err := file.Read(buffer); err != nil {
+		return "application/octet-stream"
+	}
+	return http.DetectContentType(buffer)
 }
 
 func MarkPodcastItemAsUnplayed(c *gin.Context) {
@@ -439,7 +452,7 @@ func getBaseUrl(c *gin.Context) string {
 	return setting.BaseUrl
 }
 
-func createRss(items []db.PodcastItem, title, description string, c *gin.Context) model.RssPodcastData {
+func createRss(items []db.PodcastItem, title, description, image string, c *gin.Context) model.RssPodcastData {
 	var rssItems []model.RssItem
 	url := getBaseUrl(c)
 	for _, item := range items {
@@ -468,6 +481,12 @@ func createRss(items []db.PodcastItem, title, description string, c *gin.Context
 		}
 		rssItems = append(rssItems, rssItem)
 	}
+
+	imagePath := fmt.Sprintf("%s/webassets/blank.png", url)
+	if image != "" {
+		imagePath = image
+	}
+
 	return model.RssPodcastData{
 		Itunes:  "http://www.itunes.com/dtds/podcast-1.0.dtd",
 		Media:   "http://search.yahoo.com/mrss/",
@@ -482,11 +501,33 @@ func createRss(items []db.PodcastItem, title, description string, c *gin.Context
 			Summary:     description,
 			Author:      "Podgrab Aggregation",
 			Link:        fmt.Sprintf("%s/allTags", url),
-			Image:       model.RssItemImage{Text: title, Href: fmt.Sprintf("%s/webassets/blank.png", url)},
+			Image:       model.RssItemImage{Text: title, URL: imagePath},
 		},
 	}
 }
 
+func GetRssForPodcastById(c *gin.Context) {
+	var searchByIdQuery SearchByIdQuery
+	if c.ShouldBindUri(&searchByIdQuery) == nil {
+		var podcast db.Podcast
+		err := db.GetPodcastById(searchByIdQuery.Id, &podcast)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		}
+		var podIds []string
+		podIds = append(podIds, searchByIdQuery.Id)
+		items := *service.GetAllPodcastItemsByPodcastIds(podIds)
+
+		description := podcast.Summary
+		title := podcast.Title
+
+		if err == nil {
+			c.XML(200, createRss(items, title, description, podcast.Image, c))
+		}
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+	}
+}
 func GetRssForTagById(c *gin.Context) {
 	var searchByIdQuery SearchByIdQuery
 	if c.ShouldBindUri(&searchByIdQuery) == nil {
@@ -501,7 +542,7 @@ func GetRssForTagById(c *gin.Context) {
 		title := fmt.Sprintf(" %s | Podgrab", tag.Label)
 
 		if err == nil {
-			c.XML(200, createRss(items, title, description, c))
+			c.XML(200, createRss(items, title, description, "", c))
 		}
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
@@ -518,7 +559,7 @@ func GetRss(c *gin.Context) {
 	title := "Podgrab"
 	description := "Pograb playlist"
 
-	c.XML(200, createRss(items, title, description, c))
+	c.XML(200, createRss(items, title, description, "", c))
 
 }
 func DeleteTagById(c *gin.Context) {
@@ -586,15 +627,18 @@ func UpdateSetting(c *gin.Context) {
 	if err == nil {
 
 		err = service.UpdateSettings(
-            model.DownloadOnAdd, 
-            model.InitialDownloadCount,
+			model.DownloadOnAdd, 
+			model.InitialDownloadCount,
 			model.AutoDownload, 
 			model.FileNameFormat,
 			model.DarkMode, 
-            model.DownloadEpisodeImages, 
-            model.GenerateNFOFile, 
-            model.DontDownloadDeletedFromDisk, 
-            model.BaseUrl)
+			model.DownloadEpisodeImages, 
+			model.GenerateNFOFile, 
+			model.DontDownloadDeletedFromDisk, 
+			model.BaseUrl,
+			model.MaxDownloadConcurrency
+			model.UserAgent,
+		)
 		if err == nil {
 			c.JSON(200, gin.H{"message": "Success"})
 

@@ -74,6 +74,7 @@
         border:1px solid;
         padding: 10px;
         width: 300px;
+        z-index: 1000;
       }
 
       .tag-editor a.pill{
@@ -327,7 +328,7 @@
         <td>${ detailPodcast.Author }</td>
       </tr>
       <tr>
-        <td>Url</td>
+        <td>Original Url</td>
         <td> <a target="_blank" :href="detailPodcast.URL">Link</a></td>
       </tr>
 
@@ -346,6 +347,10 @@
       <tr>
         <td>Paused</td>
         <td> ${ detailPodcast.IsPaused?'Yes':'No' }</td>
+      </tr>
+      <tr>
+        <td>Podgrab Feed</td>
+        <td> <a target="_blank" :href="'/podcasts/'+detailPodcast.ID+'/rss'">Link</a></td>
       </tr>
     </table>
 

@@ -86,6 +86,8 @@ type Setting struct {
 	GenerateNFOFile               bool `gorm:"default:false"`
 	DontDownloadDeletedFromDisk   bool `gorm:"default:false"`
 	BaseUrl                       string
+	MaxDownloadConcurrency        int `gorm:"default:5"`
+	UserAgent                     string
 }
 type Migration struct {
 	Base

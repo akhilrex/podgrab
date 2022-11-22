@@ -143,14 +143,22 @@ func AddOpml(content string) error {
 
 }
 
-func ExportOmpl() ([]byte, error) {
+func ExportOmpl(usePodgrabLink bool, baseUrl string) ([]byte, error) {
+
 	podcasts := GetAllPodcasts("")
+
 	var outlines []model.OpmlOutline
 	for _, podcast := range *podcasts {
+
+		xmlUrl := podcast.URL
+		if usePodgrabLink {
+			xmlUrl = fmt.Sprintf("%s/podcasts/%s/rss", baseUrl, podcast.ID)
+		}
+
 		toAdd := model.OpmlOutline{
 			AttrText: podcast.Summary,
 			Type:     "rss",
-			XmlUrl:   podcast.URL,
+			XmlUrl:   xmlUrl,
 			Title:    podcast.Title,
 		}
 		outlines = append(outlines, toAdd)
@@ -578,7 +586,7 @@ func DownloadMissingEpisodes() error {
 			SetPodcastItemAsDownloaded(item.ID, url)
 		}(item, *setting)
 
-		if index%5 == 0 {
+		if index%setting.MaxDownloadConcurrency == 0 {
 			wg.Wait()
 		}
 	}
@@ -726,6 +734,12 @@ func DeletePodcast(id string, deleteFiles bool) error {
 		db.DeletePodcastItemById(item.ID)
 
 	}
+
+	err = deletePodcastFolder(podcast.Title)
+	if err != nil {
+		return err
+	}
+
 	err = db.DeletePodcastById(id)
 	if err != nil {
 		return err
@@ -798,7 +812,19 @@ func GetSearchFromPodcastIndex(pod *podcastindex.Podcast) *model.CommonSearchRes
 	return p
 }
 
-func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload bool, fileNameFormat string, darkMode bool, downloadEpisodeImages bool, generateNFOFile bool, dontDownloadDeletedFromDisk bool, baseUrl string) error {
+func UpdateSettings(
+			downloadOnAdd bool,
+			initialDownloadCount int,
+			autoDownload bool,
+			fileNameFormat string,
+			darkMode bool,
+			downloadEpisodeImages bool,
+			generateNFOFile bool,
+			dontDownloadDeletedFromDisk bool,
+			baseUrl string,
+			maxDownloadConcurrency int,
+			userAgent string,
+		) error {
 	setting := db.GetOrCreateSetting()
 
 	setting.AutoDownload = autoDownload
@@ -810,6 +836,8 @@ func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload b
 	setting.GenerateNFOFile = generateNFOFile
 	setting.DontDownloadDeletedFromDisk = dontDownloadDeletedFromDisk
 	setting.BaseUrl = baseUrl
+	setting.MaxDownloadConcurrency = maxDownloadConcurrency
+	setting.UserAgent = userAgent
 
 	return db.UpdateSettings(setting)
 }

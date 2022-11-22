@@ -56,6 +56,7 @@ type RssItemEnclosure struct {
 type RssItemImage struct {
 	Text string `xml:",chardata"`
 	Href string `xml:"href,attr"`
+	URL  string `xml:"url"`
 }
 
 type RssItemGuid struct {

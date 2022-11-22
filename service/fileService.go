@@ -27,7 +27,13 @@ func Download(link string, episodeTitle string, podcastName string, episodePathN
 		return "", errors.New("Download path empty")
 	}
 	client := httpClient()
-	resp, err := client.Get(link)
+
+	req, err := getRequest(link)
+	if err != nil {
+		Logger.Errorw("Error creating request: "+link, err)
+	}
+
+	resp, err := client.Do(req)
 	if err != nil {
 		Logger.Errorw("Error getting response: "+link, err)
 		return "", err
@@ -103,7 +109,13 @@ func DownloadPodcastCoverImage(link string, podcastName string) (string, error) 
 		return "", errors.New("Download path empty")
 	}
 	client := httpClient()
-	resp, err := client.Get(link)
+	req, err := getRequest(link)
+	if err != nil {
+		Logger.Errorw("Error creating request: "+link, err)
+		return "", err
+	}
+
+	resp, err := client.Do(req)
 	if err != nil {
 		Logger.Errorw("Error getting response: "+link, err)
 		return "", err
@@ -140,7 +152,13 @@ func DownloadImage(link string, episodeId string, podcastName string) (string, e
 		return "", errors.New("Download path empty")
 	}
 	client := httpClient()
-	resp, err := client.Get(link)
+	req, err := getRequest(link)
+	if err != nil {
+		Logger.Errorw("Error creating request: "+link, err)
+		return "", err
+	}
+
+	resp, err := client.Do(req)
 	if err != nil {
 		Logger.Errorw("Error getting response: "+link, err)
 		return "", err
@@ -327,6 +345,20 @@ func httpClient() *http.Client {
 	return &client
 }
 
+func getRequest(url string) (*http.Request, error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	setting := db.GetOrCreateSetting()
+	if len(setting.UserAgent) > 0 {
+		req.Header.Add("User-Agent", setting.UserAgent)
+	}
+
+	return req, nil
+}
+
 func createPreSanitizedPath(folderPath string) string {
 	if _, err := os.Stat(folderPath); os.IsNotExist(err) {
 		os.MkdirAll(folderPath, 0777)
@@ -349,6 +381,10 @@ func createDataFolderIfNotExists(folder string) string {
 func createConfigFolderIfNotExists(folder string) string {
 	dataPath := os.Getenv("CONFIG")
 	return createFolder(folder, dataPath)
+}
+
+func deletePodcastFolder(folder string) error {
+	return os.RemoveAll(createDataFolderIfNotExists(folder))
 }
 
 func getFileName(link string, title string, defaultExtension string) string {

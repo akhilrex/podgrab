@@ -30,6 +30,8 @@ type SettingModel struct {
 	GenerateNFOFile               bool   `form:"generateNFOFile" json:"generateNFOFile" query:"generateNFOFile"`
 	DontDownloadDeletedFromDisk   bool   `form:"dontDownloadDeletedFromDisk" json:"dontDownloadDeletedFromDisk" query:"dontDownloadDeletedFromDisk"`
 	BaseUrl                       string `form:"baseUrl" json:"baseUrl" query:"baseUrl"`
+	MaxDownloadConcurrency        int    `form:"maxDownloadConcurrency" json:"maxDownloadConcurrency" query:"maxDownloadConcurrency"`
+	UserAgent                     string `form:"userAgent" json:"userAgent" query:"userAgent"`
 }
 
 var searchOptions = map[string]string{
@@ -331,7 +333,10 @@ func Search(c *gin.Context) {
 }
 
 func GetOmpl(c *gin.Context) {
-	data, err := service.ExportOmpl()
+
+	usePodgrabLink := c.DefaultQuery("usePodgrabLink", "false") == "true"
+
+	data, err := service.ExportOmpl(usePodgrabLink, getBaseUrl(c))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid request"})
 		return

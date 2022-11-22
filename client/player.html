@@ -694,7 +694,7 @@ div#large-visualization{
             <div id="player-left-bottom">
               <div id="time-container">
                 <span class="current-time">
-                  <span class="amplitude-current-minutes" ></span>:<span class="amplitude-current-seconds"></span>
+                  <span class="amplitude-current-hours" ></span>:<span class="amplitude-current-minutes" ></span>:<span class="amplitude-current-seconds"></span>
                 </span>
                 <div id="progress-container">
               
@@ -953,21 +953,12 @@ div#large-visualization{
             "autoplay": true,
             "volume":volume,
             "callbacks": {
-              // 'song_change':function(){
-              //   song = Amplitude.getActiveSongMetadata();
-              //   if(self.songLoaded.indexOf(song.id)!==-1){
-              //     return;
-              //   }
-              //   time= self.getSavedSongTime();
-              //   console.log('change',time)
-              //   if(time>0){
-              //       self.songLoaded.push(song.id);
-              //        Amplitude.skipTo(time,song.index);
-              //        setTimeout(() => {
-              //           self.songLoaded=self.songLoaded.splice(self.songLoaded.indexOf(song.id),1)
-              //        }, 500);
-              //   }
-              // },
+              'song_change':function(){
+                if(localStorage && localStorage.playerVolume){
+                  volume=parseInt(localStorage.playerVolume)
+                  Amplitude.setVolume(volume);
+                }
+              },
                 'timeupdate':function(){
                     
                     var secs=Math.floor(Amplitude.getSongPlayedSeconds());
