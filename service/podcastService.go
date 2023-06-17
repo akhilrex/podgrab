@@ -526,6 +526,7 @@ func DownloadMissingEpisodes() error {
 
 	fmt.Println("Processing episodes: ", strconv.Itoa(len(*data)))
 	if err != nil {
+		db.Unlock(JOB_NAME)
 		return err
 	}
 	var wg sync.WaitGroup

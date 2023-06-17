@@ -31,12 +31,13 @@ func Download(link string, episodeTitle string, podcastName string, prefix strin
 	req, err := getRequest(link)
 	if err != nil {
 		Logger.Errorw("Error creating request: "+link, err)
+		return "", err
 	}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		Logger.Errorw("Error getting response: "+link, err)
-		return "", err
+		// Logger.Errorw("Error getting response: "+link,  nil)
+		return link, nil
 	}
 
 	fileName := getFileName(link, episodeTitle, ".mp3")
