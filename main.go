@@ -181,6 +181,8 @@ func main() {
 	router.POST("/podcasts/:id/tags/:tagId", controllers.AddTagToPodcast)
 	router.DELETE("/podcasts/:id/tags/:tagId", controllers.RemoveTagFromPodcast)
 
+	router.GET("/stats", controllers.GetStats)
+
 	router.GET("/add", controllers.AddPage)
 	router.GET("/search", controllers.Search)
 	router.GET("/", controllers.HomePage)
@@ -230,6 +232,7 @@ func intiCron() {
 	gocron.Every(uint64(checkFrequency) * 2).Minutes().Do(service.UnlockMissedJobs)
 	gocron.Every(uint64(checkFrequency) * 3).Minutes().Do(service.UpdateAllFileSizes)
 	gocron.Every(uint64(checkFrequency)).Minutes().Do(service.DownloadMissingImages)
+	gocron.Every(uint64(checkFrequency)).Minutes().Do(service.ClearEpisodeFiles)
 	gocron.Every(2).Days().Do(service.CreateBackup)
 	<-gocron.Start()
 }

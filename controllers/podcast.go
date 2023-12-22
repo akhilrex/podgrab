@@ -629,7 +629,7 @@ func UpdateSetting(c *gin.Context) {
 		err = service.UpdateSettings(model.DownloadOnAdd, model.InitialDownloadCount,
 			model.AutoDownload, model.AppendDateToFileName, model.AppendEpisodeNumberToFileName,
 			model.DarkMode, model.DownloadEpisodeImages, model.GenerateNFOFile, model.DontDownloadDeletedFromDisk, model.BaseUrl,
-			model.MaxDownloadConcurrency, model.UserAgent,
+			model.MaxDownloadConcurrency, model.MaxDownloadKeep, model.UserAgent,
 		)
 		if err == nil {
 			c.JSON(200, gin.H{"message": "Success"})
@@ -643,5 +643,35 @@ func UpdateSetting(c *gin.Context) {
 		fmt.Println(err.Error())
 		c.JSON(http.StatusBadRequest, err)
 	}
+
+}
+
+func GetStats(c *gin.Context) {
+	var items []db.PodcastItem
+
+	if err := db.GetAllPodcastItems(&items); err != nil {
+		fmt.Println(err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+	}
+
+	var podcasts []db.Podcast
+	if err := db.GetAllPodcasts(&podcasts, ""); err != nil {
+		fmt.Println(err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+	}
+
+	downloadedCount := 0
+	listenedCount := 0
+	podcastCount := len(podcasts)
+	for _, i := range items {
+		if i.DownloadStatus == db.Downloaded {
+			downloadedCount++
+		}
+		if i.IsPlayed {
+			listenedCount++
+		}
+	}
+
+	c.JSON(200, gin.H{"downloaded": downloadedCount, "listened": listenedCount, "podcasts": podcastCount})
 
 }
