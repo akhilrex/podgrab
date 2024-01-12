@@ -14,6 +14,7 @@ require (
 	github.com/grokify/html-strip-tags-go v0.0.0-20200923094847-079d207a09f1
 	github.com/jasonlvhit/gocron v0.0.1
 	github.com/joho/godotenv v1.3.0
+	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.15
 	github.com/satori/go.uuid v1.2.0
 	go.uber.org/multierr v1.6.0 // indirect
