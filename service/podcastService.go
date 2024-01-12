@@ -500,6 +500,9 @@ func GetPodcastPrefix(item *db.PodcastItem, setting *db.Setting) string {
 		seq, err := db.GetEpisodeNumber(item.ID, item.PodcastID)
 		if err == nil {
 			prefix = strconv.Itoa(seq)
+			if prefix != "" {
+				prefix = "0" + prefix
+			}
 		}
 	}
 	if setting.AppendDateToFileName {
