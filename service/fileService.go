@@ -26,17 +26,32 @@ func Download(link string, episodeTitle string, podcastName string, prefix strin
 	if link == "" {
 		return "", errors.New("Download path empty")
 	}
-	client := httpClient()
 
-	req, err := getRequest(link)
+	req, err := http.NewRequest("GET", link, nil)
+	if err != nil {
+		Logger.Errorw("Error getting response: "+link, err)
+		return "", err
+	}
+	req.Header.Add("Accept", "*/*")
+	req.Header.Add("User-Agent", "Go-http-client")
+
+	client := httpClient()
+	req, err = getRequest(link)
+
 	if err != nil {
 		Logger.Errorw("Error creating request: "+link, err)
 	}
 
 	resp, err := client.Do(req)
+
 	if err != nil {
 		Logger.Errorw("Error getting response: "+link, err)
 		return "", err
+	}
+
+	if resp.StatusCode != 200 {
+		Logger.Errorw("Cannot download \"" + episodeTitle + "\" from the Podcast " + podcastName + ", http status: " + resp.Status)
+		return "", errors.New("Error while downloading file(" + link + "): " + resp.Status)
 	}
 
 	fileName := getFileName(link, episodeTitle, ".mp3")
@@ -107,8 +122,17 @@ func DownloadPodcastCoverImage(link string, podcastName string) (string, error) 
 	if link == "" {
 		return "", errors.New("Download path empty")
 	}
+
+	req, err := http.NewRequest("GET", link, nil)
+	if err != nil {
+		Logger.Errorw("Error getting response: "+link, err)
+		return "", err
+	}
+	req.Header.Add("Accept", "*/*")
+	req.Header.Add("User-Agent", "Go-http-client")
+
 	client := httpClient()
-	req, err := getRequest(link)
+	req, err = getRequest(link)
 	if err != nil {
 		Logger.Errorw("Error creating request: "+link, err)
 		return "", err
@@ -118,6 +142,11 @@ func DownloadPodcastCoverImage(link string, podcastName string) (string, error) 
 	if err != nil {
 		Logger.Errorw("Error getting response: "+link, err)
 		return "", err
+	}
+
+	if resp.StatusCode != 200 {
+		Logger.Errorw("Cannot download \"" + podcastName + "\" Cover Image, http status: " + resp.Status)
+		return "", errors.New("Error while downloading file(" + link + "): " + resp.Status)
 	}
 
 	fileName := getFileName(link, "folder", ".jpg")

@@ -18,6 +18,10 @@ var migrations = []localMigration{
 		Name:  "2020_11_03_04_42_SetDefaultDownloadStatus",
 		Query: "update podcast_items set download_status=2 where download_path!='' and download_status=0",
 	},
+	{
+		Name:  "2025_09_17_14_00_AddPassthroughPodcastGuidSetting",
+		Query: "ALTER TABLE settings ADD COLUMN passthroughPodcastGuid BOOLEAN NOT NULL DEFAULT FALSE; ",
+	},
 }
 
 func RunMigrations() {

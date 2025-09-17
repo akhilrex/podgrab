@@ -455,7 +455,13 @@ func getBaseUrl(c *gin.Context) string {
 func createRss(items []db.PodcastItem, title, description, image string, c *gin.Context) model.RssPodcastData {
 	var rssItems []model.RssItem
 	url := getBaseUrl(c)
+	setting := db.GetOrCreateSetting()
 	for _, item := range items {
+		var itemGuid string = item.ID
+		if setting.PassthroughPodcastGuid && strings.TrimSpace(item.GUID) != "" {
+			itemGuid = item.GUID
+		}
+
 		rssItem := model.RssItem{
 			Title:       item.Title,
 			Description: item.Summary,
@@ -473,7 +479,7 @@ func createRss(items []db.PodcastItem, title, description, image string, c *gin.
 			PubDate: item.PubDate.Format("Mon, 02 Jan 2006 15:04:05 -0700"),
 			Guid: model.RssItemGuid{
 				IsPermaLink: "false",
-				Text:        item.ID,
+				Text:        itemGuid,
 			},
 			Link:     fmt.Sprintf("%s/allTags", url),
 			Text:     item.Title,
@@ -627,7 +633,7 @@ func UpdateSetting(c *gin.Context) {
 	if err == nil {
 
 		err = service.UpdateSettings(model.DownloadOnAdd, model.InitialDownloadCount,
-			model.AutoDownload, model.AppendDateToFileName, model.AppendEpisodeNumberToFileName,
+			model.AutoDownload, model.AppendDateToFileName, model.AppendEpisodeNumberToFileName, model.PassthroughPodcastGuid,
 			model.DarkMode, model.DownloadEpisodeImages, model.GenerateNFOFile, model.DontDownloadDeletedFromDisk, model.BaseUrl,
 			model.MaxDownloadConcurrency, model.UserAgent,
 		)

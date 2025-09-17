@@ -35,7 +35,7 @@ func ParseOpml(content string) (model.OpmlModel, error) {
 	return response, err
 }
 
-//FetchURL is
+// FetchURL is
 func FetchURL(url string) (model.PodcastData, []byte, error) {
 	body, err := makeQuery(url)
 	if err != nil {
@@ -763,7 +763,7 @@ func GetSearchFromPodcastIndex(pod *podcastindex.Podcast) *model.CommonSearchRes
 }
 
 func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload bool,
-	appendDateToFileName bool, appendEpisodeNumberToFileName bool, darkMode bool, downloadEpisodeImages bool,
+	appendDateToFileName bool, appendEpisodeNumberToFileName bool, passthroughPodcastGuid bool, darkMode bool, downloadEpisodeImages bool,
 	generateNFOFile bool, dontDownloadDeletedFromDisk bool, baseUrl string, maxDownloadConcurrency int, userAgent string) error {
 	setting := db.GetOrCreateSetting()
 
@@ -772,6 +772,7 @@ func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload b
 	setting.InitialDownloadCount = initialDownloadCount
 	setting.AppendDateToFileName = appendDateToFileName
 	setting.AppendEpisodeNumberToFileName = appendEpisodeNumberToFileName
+	setting.PassthroughPodcastGuid = passthroughPodcastGuid
 	setting.DarkMode = darkMode
 	setting.DownloadEpisodeImages = downloadEpisodeImages
 	setting.GenerateNFOFile = generateNFOFile

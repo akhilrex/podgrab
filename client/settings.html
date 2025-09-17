@@ -84,6 +84,11 @@
             <span class="label-body">Append episode number to episode file name</span>
         </label>
 
+        <label for="passthroughPodcastGuid">
+            <input type="checkbox" name="passthroughPodcastGuid" v-model="passthroughPodcastGuid">
+            <span class="label-body">Use host Guid if provided</span>
+        </label>
+
         <label for="darkMode">
             <input type="checkbox" name="darkMode" v-model="darkMode">
             <span class="label-body">Use Dark Mode</span>
@@ -184,6 +189,7 @@ var app = new Vue({
             autoDownload:self.autoDownload,
             appendDateToFileName:self.appendDateToFileName,
             appendEpisodeNumberToFileName:self.appendEpisodeNumberToFileName,
+            passthroughPodcastGuid:self.passthroughPodcastGuid,
             darkMode:self.darkMode,
             downloadEpisodeImages:self.downloadEpisodeImages,
             generateNFOFile:self.generateNFOFile,
@@ -229,6 +235,7 @@ var app = new Vue({
     autoDownload: {{ .setting.AutoDownload }},
     appendDateToFileName: {{ .setting.AppendDateToFileName }},
     appendEpisodeNumberToFileName:{{ .setting.AppendEpisodeNumberToFileName }},
+    passthroughPodcastGuid:{{ .setting.PassthroughPodcastGuid }},
     darkMode:{{ .setting.DarkMode }},
     originalThemeSetting:{{ .setting.DarkMode }},
     downloadEpisodeImages:{{.setting.DownloadEpisodeImages }},
