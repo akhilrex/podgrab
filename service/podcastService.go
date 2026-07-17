@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -15,6 +16,7 @@ import (
 	"github.com/TheHippo/podcastindex"
 	"github.com/akhilrex/podgrab/db"
 	"github.com/akhilrex/podgrab/model"
+	"github.com/akhilrex/podgrab/internal/sanitize"
 	"github.com/antchfx/xmlquery"
 	strip "github.com/grokify/html-strip-tags-go"
 	"go.uber.org/zap"
@@ -494,24 +496,70 @@ func SetAllEpisodesToDownload(podcastId string) error {
 	return db.SetAllEpisodesToDownload(podcastId)
 }
 
-func GetPodcastPrefix(item *db.PodcastItem, setting *db.Setting) string {
-	prefix := ""
-	if setting.AppendEpisodeNumberToFileName {
+var format_re = regexp.MustCompile("%%|%([^%]+)%")
+
+var format_map = map[string]interface{}{
+	"%ShowTitle%": func(item *db.PodcastItem, args ...string) string {
+		return item.Podcast.Title
+	},
+	"%EpisodeTitle%": func(item *db.PodcastItem, args ...string) string {
+		return item.Title
+	},
+	"%EpisodeNumber%": func(item *db.PodcastItem, args ...string) string {
 		seq, err := db.GetEpisodeNumber(item.ID, item.PodcastID)
-		if err == nil {
-			prefix = strconv.Itoa(seq)
+		if err != nil {
+			seq = 0
 		}
-	}
-	if setting.AppendDateToFileName {
-		toAppend := item.PubDate.Format("2006-01-02")
-		if prefix == "" {
-			prefix = toAppend
-		} else {
-			prefix = prefix + "-" + toAppend
+		width, err := 0, *new(error)
+		if len(args) > 0 {
+			width, err = strconv.Atoi(args[0])
 		}
-	}
-	return prefix
+		if err != nil {
+			width = 0
+		}
+		return fmt.Sprintf("%0*d", width, seq)
+	},
+	"%EpisodeDate%": func(item *db.PodcastItem, args ...string) string {
+		return item.PubDate.Format("2006-01-02")
+	},
+	"%YYYY%": func(item *db.PodcastItem, args ...string) string {
+		return item.PubDate.Format("2006")
+	},
+	"%mm%": func(item *db.PodcastItem, args ...string) string {
+		return item.PubDate.Format("01")
+	},
+	"%dd%": func(item *db.PodcastItem, args ...string) string {
+		return item.PubDate.Format("02")
+	},
+	"%%": func(item *db.PodcastItem, args ...string) string {
+		return "%"
+	},
 }
+
+func FormatFileName(item *db.PodcastItem, formatString string) string {
+	var matchedTokens = format_re.FindAllStringIndex(formatString, -1)
+	var previousTokenEndingIndex = 0
+	var formattedFileName = ""
+	for _,t := range matchedTokens {
+		if previousTokenEndingIndex != t[0] {
+			formattedFileName += formatString[previousTokenEndingIndex:t[0]]
+		}
+		token := formatString[t[0]:t[1]]
+		tokenArgs := strings.Split(token[1:len(token)-1], ":")
+		tokenFunction := format_map["%"+tokenArgs[0]+"%"]
+		if nil != tokenFunction {
+			token = tokenFunction.(func(*db.PodcastItem, ...string)string)(item, tokenArgs[1:]...)
+			token = sanitize.Name(token)
+		}
+		formattedFileName += token
+		previousTokenEndingIndex = t[1]
+	}
+	if previousTokenEndingIndex < len(formatString) {
+		formattedFileName += formatString[previousTokenEndingIndex:]
+	}
+	return formattedFileName
+}
+
 func DownloadMissingEpisodes() error {
 	const JOB_NAME = "DownloadMissingEpisodes"
 	lock := db.GetLock(JOB_NAME)
@@ -533,7 +581,8 @@ func DownloadMissingEpisodes() error {
 		wg.Add(1)
 		go func(item db.PodcastItem, setting db.Setting) {
 			defer wg.Done()
-			url, _ := Download(item.FileURL, item.Title, item.Podcast.Title, GetPodcastPrefix(&item, &setting))
+			podcastFileName := FormatFileName(&item, setting.FileNameFormat)
+			url, _ := Download(item.FileURL, item.Title, item.Podcast.Title, podcastFileName)
 			SetPodcastItemAsDownloaded(item.ID, url)
 		}(item, *setting)
 
@@ -600,7 +649,8 @@ func DownloadSingleEpisode(podcastItemId string) error {
 	setting := db.GetOrCreateSetting()
 	SetPodcastItemAsQueuedForDownload(podcastItemId)
 
-	url, err := Download(podcastItem.FileURL, podcastItem.Title, podcastItem.Podcast.Title, GetPodcastPrefix(&podcastItem, setting))
+	podcastFileName := FormatFileName(&podcastItem, setting.FileNameFormat)
+	url, err := Download(podcastItem.FileURL, podcastItem.Title, podcastItem.Podcast.Title, podcastFileName)
 
 	if err != nil {
 		fmt.Println(err.Error())
@@ -762,16 +812,25 @@ func GetSearchFromPodcastIndex(pod *podcastindex.Podcast) *model.CommonSearchRes
 	return p
 }
 
-func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload bool,
-	appendDateToFileName bool, appendEpisodeNumberToFileName bool, darkMode bool, downloadEpisodeImages bool,
-	generateNFOFile bool, dontDownloadDeletedFromDisk bool, baseUrl string, maxDownloadConcurrency int, userAgent string) error {
+func UpdateSettings(
+			downloadOnAdd bool,
+			initialDownloadCount int,
+			autoDownload bool,
+			fileNameFormat string,
+			darkMode bool,
+			downloadEpisodeImages bool,
+			generateNFOFile bool,
+			dontDownloadDeletedFromDisk bool,
+			baseUrl string,
+			maxDownloadConcurrency int,
+			userAgent string,
+		) error {
 	setting := db.GetOrCreateSetting()
 
 	setting.AutoDownload = autoDownload
 	setting.DownloadOnAdd = downloadOnAdd
 	setting.InitialDownloadCount = initialDownloadCount
-	setting.AppendDateToFileName = appendDateToFileName
-	setting.AppendEpisodeNumberToFileName = appendEpisodeNumberToFileName
+	setting.FileNameFormat = fileNameFormat
 	setting.DarkMode = darkMode
 	setting.DownloadEpisodeImages = downloadEpisodeImages
 	setting.GenerateNFOFile = generateNFOFile
