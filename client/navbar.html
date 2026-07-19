@@ -143,7 +143,14 @@ div#overlay{
   </a>
   <h1 id="pageTitle">{{ .title }}</h1>
   {{if .podcastId }}
-  <button
+<button
+  class="button"
+  title="Refresh this podcast"
+  onclick="refreshPodcast({{ .podcastId }}, {{ .title }})"
+>
+  <i class="fas fa-sync"></i>
+</button>
+<button
   class="button"
   title="Download all episode files"
   onclick="downloadAllEpisodes({{ .podcastId }})"

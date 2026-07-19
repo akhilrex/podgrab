@@ -172,6 +172,34 @@
           .then(function () {});
         return false;
       }
+      function refreshPodcast(id, title) {
+        axios
+          .get("/podcasts/" + id + "/refresh")
+          .then(function (response) {
+            Vue.toasted.show(
+              "\"" + title + "\" has been enqueued to refresh.",
+              {
+                theme: "bubble",
+                type: "info",
+                position: "top-right",
+                duration: 5000,
+              }
+            );
+          })
+          .catch(function (error) {
+            if (error.response && error.response.data && error.response.data.message) {
+
+              Vue.toasted.show(error.response.data.message, {
+                theme: "bubble",
+                type: "error",
+                position: "top-right",
+                duration: 5000,
+              });
+            }
+          })
+          .then(function () {});
+        return false;
+      }
       function deletePodcast(id,onSuccess) {
         if (typeof id !== 'string'){
             id= id.getAttribute('data-id')

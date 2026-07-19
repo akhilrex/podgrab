@@ -273,6 +273,13 @@
         <i style="color: red;" class="fas fa-dot-circle"></i>
       </button>
       <button
+        class="button"
+        title="Click to refresh this podcast."
+        @click="refreshPodcast(podcast)"
+      >
+        <i class="fas fa-sync"></i>
+      </button>
+      <button
       class="button"
       title="Click to see details."
       
@@ -672,6 +679,7 @@
            return dt.toDateString()
           },
           downloadAllEpisodes(id) { downloadAllEpisodes(id);},
+          refreshPodcast(podcast) { refreshPodcast(podcast.ID, podcast.Title); },
           deletePodcast(id){ deletePodcast(id,()=>{
            
               const index= this.podcasts.findIndex(x=>x.ID===id);

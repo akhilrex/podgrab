@@ -43,7 +43,16 @@
         <a href="/opml?usePodgrabLink=true" class="button" title="Export OPML file with Podgrab podcast feed urls">Export OPML (Podgrab Urls)</a>
     </div>
     <div class="columns two">
-        <a title="Import this rss feed in your favorite podcast player" target="_blank" href="/rss" class="button">Rss Feed</a>
+        <a title="Import this RSS feed in your favorite podcast player" target="_blank" href="/rss" class="button">RSS Feed</a>
+    </div>
+    <div class="columns two">
+        <button
+            class="button"
+            title="Refresh all RSS feeds."
+            onclick="refreshEpisodes()"
+        >
+            Refresh All Feeds
+        </button>
     </div>
 </div>
 <hr>
@@ -166,6 +175,35 @@
 </div>
 
 {{template "scripts"}}
+<script>
+function refreshEpisodes() {
+  axios
+    .get("/refreshAll")
+    .then(function (response) {
+      Vue.toasted.show(
+        "All feeds have been enqueued to refresh.",
+        {
+          theme: "bubble",
+          type: "info",
+          position: "top-right",
+          duration: 5000,
+        }
+      );
+    })
+    .catch(function (error) {
+      if (error.response && error.response.data && error.response.data.message) {
+        Vue.toasted.show(error.response.data.message, {
+          theme: "bubble",
+          type: "error",
+          position: "top-right",
+          duration: 5000,
+        });
+      }
+    })
+    .then(function () {});
+  return false;
+}
+</script>
 <script>
 var app = new Vue({
   delimiters: ['${', '}'],
