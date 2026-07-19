@@ -557,7 +557,7 @@ func GetRss(c *gin.Context) {
 	}
 
 	title := "Podgrab"
-	description := "Pograb playlist"
+	description := "Podgrab playlist"
 
 	c.XML(200, createRss(items, title, description, "", c))
 
