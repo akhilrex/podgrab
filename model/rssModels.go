@@ -6,45 +6,71 @@ import "encoding/xml"
 type RssPodcastData struct {
 	XMLName    xml.Name   `xml:"rss"`
 	Text       string     `xml:",chardata"`
-	Itunes     string     `xml:"itunes,attr"`
-	Atom       string     `xml:"atom,attr"`
-	Media      string     `xml:"media,attr"`
-	Psc        string     `xml:"psc,attr"`
-	Omny       string     `xml:"omny,attr"`
-	Content    string     `xml:"content,attr"`
-	Googleplay string     `xml:"googleplay,attr"`
-	Acast      string     `xml:"acast,attr"`
+	Itunes     string     `xml:"xmlns:itunes,attr"`
+	Atom       string     `xml:"xmlns:atom,attr"`
+	Media      string     `xml:"xmlns:media,attr"`
+	Psc        string     `xml:"xmlns:psc,attr"`
+	Omny       string     `xml:"xmlns:omny,attr,omitempty"`
+	Content    string     `xml:"xmlns:content,attr"`
+	Googleplay string     `xml:"xmlns:googleplay,attr,omitempty"`
+	Acast      string     `xml:"xmlns:acast,attr,omitempty"`
 	Version    string     `xml:"version,attr"`
 	Channel    RssChannel `xml:"channel"`
 }
 type RssChannel struct {
-	Text        string       `xml:",chardata"`
-	Language    string       `xml:"language"`
-	Link        string       `xml:"link"`
-	Title       string       `xml:"title"`
-	Description string       `xml:"description"`
-	Type        string       `xml:"type"`
-	Summary     string       `xml:"summary"`
-	Image       RssItemImage `xml:"image"`
-	Item        []RssItem    `xml:"item"`
-	Author      string       `xml:"author"`
+	Text           string            `xml:",chardata"`
+	Language       string            `xml:"language"`
+	Link           string            `xml:"link"`
+	Title          string            `xml:"title"`
+	Description    string            `xml:"description"`
+	Image          RssItemImage      `xml:"image"`
+	Item           []RssItem         `xml:"item"`
+	ItunesAuthor   string            `xml:"itunes:author"`
+	ItunesSummary  string            `xml:"itunes:summary"`
+	ItunesType     string            `xml:"itunes:type"`
+	ItunesExplicit string            `xml:"itunes:explicit"`
+	ItunesImage    RssItunesImage    `xml:"itunes:image"`
+	ItunesCategory RssItunesCategory `xml:"itunes:category"`
+	ItunesOwner    RssItunesOwner    `xml:"itunes:owner"`
 }
 type RssItem struct {
-	Text        string           `xml:",chardata"`
-	Title       string           `xml:"title"`
-	Description string           `xml:"description"`
-	Encoded     string           `xml:"encoded"`
-	Summary     string           `xml:"summary"`
-	EpisodeType string           `xml:"episodeType"`
-	Author      string           `xml:"author"`
-	Image       RssItemImage     `xml:"image"`
-	Guid        RssItemGuid      `xml:"guid"`
-	ClipId      string           `xml:"clipId"`
-	PubDate     string           `xml:"pubDate"`
-	Duration    string           `xml:"duration"`
-	Enclosure   RssItemEnclosure `xml:"enclosure"`
-	Link        string           `xml:"link"`
-	Episode     string           `xml:"episode"`
+	Text              string           `xml:",chardata"`
+	Title             string           `xml:"title"`
+	Description       string           `xml:"description"`
+	Encoded           string           `xml:"encoded"`
+	Image             RssItemImage     `xml:"image"`
+	Guid              RssItemGuid      `xml:"guid"`
+	ClipId            string           `xml:"clipId,omitempty"`
+	PubDate           string           `xml:"pubDate"`
+	Enclosure         RssItemEnclosure `xml:"enclosure"`
+	Link              string           `xml:"link"`
+	ItunesAuthor      string           `xml:"itunes:author,omitempty"`
+	ItunesSummary     string           `xml:"itunes:summary"`
+	ItunesEpisodeType string           `xml:"itunes:episodeType"`
+	ItunesDuration    string           `xml:"itunes:duration"`
+	ItunesImage       RssItunesImage   `xml:"itunes:image"`
+	ItunesExplicit    string           `xml:"itunes:explicit"`
+	ItunesEpisode     string           `xml:"itunes:episode,omitempty"`
+}
+
+// RssItunesImage is the self-closing <itunes:image href="..."/> element -
+// distinct from the child-element-based RSS <image> in RssItemImage.
+type RssItunesImage struct {
+	Href string `xml:"href,attr"`
+}
+
+// RssItunesCategory is Apple's required channel-level <itunes:category text="..."/>.
+type RssItunesCategory struct {
+	Text string `xml:"text,attr"`
+}
+
+// RssItunesOwner must always carry both children: parsers such as Castopod's
+// php-podcast-parser (PodcastFeed\Tags\Itunes\ItunesOwner) require itunes:email
+// and only lazily set itunes:name, so a partially-populated owner blows up
+// downstream consumers with "Undefined property ...::$itunes_name".
+type RssItunesOwner struct {
+	Name  string `xml:"itunes:name"`
+	Email string `xml:"itunes:email"`
 }
 
 type RssItemEnclosure struct {
