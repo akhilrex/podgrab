@@ -89,6 +89,7 @@ type Setting struct {
 	BaseUrl                       string
 	MaxDownloadConcurrency        int `gorm:"default:5"`
 	UserAgent                     string
+	MaxDownloadKeep               int `gorm:"default:5"`
 }
 type Migration struct {
 	Base

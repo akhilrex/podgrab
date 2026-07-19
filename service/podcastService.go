@@ -566,6 +566,35 @@ func CheckMissingFiles() error {
 	return nil
 }
 
+func ClearEpisodeFiles() error {
+	fmt.Println("Clearning Episode Files")
+	var podcasts []db.Podcast
+	err := db.GetAllPodcasts(&podcasts, "")
+	setting := db.GetOrCreateSetting()
+	var maxDownloadKeep int = setting.MaxDownloadKeep
+
+	if err != nil {
+		return err
+	}
+	for _, pod := range podcasts {
+		var episodes []db.PodcastItem
+		err = db.GetAllPodcastItemsByPodcastId(pod.ID, &episodes)
+		if err != nil {
+			return err
+		}
+		downloadedCount := 0
+		for _, episode := range episodes {
+			if (downloadedCount >= maxDownloadKeep && episode.DownloadStatus == 2) {
+				DeleteEpisodeFile(episode.ID)
+			}
+			if (episode.DownloadStatus == 2) {
+				downloadedCount = downloadedCount + 1
+			}
+		}
+	}
+	return nil
+}
+
 func DeleteEpisodeFile(podcastItemId string) error {
 	var podcastItem db.PodcastItem
 	err := db.GetPodcastItemById(podcastItemId, &podcastItem)
@@ -764,7 +793,7 @@ func GetSearchFromPodcastIndex(pod *podcastindex.Podcast) *model.CommonSearchRes
 
 func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload bool,
 	appendDateToFileName bool, appendEpisodeNumberToFileName bool, darkMode bool, downloadEpisodeImages bool,
-	generateNFOFile bool, dontDownloadDeletedFromDisk bool, baseUrl string, maxDownloadConcurrency int, userAgent string) error {
+	generateNFOFile bool, dontDownloadDeletedFromDisk bool, baseUrl string, maxDownloadConcurrency int, maxDownloadKeep int, userAgent string) error {
 	setting := db.GetOrCreateSetting()
 
 	setting.AutoDownload = autoDownload
@@ -778,6 +807,7 @@ func UpdateSettings(downloadOnAdd bool, initialDownloadCount int, autoDownload b
 	setting.DontDownloadDeletedFromDisk = dontDownloadDeletedFromDisk
 	setting.BaseUrl = baseUrl
 	setting.MaxDownloadConcurrency = maxDownloadConcurrency
+	setting.MaxDownloadKeep = maxDownloadKeep
 	setting.UserAgent = userAgent
 
 	return db.UpdateSettings(setting)
