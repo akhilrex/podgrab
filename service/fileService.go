@@ -399,7 +399,7 @@ func getFileName(link string, title string, defaultExtension string) string {
 }
 
 func cleanFileName(original string) string {
-	return sanitize.Name(original)
+	return sanitize.BaseName(original)
 }
 
 func checkError(err error) {
