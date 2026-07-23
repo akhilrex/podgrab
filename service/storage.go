@@ -40,6 +40,19 @@ func s3KeyPrefix() string {
 	return strings.Trim(os.Getenv("S3_KEY_PREFIX"), "/")
 }
 
+// s3Endpoint returns S3_ENDPOINT normalized to include a scheme. Both the
+// AWS SDK's BaseEndpoint and url.Parse (used below to derive the public
+// URL) require one - without it, a bare hostname like
+// "nyc3.digitaloceanspaces.com" silently parses with an empty host/scheme,
+// or "host:port" gets misread as "scheme:opaque".
+func s3Endpoint() string {
+	endpoint := strings.TrimRight(os.Getenv("S3_ENDPOINT"), "/")
+	if endpoint == "" || strings.Contains(endpoint, "://") {
+		return endpoint
+	}
+	return "https://" + endpoint
+}
+
 func s3UsePathStyle() bool {
 	v, _ := strconv.ParseBool(os.Getenv("S3_USE_PATH_STYLE"))
 	return v
@@ -79,7 +92,7 @@ func getS3Client() (*s3.Client, error) {
 			return
 		}
 		s3Client = s3.NewFromConfig(cfg, func(o *s3.Options) {
-			if endpoint := os.Getenv("S3_ENDPOINT"); endpoint != "" {
+			if endpoint := s3Endpoint(); endpoint != "" {
 				o.BaseEndpoint = aws.String(endpoint)
 			}
 			o.UsePathStyle = s3UsePathStyle()
@@ -99,7 +112,7 @@ func s3PublicURLBase() string {
 
 	bucket := s3Bucket()
 	region := s3Region()
-	endpoint := strings.TrimRight(os.Getenv("S3_ENDPOINT"), "/")
+	endpoint := s3Endpoint()
 	pathStyle := s3UsePathStyle()
 
 	if endpoint != "" {

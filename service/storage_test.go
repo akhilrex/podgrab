@@ -85,6 +85,32 @@ func TestS3PublicURLCustomEndpointVirtualHosted(t *testing.T) {
 	})
 }
 
+func TestS3PublicURLCustomEndpointWithoutScheme(t *testing.T) {
+	withEnv(t, map[string]string{
+		"S3_BUCKET":          "spaces-bucket",
+		"S3_ENDPOINT":        "nyc3.digitaloceanspaces.com",
+		"S3_USE_PATH_STYLE":  "",
+		"S3_PUBLIC_URL_BASE": "",
+		"S3_KEY_PREFIX":      "",
+	}, func() {
+		got := s3PublicURL("show/ep.mp3")
+		want := "https://spaces-bucket.nyc3.digitaloceanspaces.com/show/ep.mp3"
+		if got != want {
+			t.Fatalf("got %q want %q", got, want)
+		}
+	})
+}
+
+func TestS3EndpointHostPortWithoutScheme(t *testing.T) {
+	withEnv(t, map[string]string{"S3_ENDPOINT": "minio:9000"}, func() {
+		got := s3Endpoint()
+		want := "https://minio:9000"
+		if got != want {
+			t.Fatalf("got %q want %q", got, want)
+		}
+	})
+}
+
 func TestS3PublicURLOverrideAndPrefix(t *testing.T) {
 	withEnv(t, map[string]string{
 		"S3_PUBLIC_URL_BASE": "https://cdn.example.com/",

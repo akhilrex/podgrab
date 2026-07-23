@@ -146,7 +146,7 @@ Although personally I feel that using the docker container is the best way of us
 | S3_REGION       | AWS region of the bucket | us-east-1 |
 | S3_ACCESS_KEY_ID | Access key for the bucket. If unset, falls back to the default AWS credential chain (IAM role, shared credentials file, etc.) | (empty) |
 | S3_SECRET_ACCESS_KEY | Secret key paired with `S3_ACCESS_KEY_ID` | (empty) |
-| S3_ENDPOINT     | Custom endpoint for S3-compatible providers (MinIO, DigitalOcean Spaces, etc). Leave unset for AWS S3 | (empty) |
+| S3_ENDPOINT     | Custom endpoint for S3-compatible providers (MinIO, DigitalOcean Spaces, etc), as a full URL e.g. `https://nyc3.digitaloceanspaces.com` or `http://minio:9000`. A bare hostname is accepted too and assumed to be `https://`. Leave unset for AWS S3 | (empty) |
 | S3_USE_PATH_STYLE | Set to `true` if your provider requires path-style requests (`https://endpoint/bucket/key`) instead of virtual-hosted style | false |
 | S3_KEY_PREFIX   | Optional prefix (subfolder) under which all objects are stored in the bucket | (empty) |
 | S3_ACL          | Object ACL applied on upload, e.g. `public-read`. Leave unset for buckets with ACLs disabled (the current AWS default) and control public access with a bucket policy instead | (empty) |
