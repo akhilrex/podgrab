@@ -244,8 +244,10 @@ func GetPodcastItemImageById(c *gin.Context) {
 
 		err := db.GetPodcastItemById(searchByIdQuery.Id, &podcast)
 		if err == nil {
-			if _, err = os.Stat(podcast.LocalImage); os.IsNotExist(err) {
+			if !service.FileExists(podcast.LocalImage) {
 				c.Redirect(302, podcast.Image)
+			} else if publicUrl := service.GetPublicFileURL(podcast.LocalImage); publicUrl != "" {
+				c.Redirect(302, publicUrl)
 			} else {
 				c.File(podcast.LocalImage)
 			}
@@ -265,8 +267,10 @@ func GetPodcastImageById(c *gin.Context) {
 		err := db.GetPodcastById(searchByIdQuery.Id, &podcast)
 		if err == nil {
 			localPath := service.GetPodcastLocalImagePath(podcast.Image, podcast.Title)
-			if _, err = os.Stat(localPath); os.IsNotExist(err) {
+			if !service.FileExists(localPath) {
 				c.Redirect(302, podcast.Image)
+			} else if publicUrl := service.GetPublicFileURL(localPath); publicUrl != "" {
+				c.Redirect(302, publicUrl)
 			} else {
 				c.File(localPath)
 			}
@@ -285,14 +289,16 @@ func GetPodcastItemFileById(c *gin.Context) {
 
 		err := db.GetPodcastItemById(searchByIdQuery.Id, &podcast)
 		if err == nil {
-			if _, err = os.Stat(podcast.DownloadPath); !os.IsNotExist(err) {
+			if !service.FileExists(podcast.DownloadPath) {
+				c.Redirect(302, podcast.FileURL)
+			} else if publicUrl := service.GetPublicFileURL(podcast.DownloadPath); publicUrl != "" {
+				c.Redirect(302, publicUrl)
+			} else {
 				c.Header("Content-Description", "File Transfer")
 				c.Header("Content-Transfer-Encoding", "binary")
 				c.Header("Content-Disposition", "attachment; filename="+path.Base(podcast.DownloadPath))
 				c.Header("Content-Type", GetFileContentType(podcast.DownloadPath))
 				c.File(podcast.DownloadPath)
-			} else {
-				c.Redirect(302, podcast.FileURL)
 			}
 		}
 	} else {
@@ -456,17 +462,29 @@ func createRss(items []db.PodcastItem, title, description, image string, c *gin.
 	var rssItems []model.RssItem
 	url := getBaseUrl(c)
 	for _, item := range items {
+		imageUrl := fmt.Sprintf("%s/podcastitems/%s/image", url, item.ID)
+		if publicUrl := service.GetPublicFileURL(item.LocalImage); publicUrl != "" {
+			imageUrl = publicUrl
+		}
+
+		fileUrl := fmt.Sprintf("%s/podcastitems/%s/file", url, item.ID)
+		if item.DownloadStatus == db.Downloaded {
+			if publicUrl := service.GetPublicFileURL(item.DownloadPath); publicUrl != "" {
+				fileUrl = publicUrl
+			}
+		}
+
 		rssItem := model.RssItem{
 			Title:       item.Title,
 			Description: item.Summary,
 			Summary:     item.Summary,
 			Image: model.RssItemImage{
 				Text: item.Title,
-				Href: fmt.Sprintf("%s/podcastitems/%s/image", url, item.ID),
+				Href: imageUrl,
 			},
 			EpisodeType: item.EpisodeType,
 			Enclosure: model.RssItemEnclosure{
-				URL:    fmt.Sprintf("%s/podcastitems/%s/file", url, item.ID),
+				URL:    fileUrl,
 				Length: fmt.Sprint(item.FileSize),
 				Type:   "audio/mpeg",
 			},

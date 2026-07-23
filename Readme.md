@@ -141,6 +141,18 @@ Although personally I feel that using the docker container is the best way of us
 | CHECK_FREQUENCY | How frequently to check for new episodes and missing files (in minutes) | 30      |
 | PASSWORD        | Set to some non empty value to enable Basic Authentication, username `podgrab`|(empty)|
 | PORT            | Change the internal port of the application. If you change this you might have to change your docker configuration as well | (empty) |  
+| STORAGE_BACKEND | Where downloaded episodes/images are stored: `local` (the `/assets` volume) or `s3` | local |
+| S3_BUCKET       | Bucket name to store episodes/images in. Required when `STORAGE_BACKEND=s3` | (empty) |
+| S3_REGION       | AWS region of the bucket | us-east-1 |
+| S3_ACCESS_KEY_ID | Access key for the bucket. If unset, falls back to the default AWS credential chain (IAM role, shared credentials file, etc.) | (empty) |
+| S3_SECRET_ACCESS_KEY | Secret key paired with `S3_ACCESS_KEY_ID` | (empty) |
+| S3_ENDPOINT     | Custom endpoint for S3-compatible providers (MinIO, DigitalOcean Spaces, etc). Leave unset for AWS S3 | (empty) |
+| S3_USE_PATH_STYLE | Set to `true` if your provider requires path-style requests (`https://endpoint/bucket/key`) instead of virtual-hosted style | false |
+| S3_KEY_PREFIX   | Optional prefix (subfolder) under which all objects are stored in the bucket | (empty) |
+| S3_ACL          | Object ACL applied on upload, e.g. `public-read`. Leave unset for buckets with ACLs disabled (the current AWS default) and control public access with a bucket policy instead | (empty) |
+| S3_PUBLIC_URL_BASE | Override the base URL used to build RSS/enclosure links, e.g. a CloudFront/CDN domain fronting the bucket. If unset, the standard `https://<bucket>.s3.<region>.amazonaws.com` (or endpoint-derived) URL is used | (empty) |
+
+When `STORAGE_BACKEND=s3`, downloaded episode and image files are uploaded straight to the bucket and the RSS feed links directly to the bucket (or `S3_PUBLIC_URL_BASE`) URL instead of proxying the bytes through Podgrab — the bucket (or fronting CDN) must therefore make those objects publicly readable. The `/assets` volume is only needed for `local` storage.
 
 ### Setup
 

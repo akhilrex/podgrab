@@ -5,6 +5,15 @@ services:
     container_name: podgrab
     environment:
       - CHECK_FREQUENCY=240
+      # Uncomment to store episodes/images in S3 instead of the /assets volume,
+      # and have the RSS feed link directly to the bucket instead of proxying.
+      # - STORAGE_BACKEND=s3
+      # - S3_BUCKET=my-podgrab-bucket
+      # - S3_REGION=us-east-1
+      # - S3_ACCESS_KEY_ID=xxxxxxxx
+      # - S3_SECRET_ACCESS_KEY=xxxxxxxx
+      # - S3_ACL=public-read       ## only needed for buckets/providers that still use ACLs
+      # - S3_PUBLIC_URL_BASE=https://cdn.example.com   ## optional, e.g. a CloudFront domain
     volumes:
       - /path/to/config:/config
       - /path/to/data:/assets

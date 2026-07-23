@@ -23,58 +23,16 @@ import (
 )
 
 func Download(link string, episodeTitle string, podcastName string, prefix string) (string, error) {
-	if link == "" {
-		return "", errors.New("Download path empty")
-	}
-	client := httpClient()
-
-	req, err := getRequest(link)
-	if err != nil {
-		Logger.Errorw("Error creating request: "+link, err)
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		Logger.Errorw("Error getting response: "+link, err)
-		return "", err
-	}
-
 	fileName := getFileName(link, episodeTitle, ".mp3")
 	if prefix != "" {
 		fileName = fmt.Sprintf("%s-%s", prefix, fileName)
 	}
-	folder := createDataFolderIfNotExists(podcastName)
-	finalPath := path.Join(folder, fileName)
-
-	if _, err := os.Stat(finalPath); !os.IsNotExist(err) {
-		changeOwnership(finalPath)
-		return finalPath, nil
-	}
-
-	file, err := os.Create(finalPath)
-	if err != nil {
-		Logger.Errorw("Error creating file"+link, err)
-		return "", err
-	}
-	defer resp.Body.Close()
-	_, erra := io.Copy(file, resp.Body)
-	//fmt.Println(size)
-	defer file.Close()
-	if erra != nil {
-		Logger.Errorw("Error saving file"+link, err)
-		return "", erra
-	}
-	changeOwnership(finalPath)
-	return finalPath, nil
-
+	return fetchAndStore(link, podcastName, fileName)
 }
 
 func GetPodcastLocalImagePath(link string, podcastName string) string {
 	fileName := getFileName(link, "folder", ".jpg")
-	folder := createDataFolderIfNotExists(podcastName)
-
-	finalPath := path.Join(folder, fileName)
-	return finalPath
+	return computeLocation(podcastName, fileName)
 }
 
 func CreateNfoFile(podcast *db.Podcast) error {
@@ -104,57 +62,54 @@ func CreateNfoFile(podcast *db.Podcast) error {
 }
 
 func DownloadPodcastCoverImage(link string, podcastName string) (string, error) {
-	if link == "" {
-		return "", errors.New("Download path empty")
-	}
-	client := httpClient()
-	req, err := getRequest(link)
-	if err != nil {
-		Logger.Errorw("Error creating request: "+link, err)
-		return "", err
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		Logger.Errorw("Error getting response: "+link, err)
-		return "", err
-	}
-
 	fileName := getFileName(link, "folder", ".jpg")
-	folder := createDataFolderIfNotExists(podcastName)
-
-	finalPath := path.Join(folder, fileName)
-	if _, err := os.Stat(finalPath); !os.IsNotExist(err) {
-		changeOwnership(finalPath)
-		return finalPath, nil
-	}
-
-	file, err := os.Create(finalPath)
-	if err != nil {
-		Logger.Errorw("Error creating file"+link, err)
-		return "", err
-	}
-	defer resp.Body.Close()
-	_, erra := io.Copy(file, resp.Body)
-	//fmt.Println(size)
-	defer file.Close()
-	if erra != nil {
-		Logger.Errorw("Error saving file"+link, err)
-		return "", erra
-	}
-	changeOwnership(finalPath)
-	return finalPath, nil
+	return fetchAndStore(link, podcastName, fileName)
 }
 
 func DownloadImage(link string, episodeId string, podcastName string) (string, error) {
+	fileName := getFileName(link, episodeId, ".jpg")
+	return fetchAndStore(link, podcastName, "images", fileName)
+}
+
+// computeLocation resolves the segments (folder(s)..., fileName) making up
+// an asset into a storage location: an absolute filesystem path for the
+// local backend (creating the intermediate folders as a side effect, as
+// before), or a relative object key for the S3 backend.
+func computeLocation(segments ...string) string {
+	if len(segments) == 0 {
+		return ""
+	}
+	fileName := segments[len(segments)-1]
+	folderSegments := segments[:len(segments)-1]
+
+	if isS3Backend() {
+		cleaned := make([]string, 0, len(folderSegments)+1)
+		for _, s := range folderSegments {
+			cleaned = append(cleaned, cleanFileName(s))
+		}
+		cleaned = append(cleaned, fileName)
+		return path.Join(cleaned...)
+	}
+
+	folder := os.Getenv("DATA")
+	for _, s := range folderSegments {
+		folder = createFolder(s, folder)
+	}
+	return path.Join(folder, fileName)
+}
+
+// fetchAndStore downloads link and persists it at the location described by
+// segments, dispatching to the S3 or local backend as configured. It
+// returns the storage location to be saved on the podcast/episode record.
+func fetchAndStore(link string, segments ...string) (string, error) {
 	if link == "" {
 		return "", errors.New("Download path empty")
 	}
 	client := httpClient()
+
 	req, err := getRequest(link)
 	if err != nil {
 		Logger.Errorw("Error creating request: "+link, err)
-		return "", err
 	}
 
 	resp, err := client.Do(req)
@@ -162,33 +117,37 @@ func DownloadImage(link string, episodeId string, podcastName string) (string, e
 		Logger.Errorw("Error getting response: "+link, err)
 		return "", err
 	}
+	defer resp.Body.Close()
 
-	fileName := getFileName(link, episodeId, ".jpg")
-	folder := createDataFolderIfNotExists(podcastName)
-	imageFolder := createFolder("images", folder)
-	finalPath := path.Join(imageFolder, fileName)
+	location := computeLocation(segments...)
 
-	if _, err := os.Stat(finalPath); !os.IsNotExist(err) {
-		changeOwnership(finalPath)
-		return finalPath, nil
+	if FileExists(location) {
+		if !isS3Backend() {
+			changeOwnership(location)
+		}
+		return location, nil
 	}
 
-	file, err := os.Create(finalPath)
+	if isS3Backend() {
+		if _, err := saveToS3(resp.Body, location, resp.Header.Get("Content-Type")); err != nil {
+			Logger.Errorw("Error uploading to S3: "+link, err)
+			return "", err
+		}
+		return location, nil
+	}
+
+	file, err := os.Create(location)
 	if err != nil {
 		Logger.Errorw("Error creating file"+link, err)
 		return "", err
 	}
-	defer resp.Body.Close()
-	_, erra := io.Copy(file, resp.Body)
-	//fmt.Println(size)
 	defer file.Close()
-	if erra != nil {
+	if _, err := io.Copy(file, resp.Body); err != nil {
 		Logger.Errorw("Error saving file"+link, err)
-		return "", erra
+		return "", err
 	}
-	changeOwnership(finalPath)
-	return finalPath, nil
-
+	changeOwnership(location)
+	return location, nil
 }
 func changeOwnership(path string) {
 	uid, err1 := strconv.Atoi(os.Getenv("PUID"))
@@ -201,6 +160,9 @@ func changeOwnership(path string) {
 
 }
 func DeleteFile(filePath string) error {
+	if isS3Backend() {
+		return deleteFromS3(filePath)
+	}
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		return err
 	}
@@ -210,6 +172,9 @@ func DeleteFile(filePath string) error {
 	return nil
 }
 func FileExists(filePath string) bool {
+	if isS3Backend() {
+		return existsInS3(filePath)
+	}
 	_, err := os.Stat(filePath)
 	return err == nil
 
@@ -229,6 +194,9 @@ func GetAllBackupFiles() ([]string, error) {
 }
 
 func GetFileSize(path string) (int64, error) {
+	if isS3Backend() {
+		return sizeInS3(path)
+	}
 	info, err := os.Stat(path)
 	if err != nil {
 		return 0, err
@@ -379,6 +347,9 @@ func createConfigFolderIfNotExists(folder string) string {
 }
 
 func deletePodcastFolder(folder string) error {
+	if isS3Backend() {
+		return deleteS3Prefix(cleanFileName(folder))
+	}
 	return os.RemoveAll(createDataFolderIfNotExists(folder))
 }
 
