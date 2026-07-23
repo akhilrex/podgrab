@@ -242,6 +242,39 @@ func AddPodcast(url string) (db.Podcast, error) {
 
 }
 
+func UpdatePodcastUrl(id string, newUrl string) (db.Podcast, error) {
+	var podcast db.Podcast
+	err := db.GetPodcastById(id, &podcast)
+	if err != nil {
+		return db.Podcast{}, err
+	}
+
+	if podcast.URL == newUrl {
+		return podcast, nil
+	}
+
+	var existing db.Podcast
+	err = db.GetPodcastByURL(newUrl, &existing)
+	if err == nil && existing.ID != podcast.ID {
+		return db.Podcast{}, &model.PodcastAlreadyExistsError{Url: newUrl}
+	}
+
+	if _, _, err := FetchURL(newUrl); err != nil {
+		Logger.Errorw("Error validating new podcast url", err)
+		return db.Podcast{}, err
+	}
+
+	podcast.URL = newUrl
+	err = db.UpdatePodcast(&podcast)
+	if err != nil {
+		return db.Podcast{}, err
+	}
+
+	go AddPodcastItems(&podcast, false)
+
+	return podcast, nil
+}
+
 func AddPodcastItems(podcast *db.Podcast, newPodcast bool) error {
 	//fmt.Println("Creating: " + podcast.ID)
 	data, _, err := FetchURL(podcast.URL)

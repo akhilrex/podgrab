@@ -151,6 +151,7 @@ func main() {
 	router.POST("/podcasts", controllers.AddPodcast)
 	router.GET("/podcasts", controllers.GetAllPodcasts)
 	router.GET("/podcasts/:id", controllers.GetPodcastById)
+	router.PATCH("/podcasts/:id", controllers.PatchPodcastById)
 	router.GET("/podcasts/:id/image", controllers.GetPodcastImageById)
 	router.DELETE("/podcasts/:id", controllers.DeletePodcastById)
 	router.GET("/podcasts/:id/items", controllers.GetPodcastItemsByPodcastId)

@@ -54,6 +54,9 @@ type PatchPodcastItem struct {
 type AddPodcastData struct {
 	Url string `binding:"required" form:"url" json:"url"`
 }
+type PatchPodcastData struct {
+	Url string `binding:"required" form:"url" json:"url"`
+}
 type AddTagData struct {
 	Label       string `binding:"required" form:"label" json:"label"`
 	Description string `form:"description" json:"description"`
@@ -424,6 +427,33 @@ func AddPodcast(c *gin.Context) {
 	} else {
 		log.Println(err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+	}
+}
+
+func PatchPodcastById(c *gin.Context) {
+	var searchByIdQuery SearchByIdQuery
+
+	if c.ShouldBindUri(&searchByIdQuery) != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+
+	var input PatchPodcastData
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	pod, err := service.UpdatePodcastUrl(searchByIdQuery.Id, input.Url)
+	if err == nil {
+		c.JSON(200, pod)
+	} else {
+		if v, ok := err.(*model.PodcastAlreadyExistsError); ok {
+			c.JSON(409, gin.H{"message": v.Error()})
+		} else {
+			log.Println(err.Error())
+			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		}
 	}
 }
 

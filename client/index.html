@@ -329,7 +329,17 @@
       </tr>
       <tr>
         <td>Original Url</td>
-        <td> <a target="_blank" :href="detailPodcast.URL">Link</a></td>
+        <td>
+          <div v-if="!editingUrl">
+            <a target="_blank" :href="detailPodcast.URL">Link</a>
+            <a style="cursor: pointer; margin-left: 10px;" title="Edit feed URL" @click="startEditUrl"><i class="fas fa-pencil-alt"></i></a>
+          </div>
+          <div v-else>
+            <input type="text" v-model="editUrlValue" style="width: 100%;" />
+            <button class="button" @click="saveUrl">Save</button>
+            <button class="button" @click="cancelEditUrl">Cancel</button>
+          </div>
+        </td>
       </tr>
 
       <tr>
@@ -533,6 +543,32 @@
           showDetails(podcast){
             this.detailPodcast=podcast;
             this.showDetail=true;
+            this.editingUrl=false;
+          },
+          startEditUrl(){
+            this.editUrlValue=this.detailPodcast.URL;
+            this.editingUrl=true;
+          },
+          cancelEditUrl(){
+            this.editingUrl=false;
+          },
+          saveUrl(){
+            var self=this;
+            if(!self.editUrlValue || self.editUrlValue===self.detailPodcast.URL){
+              self.editingUrl=false;
+              return;
+            }
+            axios
+              .patch("/podcasts/"+self.detailPodcast.ID, {url: self.editUrlValue})
+              .then(function(response){
+                self.detailPodcast.URL=response.data.URL;
+                var podcast=self.podcasts.find(x=>x.ID===self.detailPodcast.ID);
+                if(podcast){
+                  podcast.URL=response.data.URL;
+                }
+                self.editingUrl=false;
+              })
+              .catch(showError);
           },
           getPodcastImage(item){
             return "/podcasts/"+item.ID+"/image"
@@ -767,6 +803,8 @@
           socket:null,
           detailPodcast:null,
           showDetail:false,
+          editingUrl:false,
+          editUrlValue:'',
           playerExists:false,
           isMobile:false,
           layoutOptions:["list","grid"],
