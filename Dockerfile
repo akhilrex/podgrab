@@ -12,6 +12,10 @@ COPY go.sum .
 RUN go mod download
 
 COPY . .
+# mattn/go-sqlite3's cgo shim references pread64/pwrite64/off64_t, which
+# musl only exposes when _LARGEFILE64_SOURCE is defined - without this,
+# the build fails on current Alpine base images.
+ENV CGO_CFLAGS="-D_LARGEFILE64_SOURCE"
 RUN go build -o ./app ./main.go
 
 FROM alpine:latest
