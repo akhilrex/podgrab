@@ -275,7 +275,59 @@ func UpdatePodcastUrl(id string, newUrl string) (db.Podcast, error) {
 	return podcast, nil
 }
 
+// parsePubDate tries the handful of RFC1123-ish layouts podcast feeds use in the wild.
+func parsePubDate(raw string) time.Time {
+	toParse := strings.TrimSpace(raw)
+
+	pubDate, _ := time.Parse(time.RFC1123Z, toParse)
+	if (pubDate == time.Time{}) {
+		pubDate, _ = time.Parse(time.RFC1123, toParse)
+	}
+	if (pubDate == time.Time{}) {
+		//	RFC1123     = "Mon, 02 Jan 2006 15:04:05 MST"
+		modifiedRFC1123 := "Mon, 2 Jan 2006 15:04:05 MST"
+		pubDate, _ = time.Parse(modifiedRFC1123, toParse)
+	}
+	if (pubDate == time.Time{}) {
+		//	RFC1123Z    = "Mon, 02 Jan 2006 15:04:05 -0700" // RFC1123 with numeric zone
+		modifiedRFC1123Z := "Mon, 2 Jan 2006 15:04:05 -0700"
+		pubDate, _ = time.Parse(modifiedRFC1123Z, toParse)
+	}
+	if (pubDate == time.Time{}) {
+		//	RFC1123Z    = "Mon, 02 Jan 2006 15:04:05 -0700" // RFC1123 with numeric zone
+		modifiedRFC1123Z := "Mon, 02 Jan 2006 15:04:05 -0700"
+		pubDate, _ = time.Parse(modifiedRFC1123Z, toParse)
+	}
+
+	if (pubDate == time.Time{}) {
+		fmt.Printf("Cant format date : %s", raw)
+	}
+	return pubDate
+}
+
+// titleDateKey is the fallback identity used when a feed's GUIDs can't be trusted
+// (e.g. right after a host migration) - same title on the same day is treated as
+// the same episode.
+func titleDateKey(title string, pubDate time.Time) string {
+	return strings.ToLower(strings.TrimSpace(title)) + "|" + pubDate.Format("2006-01-02")
+}
+
+// podcastRefreshLocks serializes AddPodcastItems per podcast. Without it, the
+// RefreshEpisodes cron tick and a manual URL edit's async refresh can race:
+// both snapshot "existing" items before either has inserted, so both conclude
+// the whole feed is new and both insert it, duplicating every episode.
+var podcastRefreshLocks sync.Map // map[string]*sync.Mutex
+
+func lockForPodcastRefresh(podcastID string) *sync.Mutex {
+	mu, _ := podcastRefreshLocks.LoadOrStore(podcastID, &sync.Mutex{})
+	return mu.(*sync.Mutex)
+}
+
 func AddPodcastItems(podcast *db.Podcast, newPodcast bool) error {
+	mu := lockForPodcastRefresh(podcast.ID)
+	mu.Lock()
+	defer mu.Unlock()
+
 	//fmt.Println("Creating: " + podcast.ID)
 	data, _, err := FetchURL(podcast.URL)
 	if err != nil {
@@ -287,99 +339,117 @@ func AddPodcastItems(podcast *db.Podcast, newPodcast bool) error {
 	// if len(data.Channel.Item) < limit {
 	// 	limit = len(data.Channel.Item)
 	// }
-	var allGuids []string
+
+	var existingItems []db.PodcastItem
+	if err := db.GetAllPodcastItemsByPodcastId(podcast.ID, &existingItems); err != nil {
+		return err
+	}
+
+	byGUID := make(map[string]*db.PodcastItem)
+	byFileURL := make(map[string]*db.PodcastItem)
+	byTitleDate := make(map[string]*db.PodcastItem)
+	for i := range existingItems {
+		item := &existingItems[i]
+		if item.GUID != "" {
+			byGUID[item.GUID] = item
+		}
+		if item.FileURL != "" {
+			byFileURL[item.FileURL] = item
+		}
+		if item.Title != "" {
+			byTitleDate[titleDateKey(item.Title, item.PubDate)] = item
+		}
+	}
+
+	// Reserve rows that will match by GUID this pass so the fallback matchers
+	// below can't steal them from under a legitimate GUID match later in the loop.
+	claimed := make(map[string]bool)
 	for i := 0; i < len(data.Channel.Item); i++ {
-		obj := data.Channel.Item[i]
-		allGuids = append(allGuids, obj.Guid.Text)
+		if existing, ok := byGUID[data.Channel.Item[i].Guid.Text]; ok {
+			claimed[existing.ID] = true
+		}
 	}
 
-	existingItems, err := db.GetPodcastItemsByPodcastIdAndGUIDs(podcast.ID, allGuids)
-	keyMap := make(map[string]int)
-
-	for _, item := range *existingItems {
-		keyMap[item.GUID] = 1
-	}
 	var latestDate = time.Time{}
 	var itemsAdded = make(map[string]string)
 	for i := 0; i < len(data.Channel.Item); i++ {
 		obj := data.Channel.Item[i]
-		var podcastItem db.PodcastItem
-		_, keyExists := keyMap[obj.Guid.Text]
-		if !keyExists {
-			duration, _ := strconv.Atoi(obj.Duration)
-			toParse := strings.TrimSpace(obj.PubDate)
+		pubDate := parsePubDate(obj.PubDate)
 
-			pubDate, _ := time.Parse(time.RFC1123Z, toParse)
-			if (pubDate == time.Time{}) {
-				pubDate, _ = time.Parse(time.RFC1123, toParse)
-			}
-			if (pubDate == time.Time{}) {
-				//	RFC1123     = "Mon, 02 Jan 2006 15:04:05 MST"
-				modifiedRFC1123 := "Mon, 2 Jan 2006 15:04:05 MST"
-				pubDate, _ = time.Parse(modifiedRFC1123, toParse)
-			}
-			if (pubDate == time.Time{}) {
-				//	RFC1123Z    = "Mon, 02 Jan 2006 15:04:05 -0700" // RFC1123 with numeric zone
-				modifiedRFC1123Z := "Mon, 2 Jan 2006 15:04:05 -0700"
-				pubDate, _ = time.Parse(modifiedRFC1123Z, toParse)
-			}
-			if (pubDate == time.Time{}) {
-				//	RFC1123Z    = "Mon, 02 Jan 2006 15:04:05 -0700" // RFC1123 with numeric zone
-				modifiedRFC1123Z := "Mon, 02 Jan 2006 15:04:05 -0700"
-				pubDate, _ = time.Parse(modifiedRFC1123Z, toParse)
-			}
+		if _, ok := byGUID[obj.Guid.Text]; ok {
+			continue
+		}
 
-			if (pubDate == time.Time{}) {
-				fmt.Printf("Cant format date : %s", obj.PubDate)
+		var matched *db.PodcastItem
+		if obj.Enclosure.URL != "" {
+			if existing, ok := byFileURL[obj.Enclosure.URL]; ok && !claimed[existing.ID] {
+				matched = existing
 			}
-
-			if latestDate.Before(pubDate) {
-				latestDate = pubDate
+		}
+		if matched == nil && obj.Title != "" {
+			if existing, ok := byTitleDate[titleDateKey(obj.Title, pubDate)]; ok && !claimed[existing.ID] {
+				matched = existing
 			}
+		}
 
-			var downloadStatus db.DownloadStatus
-			if setting.AutoDownload {
-				if !newPodcast {
+		if matched != nil {
+			// Same episode re-served from a new URL - adopt its new identity
+			// instead of creating a duplicate, preserving download/play state.
+			claimed[matched.ID] = true
+			matched.GUID = obj.Guid.Text
+			matched.FileURL = obj.Enclosure.URL
+			db.UpdatePodcastItem(matched)
+			continue
+		}
+
+		duration, _ := strconv.Atoi(obj.Duration)
+
+		if latestDate.Before(pubDate) {
+			latestDate = pubDate
+		}
+
+		var downloadStatus db.DownloadStatus
+		if setting.AutoDownload {
+			if !newPodcast {
+				downloadStatus = db.NotDownloaded
+			} else {
+				if i < limit {
 					downloadStatus = db.NotDownloaded
 				} else {
-					if i < limit {
-						downloadStatus = db.NotDownloaded
-					} else {
-						downloadStatus = db.Deleted
-					}
+					downloadStatus = db.Deleted
 				}
-			} else {
-				downloadStatus = db.Deleted
 			}
-
-			if newPodcast && !setting.DownloadOnAdd {
-				downloadStatus = db.Deleted
-			}
-
-			if podcast.IsPaused {
-				downloadStatus = db.Deleted
-			}
-
-			summary := strip.StripTags(obj.Summary)
-			if summary == "" {
-				summary = strip.StripTags(obj.Description)
-			}
-
-			podcastItem = db.PodcastItem{
-				PodcastID:      podcast.ID,
-				Title:          obj.Title,
-				Summary:        summary,
-				EpisodeType:    obj.EpisodeType,
-				Duration:       duration,
-				PubDate:        pubDate,
-				FileURL:        obj.Enclosure.URL,
-				GUID:           obj.Guid.Text,
-				Image:          obj.Image.Href,
-				DownloadStatus: downloadStatus,
-			}
-			db.CreatePodcastItem(&podcastItem)
-			itemsAdded[podcastItem.ID] = podcastItem.FileURL
+		} else {
+			downloadStatus = db.Deleted
 		}
+
+		if newPodcast && !setting.DownloadOnAdd {
+			downloadStatus = db.Deleted
+		}
+
+		if podcast.IsPaused {
+			downloadStatus = db.Deleted
+		}
+
+		summary := strip.StripTags(obj.Summary)
+		if summary == "" {
+			summary = strip.StripTags(obj.Description)
+		}
+
+		podcastItem := db.PodcastItem{
+			PodcastID:      podcast.ID,
+			Title:          obj.Title,
+			Summary:        summary,
+			EpisodeType:    obj.EpisodeType,
+			Duration:       duration,
+			PubDate:        pubDate,
+			FileURL:        obj.Enclosure.URL,
+			GUID:           obj.Guid.Text,
+			Image:          obj.Image.Href,
+			DownloadStatus: downloadStatus,
+		}
+		db.CreatePodcastItem(&podcastItem)
+		itemsAdded[podcastItem.ID] = podcastItem.FileURL
 	}
 	if (latestDate != time.Time{}) {
 		db.UpdateLastEpisodeDateForPodcast(podcast.ID, latestDate)

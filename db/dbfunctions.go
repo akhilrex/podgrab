@@ -278,11 +278,6 @@ func TogglePodcastPauseStatus(podcastId string, isPaused bool) error {
 	return tx.Error
 }
 
-func GetPodcastItemsByPodcastIdAndGUIDs(podcastId string, guids []string) (*[]PodcastItem, error) {
-	var podcastItems []PodcastItem
-	result := DB.Preload(clause.Associations).Where(&PodcastItem{PodcastID: podcastId}).Where("guid IN ?", guids).Find(&podcastItems)
-	return &podcastItems, result.Error
-}
 func GetPodcastItemByPodcastIdAndGUID(podcastId string, guid string, podcastItem *PodcastItem) error {
 
 	result := DB.Preload(clause.Associations).Where(&PodcastItem{PodcastID: podcastId, GUID: guid}).First(&podcastItem)
