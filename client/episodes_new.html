@@ -69,6 +69,8 @@
       
       <div id="app" v-cloak>
 
+  <h4>${pageTitle}</h4>
+
   <button @click="toggleFilters()" class="u-full-width">
     <span  v-show="!showFilters">Show Filters</span>
     <span  v-show="showFilters">Hide Filters</span>
@@ -91,8 +93,8 @@
    
   </div>
     <div class="row">
-      <vue-multiselect class="columns three" v-model="selectedPodcasts" :options="podcasts"  :show-labels="false"
-      :multiple="true" :close-on-select="false" :clear-on-select="false" 
+      <vue-multiselect v-if="!lockedPodcastId" class="columns three" v-model="selectedPodcasts" :options="podcasts"  :show-labels="false"
+      :multiple="true" :close-on-select="false" :clear-on-select="false"
       :preserve-search="true" placeholder="Podcasts" label="Title" track-by="ID" :preselect-first="false">
         <template slot="selection" slot-scope="{ values, search, isOpen }">
           <span class="multiselect__single" v-if="values.length && !isOpen">${ values.length } options selected</span>
@@ -361,15 +363,20 @@ var app = new Vue({
           },
         },
         mounted(){
-          if(localStorage && localStorage.episodesFilter){
-              this.filter=JSON.parse(localStorage.episodesFilter);
+          var storageKey = this.filterStorageKey();
+          if(localStorage && localStorage[storageKey]){
+              this.filter=JSON.parse(localStorage[storageKey]);
 
             }
             if(localStorage && localStorage.showFilters){
               this.showFilters=JSON.parse(localStorage.showFilters);
             }
 
-            if(this.filter.podcastIds!=null){
+            if(this.lockedPodcastId){
+              // Always win over whatever a stale localStorage filter says -
+              // this page must only ever show this one podcast's episodes.
+              this.filter.podcastIds=[this.lockedPodcastId];
+            } else if(this.filter.podcastIds!=null){
               var selectedPodcasts=[];
               for(var i=0;i<this.podcasts.length;i++){
                 for(var j=0;j<this.filter.podcastIds.length;j++){
@@ -399,14 +406,16 @@ var app = new Vue({
               }
             }
 
+            var isDownloadedValue = this.filter.isDownloaded===null || this.filter.isDownloaded===undefined ? "nil" : this.filter.isDownloaded.toString();
             for(var i=0;i<this.downloadStatusOptions.length;i++){
-              if(this.downloadStatusOptions[i].Value===this.filter.isDownloaded.toString()){
+              if(this.downloadStatusOptions[i].Value===isDownloadedValue){
                 this.selectedDownloadStatus=this.downloadStatusOptions[i]
               }
             }
 
+            var isPlayedValue = this.filter.isPlayed===null || this.filter.isPlayed===undefined ? "nil" : this.filter.isPlayed.toString();
             for(var i=0;i<this.playedStatusOptions.length;i++){
-              if(this.playedStatusOptions[i].Value===this.filter.isPlayed.toString()){
+              if(this.playedStatusOptions[i].Value===isPlayedValue){
                 this.selectedPlayedStatus=this.playedStatusOptions[i]
               }
             }
@@ -483,9 +492,14 @@ var app = new Vue({
                 self.getData()
               }, 600)
           },
+          filterStorageKey(){
+            // Keeps a podcast-scoped page's filter/sort preferences separate
+            // from the all-episodes page's, and from every other podcast's.
+            return this.lockedPodcastId ? "episodesFilter:"+this.lockedPodcastId : "episodesFilter";
+          },
           saveFilter(data){
             if(localStorage){
-              localStorage.episodesFilter=JSON.stringify(data);
+              localStorage[this.filterStorageKey()]=JSON.stringify(data);
             }
           },
           submitFilters(){
@@ -522,7 +536,12 @@ var app = new Vue({
           },
           resetFilters(){
             this.filter.q="";
-            this.selectedPodcasts=[];
+            if(!this.lockedPodcastId){
+              // Leave podcastIds alone when locked - the selectedPodcasts
+              // watcher below would otherwise clear it and widen the scope
+              // to every podcast.
+              this.selectedPodcasts=[];
+            }
             this.selectedTags=[];
             this.selectedDownloadStatus=this.downloadStatusOptions[0];
             this.selectedPlayedStatus=this.playedStatusOptions[0];
@@ -542,7 +561,7 @@ var app = new Vue({
                 self.filter=response.data.filter;
                 self.saveFilter(self.filter);
                 self.updateUrl();
-                setPageTitle("Episodes ("+self.filter.totalCount+")")
+                setPageTitle(self.pageTitle+" ("+self.filter.totalCount+")")
               })
               .catch(function (error) {
                 if (error.response && error.response.data && error.response.data.message) {
@@ -574,6 +593,8 @@ var app = new Vue({
          
             {{ $len := len .podcastItems}}
             podcastItems: {{if gt $len 0}} {{ .podcastItems }} {{else}} [] {{end}},
+            pageTitle:"{{.title}}",
+            lockedPodcastId:"{{.podcastId}}",
             settings:{{.setting}},
             filter:{{.filter}},
             podcasts:{{.podcasts}},

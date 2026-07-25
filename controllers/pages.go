@@ -56,59 +56,40 @@ func HomePage(c *gin.Context) {
 }
 func PodcastPage(c *gin.Context) {
 	var searchByIdQuery SearchByIdQuery
-	if c.ShouldBindUri(&searchByIdQuery) == nil {
-
-		var podcast db.Podcast
-
-		if err := db.GetPodcastById(searchByIdQuery.Id, &podcast); err == nil {
-			var pagination model.Pagination
-			if c.ShouldBindQuery(&pagination) == nil {
-				var page, count int
-				if page = pagination.Page; page == 0 {
-					page = 1
-				}
-				if count = pagination.Count; count == 0 {
-					count = 10
-				}
-				setting := c.MustGet("setting").(*db.Setting)
-				totalCount := len(podcast.PodcastItems)
-				totalPages := int(math.Ceil(float64(totalCount) / float64(count)))
-				nextPage, previousPage := 0, 0
-				if page < totalPages {
-					nextPage = page + 1
-				}
-				if page > 1 {
-					previousPage = page - 1
-				}
-
-				from := (page - 1) * count
-				to := page * count
-				if to > totalCount {
-					to = totalCount
-				}
-				c.HTML(http.StatusOK, "episodes.html", gin.H{
-					"title":          podcast.Title,
-					"podcastItems":   podcast.PodcastItems[from:to],
-					"setting":        setting,
-					"page":           page,
-					"count":          count,
-					"totalCount":     totalCount,
-					"totalPages":     totalPages,
-					"nextPage":       nextPage,
-					"previousPage":   previousPage,
-					"downloadedOnly": false,
-					"podcastId":      searchByIdQuery.Id,
-				})
-			} else {
-				c.JSON(http.StatusBadRequest, err)
-			}
-		} else {
-			c.JSON(http.StatusBadRequest, err)
-		}
-	} else {
+	if c.ShouldBindUri(&searchByIdQuery) != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
 	}
 
+	var podcast db.Podcast
+	if err := db.GetPodcastById(searchByIdQuery.Id, &podcast); err != nil {
+		c.JSON(http.StatusBadRequest, err)
+		return
+	}
+
+	// Reuses the same filter/sort machinery as the all-episodes page
+	// (AllEpisodesPage/episodes_new.html), just locked to this podcast's ID -
+	// see lockedPodcastId in episodes_new.html.
+	var filter model.EpisodesFilter
+	c.ShouldBindQuery(&filter)
+	filter.PodcastIds = []string{searchByIdQuery.Id}
+	filter.VerifyPaginationValues()
+
+	setting := c.MustGet("setting").(*db.Setting)
+	tags, _ := db.GetAllTags("")
+
+	c.HTML(http.StatusOK, "episodes_new.html", gin.H{
+		"title":        podcast.Title,
+		"podcastItems": []db.PodcastItem{},
+		"setting":      setting,
+		"page":         filter.Page,
+		"count":        filter.Count,
+		"filter":       filter,
+		"podcasts":     []db.Podcast{},
+		"tags":         tags,
+		"sortOptions":  getSortOptions(),
+		"podcastId":    searchByIdQuery.Id,
+	})
 }
 
 func getItemsToPlay(itemIds []string, podcastId string, tagIds []string) []db.PodcastItem {
@@ -258,6 +239,7 @@ func AllEpisodesPage(c *gin.Context) {
 		"podcasts":     podcasts,
 		"tags":         tags,
 		"sortOptions":  getSortOptions(),
+		"podcastId":    "",
 	}
 	c.HTML(http.StatusOK, "episodes_new.html", toReturn)
 
