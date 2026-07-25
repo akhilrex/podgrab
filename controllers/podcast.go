@@ -452,19 +452,29 @@ func getBaseUrl(c *gin.Context) string {
 	return setting.BaseUrl
 }
 
-func createRss(items []db.PodcastItem, title, description, image string, c *gin.Context) model.RssPodcastData {
+// ownerEmail synthesizes a placeholder itunes:owner email from the feed's own
+// host, since Podgrab doesn't store a real owner email for aggregated feeds.
+// itunes:email is a required child of itunes:owner - parsers such as
+// Castopod's php-podcast-parser crash with "Undefined property
+// ...ItunesOwner::$itunes_name" if itunes:owner is emitted without it, so we
+// always populate one rather than omitting the owner block.
+func ownerEmail(baseUrl string) string {
+	host := strings.TrimPrefix(strings.TrimPrefix(baseUrl, "https://"), "http://")
+	return fmt.Sprintf("podcast-owner@%s", host)
+}
+
+func createRss(items []db.PodcastItem, title, description, image, author string, c *gin.Context) model.RssPodcastData {
 	var rssItems []model.RssItem
 	url := getBaseUrl(c)
 	for _, item := range items {
+		itemImageUrl := fmt.Sprintf("%s/podcastitems/%s/image", url, item.ID)
 		rssItem := model.RssItem{
 			Title:       item.Title,
 			Description: item.Summary,
-			Summary:     item.Summary,
 			Image: model.RssItemImage{
 				Text: item.Title,
-				Href: fmt.Sprintf("%s/podcastitems/%s/image", url, item.ID),
+				Href: itemImageUrl,
 			},
-			EpisodeType: item.EpisodeType,
 			Enclosure: model.RssItemEnclosure{
 				URL:    fmt.Sprintf("%s/podcastitems/%s/file", url, item.ID),
 				Length: fmt.Sprint(item.FileSize),
@@ -475,9 +485,13 @@ func createRss(items []db.PodcastItem, title, description, image string, c *gin.
 				IsPermaLink: "false",
 				Text:        item.ID,
 			},
-			Link:     fmt.Sprintf("%s/allTags", url),
-			Text:     item.Title,
-			Duration: fmt.Sprint(item.Duration),
+			Link:              fmt.Sprintf("%s/allTags", url),
+			Text:              item.Title,
+			ItunesSummary:     item.Summary,
+			ItunesEpisodeType: item.EpisodeType,
+			ItunesDuration:    fmt.Sprint(item.Duration),
+			ItunesImage:       model.RssItunesImage{Href: itemImageUrl},
+			ItunesExplicit:    "false",
 		}
 		rssItems = append(rssItems, rssItem)
 	}
@@ -485,6 +499,10 @@ func createRss(items []db.PodcastItem, title, description, image string, c *gin.
 	imagePath := fmt.Sprintf("%s/webassets/blank.png", url)
 	if image != "" {
 		imagePath = image
+	}
+
+	if author == "" {
+		author = "Podgrab Aggregation"
 	}
 
 	return model.RssPodcastData{
@@ -495,13 +513,25 @@ func createRss(items []db.PodcastItem, title, description, image string, c *gin.
 		Psc:     "https://podlove.org/simple-chapters/",
 		Content: "http://purl.org/rss/1.0/modules/content/",
 		Channel: model.RssChannel{
-			Item:        rssItems,
-			Title:       title,
-			Description: description,
-			Summary:     description,
-			Author:      "Podgrab Aggregation",
-			Link:        fmt.Sprintf("%s/allTags", url),
-			Image:       model.RssItemImage{Text: title, URL: imagePath},
+			Item:           rssItems,
+			Title:          title,
+			Description:    description,
+			Language:       "en",
+			ItunesSummary:  description,
+			ItunesAuthor:   author,
+			ItunesType:     "episodic",
+			ItunesExplicit: "false",
+			ItunesImage:    model.RssItunesImage{Href: imagePath},
+			// Podgrab has no per-podcast category from the source feed, so
+			// this is a placeholder to satisfy Apple's required channel-level
+			// <itunes:category> rather than an accurate genre.
+			ItunesCategory: model.RssItunesCategory{Text: "Technology"},
+			ItunesOwner: model.RssItunesOwner{
+				Name:  author,
+				Email: ownerEmail(url),
+			},
+			Link:  fmt.Sprintf("%s/allTags", url),
+			Image: model.RssItemImage{Text: title, URL: imagePath},
 		},
 	}
 }
@@ -522,7 +552,7 @@ func GetRssForPodcastById(c *gin.Context) {
 		title := podcast.Title
 
 		if err == nil {
-			c.XML(200, createRss(items, title, description, podcast.Image, c))
+			c.XML(200, createRss(items, title, description, podcast.Image, podcast.Author, c))
 		}
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
@@ -542,7 +572,7 @@ func GetRssForTagById(c *gin.Context) {
 		title := fmt.Sprintf(" %s | Podgrab", tag.Label)
 
 		if err == nil {
-			c.XML(200, createRss(items, title, description, "", c))
+			c.XML(200, createRss(items, title, description, "", "", c))
 		}
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
@@ -559,7 +589,7 @@ func GetRss(c *gin.Context) {
 	title := "Podgrab"
 	description := "Pograb playlist"
 
-	c.XML(200, createRss(items, title, description, "", c))
+	c.XML(200, createRss(items, title, description, "", "", c))
 
 }
 func DeleteTagById(c *gin.Context) {
