@@ -1,7 +1,7 @@
 version: "2.1"
 services:
   podgrab:
-    image: akhilrex/podgrab
+    image: vanityshed/podgrab-s3:latest
     container_name: podgrab
     environment:
       - CHECK_FREQUENCY=240
