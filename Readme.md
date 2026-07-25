@@ -1,20 +1,10 @@
-
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
-
-<!-- PROJECT LOGO -->
-<br />
 <p align="center">
   <!-- <a href="https://github.com/akhilrex/podgrab">
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a> -->
 
   <h1 align="center" style="margin-bottom:0px">Podgrab-S3</h1>
-  <p align="center">Current Version -2022.07.07</p>
+  <p align="center">Current Version - 2026.07.25</p>
 
   <p align="center">
     A self-hosted podcast manager to download episodes as soon as they become live
@@ -56,13 +46,9 @@ Podgrab is a is a self-hosted podcast manager which automatically downloads late
 
 It works best if you already know which podcasts you want to monitor. However there is a podcast search system powered by iTunes built into Podgrab
 
-*Developers Note: This project is under active development which means I release new updates very frequently. It is recommended that you use something like [watchtower](https://github.com/containrrr/watchtower) which will automatically update your containers whenever I release a new version or periodically rebuild the container with the latest image manually.*
-
-__Also check out my other self-hosted, open-source solution - [Hammond](https://github.com/akhilrex/hammond) - Vehicle and Expense management system.__
-
 ### Motivation
 
-Podgrab started as a tool that I initially built to solve a specific problem I had. During the COVID pandemic times I started going for a run. I do not prefer taking my phone along so I would add podcast episodes to my smart watch which could be connected with my bluetooth earphones. Most podcasting apps do not expose the mp3 files directly which is why I decided to build this quick tool for myself. Once it reached a stage where my requirements were fulfilled I decided to make it a little pretty and share it with everyone else.
+Podgrab started as a tool that initially built to solve a specific problem akhilrex had. During the COVID pandemic times he started going for a run. He did not prefer taking his phone along so he would add podcast episodes to his smart watch which could be connected with his bluetooth earphones. Most podcasting apps do not expose the mp3 files directly which is why he decided to build this quick tool for himself. Once it reached a stage where his requirements were fulfilled he decided to make it a little pretty and share it with everyone else.
 
 ![Product Name Screen Shot][product-screenshot]
 [More Screenshots](Screenshots.md)
@@ -100,18 +86,18 @@ The easiest way to run Podgrab is to run it as a docker container.
 Simple setup without mounted volumes (for testing and evaluation)
 
 ```sh
-  docker run -d -p 8080:8080 --name=podgrab akhilrex/podgrab
+  docker run -d -p 8080:8080 --name=podgrab vanityshed/podgrab-s3
 ```
 
 Binding local volumes to the container
 
 ```sh
-   docker run -d -p 8080:8080 --name=podgrab -v "/host/path/to/assets:/assets" -v "/host/path/to/config:/config"  akhilrex/podgrab
+   docker run -d -p 8080:8080 --name=podgrab -v "/host/path/to/assets:/assets" -v "/host/path/to/config:/config"  vanityshed/podgrab-s3
 ```
 
 ### Using Docker-Compose
 
-Modify the docker compose file provided [here](https://github.com/akhilrex/podgrab/blob/master/docker-compose.yml) to update the volume and port binding and run the following command
+Modify the docker compose file provided [here](https://github.com/stevesbrain/podgrab-s3/blob/master/docker-compose.yml) to update the volume and port binding and run the following command
 
 ```yaml
 version: "2.1"
@@ -144,7 +130,7 @@ services:
 ```
 ### Build from Source / Ubuntu Installation
 
-Although personally I feel that using the docker container is the best way of using and enjoying something like Podgrab, a lot of people in the community are still not comfortable with using Docker and wanted to host it natively on their Linux servers. Follow the link below to get a guide on how to build Podgrab from source.
+Although personally he feels that using the docker container is the best way of using and enjoying something like Podgrab, a lot of people in the community are still not comfortable with using Docker and wanted to host it natively on their Linux servers. Follow the link below to get a guide on how to build Podgrab from source.
 
 [Build from source / Ubuntu Guide](docs/ubuntu-install.md)
 ### Environment Variables
@@ -207,7 +193,7 @@ Distributed under the GPL-3.0 License. See `LICENSE` for more information.
 - [x] OPML export
 - [x] In built podcast player
 - [ ] Set ID3 tags if not set 
-- [ ] Filtering and Sorting options
+- [X] Filtering and Sorting options
 - [ ] Native installer for Windows/Linux/MacOS
 
 
@@ -219,7 +205,7 @@ Distributed under the GPL-3.0 License. See `LICENSE` for more information.
 
 Akhil Gupta - [@akhilrex](https://twitter.com/akhilrex)
 
-Project Link: [https://github.com/akhilrex/podgrab](https://github.com/akhilrex/podgrab)
+Project Link: [https://github.com/stevesbrain/podgrab-3](https://github.com/akhilrex/podgrab)
 
 <a href="https://www.buymeacoffee.com/akhilrex" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
 
