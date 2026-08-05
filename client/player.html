@@ -736,7 +736,7 @@ div#large-visualization{
                 <span data-amplitude-song-info="name" class="song-name"></span>
   
                 <div class="song-artist-album">
-                  <span data-amplitude-song-info="artist"></span>
+                  <span data-amplitude-song-info="show_link"></span>
                   <span data-amplitude-song-info="album"></span>
                 </div>
                 <br>
@@ -879,6 +879,7 @@ div#large-visualization{
                     id:x.ID,
                     name:x.Title,
                     url:"/podcastitems/"+x.ID+"/file",
+                    show_link:"<a href=\"/podcasts/"+x.Podcast.ID+"/view\">"+x.Podcast.Title+"</a>",
                     cover_art_url:image,
                     artist:x.Podcast.Title,
                     summary:x.Summary,

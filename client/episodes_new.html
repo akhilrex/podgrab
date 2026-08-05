@@ -138,7 +138,12 @@
                    style="color: green"
                    class="fas fa-check-circle"
                  ></i>
-                 ${item.Title} <template v-if="item.Podcast && item.Podcast.Title"> // ${item.Podcast.Title}</template>
+                 ${item.Title} <template v-if="item.Podcast && item.Podcast.Title"> // 
+                 <a
+                   v-if="item.Podcast && item.Podcast.ID"
+                   :href="goToShow(item)"
+                   title="Go To Show Page"
+                   >${item.Podcast.Title}</a></template>
                </h4>
             </div>
             <div class="columns three">
@@ -433,6 +438,9 @@ var app = new Vue({
           },
           downloadFromServer(item){
             return "/podcastitems/"+item.ID+"/file"
+          },
+          goToShow(item){
+            return "/podcasts/"+item.Podcast.ID+"/view"
           },
           changePlayedStatus(item){
             changePlayedStatus(item.ID,!item.IsPlayed,()=>item.IsPlayed=!item.IsPlayed)
