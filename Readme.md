@@ -140,7 +140,12 @@ Although personally I feel that using the docker container is the best way of us
 | --------------- | ----------------------------------------------------------------------- | ------- |
 | CHECK_FREQUENCY | How frequently to check for new episodes and missing files (in minutes) | 30      |
 | PASSWORD        | Set to some non empty value to enable Basic Authentication, username `podgrab`|(empty)|
-| PORT            | Change the internal port of the application. If you change this you might have to change your docker configuration as well | (empty) |  
+| PORT            | Change the internal port of the application. If you change this you might have to change your docker configuration as well | (empty) | 
+| UID             | Set the UID used by the container                                       | 998     |
+| PID             | ? Should this be GID ?                                                  | 100     |
+| CONFIG          | Set the folder used for configuration files                             | /config |
+| DATA            | Set the folder used for the podcasts                                    | /assets |
+| GIN_MODE        | Sets the version of Podgrab to use                                      | release |
 
 ### Setup
 
