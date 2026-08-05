@@ -49,7 +49,7 @@
 
 ## About The Project
 
-Podgrab is a is a self-hosted podcast manager which automatically downloads latest podcast episodes. It is a light-weight application built using GO.
+Podgrab is a self-hosted podcast manager which automatically downloads latest podcast episodes. It is a light-weight application built using GO.
 
 It works best if you already know which podcasts you want to monitor. However there is a podcast search system powered by iTunes built into Podgrab
 
