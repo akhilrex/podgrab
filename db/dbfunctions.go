@@ -165,7 +165,7 @@ func DeleteTagById(id string) error {
 
 func GetAllPodcastItemsByPodcastId(podcastId string, podcastItems *[]PodcastItem) error {
 
-	result := DB.Preload(clause.Associations).Where(&PodcastItem{PodcastID: podcastId}).Find(&podcastItems)
+	result := DB.Preload(clause.Associations).Where(&PodcastItem{PodcastID: podcastId}).Order("pub_date desc").Find(&podcastItems)
 	return result.Error
 }
 func GetAllPodcastItemsByPodcastIds(podcastIds []string, podcastItems *[]PodcastItem) error {

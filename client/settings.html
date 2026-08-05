@@ -108,6 +108,10 @@
             <span class="label-body">Limit the number of podcasts that can be downloaded simultaneously</span>
             <input type="number" name="maxDownloadConcurrency" v-model.number="maxDownloadConcurrency" min="1">
         </label>
+        <label for="maxDownloadKeep" style="display: inline-block;" >
+            <span class="label-body">Limit the number of podcast episodes that are kept (auto deletes older episodes beyond this number)</span>
+            <input type="number" name="maxDownloadKeep" v-model.number="maxDownloadKeep" min="1">
+        </label>
         <label for="userAgent" style="display: inline-block;" >
             <span class="label-body">The <code>User-Agent</code> header used when downloading podcasts</span>
             <input type="text" class="u-full-width" name="userAgent" v-model="userAgent">
@@ -190,6 +194,7 @@ var app = new Vue({
             dontDownloadDeletedFromDisk:self.dontDownloadDeletedFromDisk,
             baseUrl:self.baseUrl,
             maxDownloadConcurrency:self.maxDownloadConcurrency,
+            maxDownloadKeep:self.maxDownloadKeep,
             userAgent:self.userAgent,
         })
         .then(function(response){
@@ -236,6 +241,7 @@ var app = new Vue({
     dontDownloadDeletedFromDisk:{{ .setting.DontDownloadDeletedFromDisk }},
     baseUrl: {{ .setting.BaseUrl }},
     maxDownloadConcurrency:{{ .setting.MaxDownloadConcurrency }},
+    maxDownloadKeep:{{ .setting.MaxDownloadKeep }},
     userAgent:{{ .setting.UserAgent}},
   },
 
