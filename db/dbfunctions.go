@@ -58,14 +58,14 @@ func GetPaginatedPodcastItemsNew(queryModel model.EpisodesFilter) (*[]PodcastIte
 	var podcasts []PodcastItem
 	var total int64
 	query := DB.Debug().Preload("Podcast")
-	if queryModel.IsDownloaded != nil {
-		isDownloaded, err := strconv.ParseBool(*queryModel.IsDownloaded)
-		if err == nil {
-			if isDownloaded {
-				query = query.Where("download_status=?", Downloaded)
-			} else {
-				query = query.Where("download_status!=?", Downloaded)
-			}
+	if queryModel.DownloadStatus != nil && *queryModel.DownloadStatus != "nil" {
+		query = query.Where("download_status=?", queryModel.DownloadStatus)
+	}
+	if queryModel.EpisodeType != nil && *queryModel.EpisodeType != "nil" {
+		if *queryModel.EpisodeType == "full" {
+			query = query.Where(DB.Where("episode_type=\"full\"").Or("episode_type=\"\""))
+		} else {
+			query = query.Where("episode_type=?", queryModel.EpisodeType)
 		}
 	}
 	if queryModel.IsPlayed != nil {
@@ -252,16 +252,16 @@ func GetEpisodeNumber(podcastItemId, podcastId string) (int, error) {
 	var id string
 	var sequence int
 	row := DB.Raw(`;With cte as(
-		SELECT 
-			id, 
-			RANK() OVER (ORDER BY pub_date) as sequence 
-		FROM 
+		SELECT
+			id,
+			RANK() OVER (ORDER BY pub_date) as sequence
+		FROM
 			podcast_items
 		WHERE
 			podcast_id=?
 	)
-	select * 
-	from cte 
+	select *
+	from cte
 	where id = ?
 	`, podcastId, podcastItemId).Row()
 	error := row.Scan(&id, &sequence)
