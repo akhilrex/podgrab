@@ -22,6 +22,10 @@ import (
 )
 
 var Logger *zap.SugaredLogger
+var (
+	ErrInvalidContentType = errors.New("invalid content type: expected RSS/XML but got HTML")
+	ErrEmptyResponse      = errors.New("empty response from server")
+)
 
 func init() {
 	zapper, _ := zap.NewProduction()
@@ -35,12 +39,12 @@ func ParseOpml(content string) (model.OpmlModel, error) {
 	return response, err
 }
 
-//FetchURL is
 func FetchURL(url string) (model.PodcastData, []byte, error) {
 	body, err := makeQuery(url)
 	if err != nil {
 		return model.PodcastData{}, nil, err
 	}
+
 	var response model.PodcastData
 	err = xml.Unmarshal(body, &response)
 	return response, body, err
@@ -706,27 +710,46 @@ func DeleteTag(id string) error {
 	return nil
 
 }
-
 func makeQuery(url string) ([]byte, error) {
-	//link := "https://www.goodreads.com/search/index.xml?q=Good%27s+Omens&key=" + "jCmNlIXjz29GoB8wYsrd0w"
-	//link := "https://www.goodreads.com/search/index.xml?key=jCmNlIXjz29GoB8wYsrd0w&q=Ender%27s+Game"
-	fmt.Println(url)
+	// Create HTTP client with timeout
+	client := &http.Client{
+		Timeout: 30 * time.Second,
+	}
+
+	// Create request
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
-	resp, err := http.DefaultClient.Do(req)
+	// Set headers to mimic apple podcast app
+	req.Header.Set("User-Agent", "AppleCoreMedia/1.0.0.22B82 (iPhone; U; CPU OS 18_1 like Mac OS X; en_us)")
+	req.Header.Set("Accept", "*/*")
+	// Some feeds might require these additional headers
+	req.Header.Set("Accept-Encoding", "gzip, deflate")
+	req.Header.Set("Connection", "keep-alive")
+	// Prevent servers from sending compressed content we can't handle
+	req.Header.Del("Accept-Encoding")
+
+	// Make the request
+	resp, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error making request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// Read response body
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error reading response: %w", err)
 	}
 
-	defer resp.Body.Close()
-	fmt.Println("Response status:", resp.Status)
-	body, err := ioutil.ReadAll(resp.Body)
+	// Check if response is empty
+	if len(body) == 0 {
+		return nil, ErrEmptyResponse
+	}
 
 	return body, nil
-
 }
 func GetSearchFromGpodder(pod model.GPodcast) *model.CommonSearchResultModel {
 	p := new(model.CommonSearchResultModel)
