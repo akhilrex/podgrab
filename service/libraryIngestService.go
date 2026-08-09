@@ -241,7 +241,17 @@ func IngestLibrary() IngestLibraryResult {
 	}
 
 	walkErr := filepath.Walk(dataPath, func(walkPath string, info os.FileInfo, err error) error {
-		if err != nil || info.IsDir() {
+		if err != nil {
+			return nil
+		}
+		if info.IsDir() {
+			// Skip hidden directories entirely - most importantly ZFS's
+			// .zfs/snapshot (a full point-in-time copy of the dataset per
+			// snapshot, which would otherwise get ingested as if every
+			// snapshotted copy of every file were a separate real file).
+			if strings.HasPrefix(info.Name(), ".") && walkPath != dataPath {
+				return filepath.SkipDir
+			}
 			return nil
 		}
 		cleanPath := filepath.Clean(walkPath)

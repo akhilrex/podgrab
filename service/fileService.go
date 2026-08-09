@@ -15,6 +15,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/akhilrex/podgrab/db"
@@ -454,6 +455,15 @@ func ScanDiskUsage() (DiskUsageScanResult, error) {
 			return nil
 		}
 		if info.IsDir() {
+			// Skip hidden directories entirely - most importantly ZFS's
+			// .zfs/snapshot, which is a complete point-in-time copy of the
+			// dataset per snapshot. Walking into it would count (or ingest)
+			// every snapshot's copy of every file as if it were a separate
+			// real file. Also covers .git, .Trash, and similar tool/OS
+			// directories that were never podcast data to begin with.
+			if strings.HasPrefix(info.Name(), ".") && walkPath != dataPath {
+				return filepath.SkipDir
+			}
 			return nil
 		}
 
