@@ -77,13 +77,28 @@ func computeFileHash(filePath string) (string, error) {
 // detectedTitleFor reads an ID3 (or other supported) tag title from a file if
 // present, falling back to a cleaned-up version of the filename when there's
 // no tag data - which is expected for some of the older, pre-Podgrab files.
-func detectedTitleFor(filePath string) string {
+// detectedTitleFor reads an ID3 (or other supported) tag title from a file if
+// present, falling back to a cleaned-up version of the filename when there's
+// no tag data - which is expected for some of the older, pre-Podgrab files.
+//
+// podcastTitle, when known, guards against a common tagging pattern in older
+// archiving tools: writing the show's own name into every file's ID3 title
+// rather than a per-episode title. Trusting that blindly would make every
+// file in a folder normalize to the same title, which the matching logic
+// would then treat as hundreds of files all being "duplicates" of one
+// episode - wrong, and a real risk given the whole point of that check is
+// distinguishing genuinely different episodes. If the ID3 title is just the
+// podcast's own name, it's treated as no title at all and the filename is
+// used instead.
+func detectedTitleFor(filePath string, podcastTitle string) string {
 	f, err := os.Open(filePath)
 	if err == nil {
 		defer f.Close()
 		if metadata, tagErr := tag.ReadFrom(f); tagErr == nil {
 			if title := strings.TrimSpace(metadata.Title()); title != "" {
-				return title
+				if podcastTitle == "" || normalizeForMatch(title) != normalizeForMatch(podcastTitle) {
+					return title
+				}
 			}
 		}
 	}
@@ -245,8 +260,17 @@ func IngestLibrary() IngestLibraryResult {
 		// podcast gets added to Podgrab after its files were already on
 		// disk), so unmatched files get another look on every run instead
 		// of being skipped forever.
-		if existing != nil && existing.Status != db.OrphanUnmatched {
-			return nil // already resolved in a previous run
+		//
+		// Separately: a resolved record is only trustworthy if it's still
+		// describing the same file. If the file at this path has been
+		// modified since we last recorded a decision about it - most
+		// commonly, deleted and then a different file copied back to the
+		// same path - its mtime will be newer than our record's UpdatedAt,
+		// and it gets a fresh look instead of being skipped as "already
+		// handled" based on a decision made about a file that's now gone.
+		fileChangedSinceLastSeen := existing != nil && info.ModTime().After(existing.UpdatedAt)
+		if existing != nil && existing.Status != db.OrphanUnmatched && !fileChangedSinceLastSeen {
+			return nil // already resolved in a previous run, and unchanged since
 		}
 
 		fileName := info.Name()
@@ -530,7 +554,11 @@ func ingestOneFile(dataPath string, filePath string, fileSize int64, existing *d
 	folderName := podcastFolderName(dataPath, filePath)
 	podcast, podcastKnown := caches.podcastByFolder[normalizeForMatch(folderName)]
 
-	title := detectedTitleFor(filePath)
+	podcastTitleForMatching := ""
+	if podcastKnown {
+		podcastTitleForMatching = podcast.Title
+	}
+	title := detectedTitleFor(filePath, podcastTitleForMatching)
 
 	if !podcastKnown {
 		if existing != nil {
