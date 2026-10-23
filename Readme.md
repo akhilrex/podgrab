@@ -3,7 +3,7 @@
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
+[![GPL-3.0 License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
 
 <!-- PROJECT LOGO -->
@@ -191,7 +191,7 @@ Project Link: [https://github.com/akhilrex/podgrab](https://github.com/akhilrex/
 [issues-shield]: https://img.shields.io/github/issues/akhilrex/podgrab.svg?style=flat-square
 [issues-url]: https://github.com/akhilrex/podgrab/issues
 [license-shield]: https://img.shields.io/github/license/akhilrex/podgrab.svg?style=flat-square
-[license-url]: https://github.com/akhilrex/podgrab/blob/master/LICENSE.txt
+[license-url]: https://github.com/akhilrex/podgrab/blob/master/LICENSE
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=flat-square&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/akhilrex
 [product-screenshot]: images/screenshot.jpg
